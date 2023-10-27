@@ -32,9 +32,9 @@ if "past_key_values" not in st.session_state:
     st.session_state.past_key_values = None
 
 # 设置max_length、top_p和temperature
-max_length = st.sidebar.slider("max_length", 0, 8192, 8192, step=1)
+max_length = st.sidebar.slider("max_length", 0, 32768, 8192, step=1)
 top_p = st.sidebar.slider("top_p", 0.0, 1.0, 0.8, step=0.01)
-temperature = st.sidebar.slider("temperature", 0.0, 1.0, 0.8, step=0.01)
+temperature = st.sidebar.slider("temperature", 0.0, 1.0, 0.6, step=0.01)
 
 # 清理会话历史
 buttonClean = st.sidebar.button("清理会话历史", key="clean")
