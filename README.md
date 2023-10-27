@@ -96,15 +96,6 @@ pip install -r requirements.txt
 git clone https://huggingface.co/THUDM/chatglm3-6b
 ```
 
-如果你从 Hugging Face Hub 上下载 checkpoint 的速度较慢，可以只下载模型实现
-```Shell
-GIT_LFS_SKIP_SMUDGE=1 git clone https://huggingface.co/THUDM/chatglm3-6b
-```
-然后从[这里](https://cloud.tsinghua.edu.cn/d/674208019e314311ab5c/)手动下载模型参数文件，并将下载的文件替换到本地的 `chatglm3-6b` 目录下。
-
-
-将模型下载到本地之后，将以上代码中的 `THUDM/chatglm3-6b` 替换为你本地的 `chatglm3-6b` 文件夹的路径，即可从本地加载模型。
-
 
 ### 网页版 Demo
 ![web-demo](resources/web-demo.gif)
