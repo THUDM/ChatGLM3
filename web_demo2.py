@@ -36,14 +36,11 @@ max_length = st.sidebar.slider("max_length", 0, 8192, 8192, step=1)
 top_p = st.sidebar.slider("top_p", 0.0, 1.0, 0.8, step=0.01)
 temperature = st.sidebar.slider("temperature", 0.0, 1.0, 0.8, step=0.01)
 
-# 是否启用agent prompt
-agent_prompt = st.sidebar.text_area("Agent Prompt:", height=100, placeholder="请在这儿输入您的Agent Prompt")
-agent_enable = st.sidebar.checkbox("启用Agent Prompt")
-
 # 清理会话历史
 buttonClean = st.sidebar.button("清理会话历史", key="clean")
 if buttonClean:
     st.session_state.history = []
+    st.session_state.past_key_values = None
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
     st.rerun()
@@ -68,10 +65,6 @@ prompt_text = st.chat_input("请输入您的问题")
 
 # 如果用户输入了内容,则生成回复
 if prompt_text:
-
-    # 如果启用agent prompt,则在prompt前面加上这段agent prompt
-    if agent_enable:
-        prompt_text = f"{agent_prompt} {prompt_text}"
 
     input_placeholder.markdown(prompt_text)
     history = st.session_state.history
