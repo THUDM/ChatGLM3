@@ -96,6 +96,8 @@ pip install -r requirements.txt
 git clone https://huggingface.co/THUDM/chatglm3-6b
 ```
 
+如果从你从 HuggingFace 下载比较慢，也可以从 [ModelScope](https://modelscope.cn/models/ZhipuAI/chatglm3-6b) 
+中下载。
 
 ### 网页版 Demo
 ![web-demo](resources/web-demo.gif)
