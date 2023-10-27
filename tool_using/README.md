@@ -2,7 +2,8 @@
 本文档将介绍如何使用 ChatGLM3-6B 进行工具调用。
 
 ## 构建 System Prompt
-首先准备好要构建的数据的描述信息（这里以两个工具调用为例）
+这里以两个工具调用为例，首先准备好要构建的数据的描述信息。
+
 ```python
 tools = [
     {
@@ -40,6 +41,7 @@ tools = [
 ]
 system_info = {"role": "system", "content": "Answer the following questions as best as you can. You have access to the following tools:", "tools": tools}
 ```
+请确保工具的定义格式与例子中一致以获得最优的性能
 
 ## 提出问题
 ```python
