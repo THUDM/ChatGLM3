@@ -44,6 +44,7 @@ system_info = {"role": "system", "content": "Answer the following questions as b
 请确保工具的定义格式与例子中一致以获得最优的性能
 
 ## 提出问题
+注意：目前 ChatGLM3-6B 的工具调用只支持通过 `chat` 方法，不支持  `stream_chat` 方法。
 ```python
 history = [system_info]
 query = "帮我查询股票10111的价格"
@@ -57,7 +58,7 @@ print(response)
 这表示模型需要调用工具 `track`，并且需要传入参数 `symbol`。
 
 ## 调用工具，生成回复
-这里需要自行实现调用工具的逻辑。假设已经得到了返回结果，将结果返回给模型并得到回复。
+这里需要自行实现调用工具的逻辑。假设已经得到了返回结果，将结果以 json 格式返回给模型并得到回复。
 ```python
 result = json.dumps({"price": 12412}, ensure_ascii=False)
 response, history = model.chat(tokenizer, result, history=history, role="observation")
