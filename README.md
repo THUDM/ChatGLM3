@@ -70,6 +70,16 @@ pip install -r requirements.txt
 ```
 其中 `transformers` 库版本推荐为 `4.30.2`，`torch` 推荐使用 2.0 及以上的版本，以获得最佳的推理性能。
 
+### 综合 Demo
+
+我们提供了一个集成以下三种功能的综合 Demo，运行方法请参考 [综合 Demo](composite_demo/README.md)
+
+- Chat: 对话模式，在此模式下可以与模型进行对话。
+- Tool: 工具模式，模型除了对话外，还可以通过工具进行其他操作。
+    ![tool](resources/tool.png)
+- Code Interpreter: 代码解释器模式，模型可以在一个 Jupyter 环境中执行代码并获取结果，以完成复杂任务。
+    ![code](resources/heart.png)
+
 ### 代码调用 
 
 可以通过如下代码调用 ChatGLM 模型来生成对话：
@@ -106,14 +116,6 @@ git clone https://huggingface.co/THUDM/chatglm3-6b
 
 如果从你从 HuggingFace 下载比较慢，也可以从 [ModelScope](https://modelscope.cn/models/ZhipuAI/chatglm3-6b) 
 中下载。
-
-### 综合 Demo
-
-我们提供了一个集成以下三种功能的综合 Demo，运行方法请参考 [综合 Demo](composite_demo/README.md)
-
-- Chat: 对话模式，在此模式下可以与模型进行对话。
-- Tool: 工具模式，模型除了对话外，还可以通过工具进行其他操作。
-- Code Interpreter: 代码解释器模式，模型可以在一个 Jupyter 环境中执行代码并获取结果，以完成复杂任务。
 
 ### 网页版对话 Demo
 ![web-demo](resources/web-demo.gif)
