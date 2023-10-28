@@ -1,5 +1,5 @@
 # 工具调用
-本文档将介绍如何使用 ChatGLM3-6B 进行工具调用。
+本文档将介绍如何使用 ChatGLM3-6B 进行工具调用。目前只有 ChatGLM3-6B 模型支持工具调用，而 ChatGLM3-6B-Base 和 ChatGLM3-6B-32K 模型不支持。
 
 ## 构建 System Prompt
 这里以两个工具调用为例，首先准备好要构建的数据的描述信息。
