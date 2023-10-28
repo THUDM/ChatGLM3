@@ -107,7 +107,15 @@ git clone https://huggingface.co/THUDM/chatglm3-6b
 如果从你从 HuggingFace 下载比较慢，也可以从 [ModelScope](https://modelscope.cn/models/ZhipuAI/chatglm3-6b) 
 中下载。
 
-### 网页版 Demo
+### 综合 Demo
+
+我们提供了一个集成以下三种功能的综合 Demo，运行方法请参考 [综合 Demo](composite_demo/README.md)
+
+- Chat: 对话模式，在此模式下可以与模型进行对话。
+- Tool: 工具模式，模型除了对话外，还可以通过工具进行其他操作。
+- Code Interpreter: 代码解释器模式，模型可以在一个 Jupyter 环境中执行代码并获取结果，以完成复杂任务。
+
+### 网页版对话 Demo
 ![web-demo](resources/web-demo.gif)
 可以通过以下命令启动基于 Gradio 的网页版 demo：
 ```shell
@@ -123,7 +131,7 @@ streamlit run web_demo2.py
 
 网页版 demo 会运行一个 Web Server，并输出地址。在浏览器中打开输出的地址即可使用。 经测试，基于 Streamlit 的网页版 Demo 会更流畅。
 
-### 命令行 Demo
+### 命令行对话 Demo
 
 ![cli-demo](resources/cli-demo.png)
 
