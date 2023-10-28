@@ -1,0 +1,12 @@
+huggingface_hub
+ipykernel
+ipython
+jupyter_client
+pillow
+sentencepiece
+streamlit
+tokenizers
+torch
+transformers
+pyyaml
+requests
