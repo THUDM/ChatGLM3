@@ -8,3 +8,7 @@ sentencepiece
 accelerate
 sse-starlette
 streamlit>=1.24.0
+fastapi==0.95.1
+typing_extensions==4.4.0
+uvicorn
+sse_starlette
