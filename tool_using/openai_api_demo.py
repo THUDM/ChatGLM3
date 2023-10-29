@@ -29,6 +29,7 @@ def main():
         model="chatglm3",
         messages=messages,
         temperature=0,
+        return_function_call=True
     )
     function_call = json.loads(response.choices[0].message.content)
     logger.info(f"Function Call Response: {function_call}")
