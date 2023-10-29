@@ -107,7 +107,7 @@ class ChatCompletionResponse(BaseModel):
     object: Literal["chat.completion", "chat.completion.chunk"]
     choices: List[Union[ChatCompletionResponseChoice, ChatCompletionResponseStreamChoice]]
     created: Optional[int] = Field(default_factory=lambda: int(time.time()))
-    usage: UsageInfo
+    usage: Optional[UsageInfo] = None
 
 
 @app.get("/v1/models", response_model=ModelList)
@@ -164,7 +164,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
         else:
             message = ChatMessage(role="assistant", content=content)
     else:
-        message = ChatMessage(role="assistant", content=response)
+        message = ChatMessage(role="assistant", content=response["text"])
 
     choice_data = ChatCompletionResponseChoice(
         index=0,
