@@ -18,7 +18,7 @@ The chat header occupies a complete line, formatted as:
 ```text
 <|role|>{metadata}
 ```
-Where `<|role|>` part is represented in a special token,  which can’t be encoded by the tokenizer from the text form to prevent injection attacks. The `metadata` part is represented in plain texts and is opetional content.
+Where `<|role|>` part is represented in a special token,  which can’t be encoded by the tokenizer from the text form to prevent injection attacks. The `metadata` part is represented in plain texts and is optional content.
 * `<|system|>`: System information, which can be interspersed in the dialogue in design, **but currently only appears at the beginning**
 * `<|user|>`: User
   - Multiple messages from `<|user|>` will not appear continuously
