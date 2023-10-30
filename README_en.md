@@ -51,7 +51,7 @@ We selected 8 typical Chinese-English datasets and conducted performance tests o
 
 We have conducted manual evaluation tests on ChatGLM3-6B-32K in multiple long-text application scenarios. Compared with the second-generation model, its effect has improved by more than 50% on average. In applications such as paper reading, document summarization, and financial report analysis, this improvement is particularly significant. In addition, we also tested the model on the LongBench evaluation set, and the specific results are shown in the table below.
 
-| Model                |  平均 |  Summary | Single-Doc QA |  Multi-Doc QA | Code | Few-shot | Synthetic | 
+| Model                |  Average |  Summary | Single-Doc QA |  Multi-Doc QA | Code | Few-shot | Synthetic | 
 |----------------------|:-----:|:----:|:----:|:----:|:------:|:-----:|:-----:|
 | ChatGLM2-6B-32K   |  41.5 | 24.8 | 37.6 | 34.7 |  52.8  |  51.3 | 47.7 | 
 | ChatGLM3-6B-32K   |  50.2 | 26.6 | 45.8 | 46.1 |  56.2  |  61.2 | 65 |
@@ -82,9 +82,9 @@ We provide an integrated demo that incorporates the following three functionalit
 - Code Interpreter: Code interpreter mode, where the model can execute code in a Jupyter environment and obtain results to complete complex tasks.
     ![code](resources/heart.png)
 
-### 代码调用 
+### Usage 
 
-可以通过如下代码调用 ChatGLM 模型来生成对话：
+The ChatGLM model can be called to start a conversation using the following code:
 
 ```python
 >>> from transformers import AutoTokenizer, AutoModel
