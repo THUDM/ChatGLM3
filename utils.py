@@ -132,6 +132,9 @@ def generate_stream_chatglm3(model: PreTrainedModel, tokenizer: PreTrainedTokeni
     inputs = inputs.to(model.device)
     input_echo_len = len(inputs["input_ids"][0])
 
+    if input_echo_len >= model.config.seq_length:
+        raise
+
     eos_token_id = [
         tokenizer.eos_token_id,
         tokenizer.get_command("<|user|>"),
