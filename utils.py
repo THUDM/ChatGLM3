@@ -1,7 +1,7 @@
 import gc
 import os
 from copy import deepcopy
-from typing import Dict, Union, Optional
+from typing import Dict, Union, Optional, Tuple
 
 import torch
 from torch.nn import Module
@@ -133,16 +133,15 @@ def generate_stream_chatglm3(model: PreTrainedModel, tokenizer: PreTrainedTokeni
     input_echo_len = len(inputs["input_ids"][0])
 
     if input_echo_len >= model.config.seq_length:
-        raise
+        print(f"Input length larger than {model.config.seq_length}")
 
     eos_token_id = [
         tokenizer.eos_token_id,
         tokenizer.get_command("<|user|>"),
-        tokenizer.get_command("<|observation|>")
     ]
 
     gen_kwargs = {
-        "max_length": max_new_tokens + input_echo_len,
+        "max_length": min(max_new_tokens + input_echo_len, model.config.seq_length),
         "do_sample": True if temperature > 1e-5 else False,
         "top_p": top_p,
         "repetition_penalty": repetition_penalty,
@@ -169,6 +168,8 @@ def generate_stream_chatglm3(model: PreTrainedModel, tokenizer: PreTrainedTokeni
 
         response = tokenizer.decode(output_ids)
         if response and response[-1] != "�":
+            response, stop_found = apply_stopping_strings(response, ["<|observation|>"])
+
             yield {
                 "text": response,
                 "usage": {
@@ -176,8 +177,11 @@ def generate_stream_chatglm3(model: PreTrainedModel, tokenizer: PreTrainedTokeni
                     "completion_tokens": total_len - input_echo_len,
                     "total_tokens": total_len,
                 },
-                "finish_reason": None,
+                "finish_reason": "function_call" if stop_found else None,
             }
+
+            if stop_found:
+                break
 
     # Only last stream result contains finish_reason, we set finish_reason as stop
     ret = {
@@ -199,3 +203,27 @@ def generate_chatglm3(model: PreTrainedModel, tokenizer: PreTrainedTokenizer, pa
     for response in generate_stream_chatglm3(model, tokenizer, params):
         pass
     return response
+
+
+def apply_stopping_strings(reply, stop_strings) -> Tuple[str, bool]:
+    stop_found = False
+    for string in stop_strings:
+        idx = reply.find(string)
+        if idx != -1:
+            reply = reply[:idx]
+            stop_found = True
+            break
+
+    if not stop_found:
+        # If something like "\nYo" is generated just before "\nYou: is completed, trim it
+        for string in stop_strings:
+            for j in range(len(string) - 1, 0, -1):
+                if reply[-j:] == string[:j]:
+                    reply = reply[:-j]
+                    break
+            else:
+                continue
+
+            break
+
+    return reply, stop_found

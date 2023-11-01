@@ -58,7 +58,7 @@ class ChatMessage(BaseModel):
     role: Literal["user", "assistant", "system", "observation"]
     content: str = None
     metadata: Optional[str] = None
-    tools: Optional[List[dict]] = None
+    tools: Optional[Union[dict, List[dict]]] = None
 
 
 class DeltaMessage(BaseModel):
@@ -69,14 +69,12 @@ class DeltaMessage(BaseModel):
 class ChatCompletionRequest(BaseModel):
     model: str
     messages: List[ChatMessage]
-    temperature: Optional[float] = 0.7
-    top_p: Optional[float] = 1.0
+    temperature: Optional[float] = 0.8
+    top_p: Optional[float] = 0.8
     max_tokens: Optional[int] = None
-    stop: Optional[Union[str, List[str]]] = None
     stream: Optional[bool] = False
 
-    # Additional parameters support for stop generation
-    stop_token_ids: Optional[List[int]] = None
+    # Additional parameters
     repetition_penalty: Optional[float] = 1.1
 
     # Additional parameters supported by tools
@@ -93,7 +91,9 @@ class ChatCompletionResponseChoice(BaseModel):
 class ChatCompletionResponseStreamChoice(BaseModel):
     index: int
     delta: DeltaMessage
-    finish_reason: Optional[Literal["stop", "length"]]
+    finish_reason: Optional[Literal["stop", "length", "function_call"]]
+    function_call: Optional[dict] = None
+    history: Optional[List[dict]] = None
 
 
 class UsageInfo(BaseModel):
@@ -120,17 +120,10 @@ async def list_models():
 async def create_chat_completion(request: ChatCompletionRequest):
     global model, tokenizer
 
-    if request.messages[-1].role == "assistant":
+    if len(request.messages) < 1 or request.messages[-1].role == "assistant":
         raise HTTPException(status_code=400, detail="Invalid request")
 
     with_function_call = bool(request.messages[0].role == "system" and request.messages[0].tools is not None)
-
-    # stop settings
-    request.stop = request.stop or []
-    if isinstance(request.stop, str):
-        request.stop = [request.stop]
-
-    request.stop_token_ids = request.stop_token_ids or []
 
     gen_params = dict(
         messages=request.messages,
@@ -139,10 +132,9 @@ async def create_chat_completion(request: ChatCompletionRequest):
         max_tokens=request.max_tokens or 1024,
         echo=False,
         stream=request.stream,
-        stop_token_ids=request.stop_token_ids,
-        stop=request.stop,
         repetition_penalty=request.repetition_penalty,
         with_function_call=with_function_call,
+        return_function_call=request.return_function_call,
     )
 
     if request.stream:
@@ -154,15 +146,19 @@ async def create_chat_completion(request: ChatCompletionRequest):
 
     finish_reason, history = "stop", None
     if with_function_call and request.return_function_call:
-        history = [m.dict(exclude_none=True) for m in request.messages]
-        content, history = process_response(response["text"], history)
-        if isinstance(content, dict):
-            message, finish_reason = ChatMessage(
-                role="assistant",
-                content=json.dumps(content, ensure_ascii=False),
-            ), "function_call"
-        else:
-            message = ChatMessage(role="assistant", content=content)
+        try:
+            history = [m.dict(exclude_none=True) for m in request.messages]
+            content, history = process_response(response["text"], history)
+            if isinstance(content, dict):
+                message, finish_reason = ChatMessage(
+                    role="assistant",
+                    content=json.dumps(content, ensure_ascii=False),
+                ), "function_call"
+            else:
+                message = ChatMessage(role="assistant", content=content)
+        except:
+            print("Failed to parse tool call")
+            message = ChatMessage(role="assistant", content=response["text"])
     else:
         message = ChatMessage(role="assistant", content=response["text"])
 
@@ -192,18 +188,30 @@ async def predict(model_id: str, params: dict):
     yield "{}".format(chunk.json(exclude_unset=True, ensure_ascii=False))
 
     previous_text = ""
+    with_function_call, return_function_call = params["with_function_call"], params["return_function_call"]
     for new_response in generate_stream_chatglm3(model, tokenizer, params):
         decoded_unicode = new_response["text"]
         delta_text = decoded_unicode[len(previous_text):]
         previous_text = decoded_unicode
 
-        if len(delta_text) == 0:
-            delta_text = None
+        finish_reason = new_response["finish_reason"]
+        if len(delta_text) == 0 and finish_reason != "function_call":
+            continue
+
+        history, function_call = None, None
+        if finish_reason == "function_call" and return_function_call:
+            try:
+                history = [m.dict(exclude_none=True) for m in params["messages"]]
+                function_call, history = process_response(decoded_unicode, history)
+            except:
+                print("Failed to parse tool call")
 
         choice_data = ChatCompletionResponseStreamChoice(
             index=0,
             delta=DeltaMessage(content=delta_text),
-            finish_reason=None
+            finish_reason=finish_reason if with_function_call else None,
+            history=history,
+            function_call=function_call
         )
         chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
         yield "{}".format(chunk.json(exclude_unset=True, ensure_ascii=False))
