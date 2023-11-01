@@ -123,6 +123,7 @@ def generate_stream_chatglm3(model: PreTrainedModel, tokenizer: PreTrainedTokeni
     repetition_penalty = float(params.get("repetition_penalty", 1.0))
     top_p = float(params.get("top_p", 1.0))
     max_new_tokens = int(params.get("max_tokens", 256))
+    max_length = params.get("max_tokens", None)
     echo = params.get("echo", True)
 
     query, role = messages[-1].content, messages[-1].role
@@ -135,13 +136,16 @@ def generate_stream_chatglm3(model: PreTrainedModel, tokenizer: PreTrainedTokeni
     if input_echo_len >= model.config.seq_length:
         print(f"Input length larger than {model.config.seq_length}")
 
+    if max_length is None:
+        max_length = min(max_new_tokens + input_echo_len, model.config.seq_length)
+
     eos_token_id = [
         tokenizer.eos_token_id,
         tokenizer.get_command("<|user|>"),
     ]
 
     gen_kwargs = {
-        "max_length": min(max_new_tokens + input_echo_len, model.config.seq_length),
+        "max_length": max_length,
         "do_sample": True if temperature > 1e-5 else False,
         "top_p": top_p,
         "repetition_penalty": repetition_penalty,

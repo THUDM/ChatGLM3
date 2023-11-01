@@ -75,6 +75,7 @@ class ChatCompletionRequest(BaseModel):
     stream: Optional[bool] = False
 
     # Additional parameters
+    max_length: Optional[int] = None
     repetition_penalty: Optional[float] = 1.1
 
     # Additional parameters supported by tools
@@ -130,6 +131,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
         temperature=request.temperature,
         top_p=request.top_p,
         max_tokens=request.max_tokens or 1024,
+        max_length=request.max_length,
         echo=False,
         stream=request.stream,
         repetition_penalty=request.repetition_penalty,
