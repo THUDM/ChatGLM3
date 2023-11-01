@@ -1,0 +1,6 @@
+__pycache__
+
+# finetune: generated files
+finetune/output
+finetune/data
+finetune/formatted_data
