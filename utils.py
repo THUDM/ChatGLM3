@@ -123,7 +123,7 @@ def generate_stream_chatglm3(model: PreTrainedModel, tokenizer: PreTrainedTokeni
     repetition_penalty = float(params.get("repetition_penalty", 1.0))
     top_p = float(params.get("top_p", 1.0))
     max_new_tokens = int(params.get("max_tokens", 256))
-    max_length = params.get("max_tokens", None)
+    max_length = params.get("max_length", None)
     echo = params.get("echo", True)
 
     query, role = messages[-1].content, messages[-1].role
