@@ -16,6 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 from transformers import AutoTokenizer, AutoModel
+from loguru import logger
 
 from utils import process_response, generate_chatglm3, generate_stream_chatglm3
 
@@ -138,6 +139,8 @@ async def create_chat_completion(request: ChatCompletionRequest):
         with_function_call=with_function_call,
         return_function_call=request.return_function_call,
     )
+
+    logger.debug(f"==== request ====\n{gen_params}")
 
     if request.stream:
         generate = predict(request.model, gen_params)
