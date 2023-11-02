@@ -1,0 +1,10 @@
+name: weather
+description: Search the current weather of a city
+parameters:
+  type: object
+  properties:
+    city:
+      type: string
+      description: City name
+  required:
+    - city
