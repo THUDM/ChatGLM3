@@ -82,9 +82,9 @@ pip install -r requirements.txt
 
 - Chat: 对话模式，在此模式下可以与模型进行对话。
 - Tool: 工具模式，模型除了对话外，还可以通过工具进行其他操作。
-    ![tool](resources/tool.png)
+    <img src="resources/tool.png" width="400">
 - Code Interpreter: 代码解释器模式，模型可以在一个 Jupyter 环境中执行代码并获取结果，以完成复杂任务。
-    ![code](resources/heart.png)
+    <img src="resources/heart.png" width="400">
 
 ### 代码调用 
 
