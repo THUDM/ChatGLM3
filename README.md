@@ -151,6 +151,12 @@ python cli_demo.py
 
 程序会在命令行中进行交互式的对话，在命令行中输入指示并回车即可生成回复，输入 `clear` 可以清空对话历史，输入 `stop` 终止程序。
 
+### LangChain Demo
+请参考 [基于 LangChain 的工具调用 Demo](langchain_demo/README.md)。
+
+### 工具调用
+关于工具调用的方法请参考 [工具调用](tool_using/README.md)。 
+
 ### API 部署
 感谢 [@xusenlinzy](https://github.com/xusenlinzy) 实现了 OpenAI 格式的流式 API 部署，可以作为任意基于 ChatGPT 的应用的后端，比如 [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web)。可以通过运行仓库中的[openai_api.py](openai_api.py) 进行部署：
 ```shell
@@ -172,9 +178,6 @@ if __name__ == "__main__":
         if hasattr(chunk.choices[0].delta, "content"):
             print(chunk.choices[0].delta.content, end="", flush=True)
 ```
-
-### 工具调用
-关于工具调用的方法请参考 [工具调用](tool_using/README.md)。 我们也提供了[基于 LangChain 的工具调用 Demo](langchain_demo/README.md)。
 
 ## 低成本部署
 
