@@ -7,7 +7,7 @@
 运行示例需要 `python>=3.9`，除基础的 `torch` 依赖外，示例代码运行还需要依赖 
 
 ```bash
-pip install transformers==4.30.2 accelerate sentencepiece
+pip install transformers==4.30.2 accelerate sentencepiece astunparse deepspeed
 ```
 
 ## 多轮对话格式
@@ -174,9 +174,10 @@ python inference.py \
 
     字样，每行依次表示一个 detokenized string, token_id 和 target_id。可在日志中查看这部分的 `loss_mask` 是否符合预期。若不符合，可能需要调整代码或数据。
 
-2. P-Tuning V2 参考显存用量
+2. 参考显存用量
 
-    `PRE_SEQ_LEN=128`, `DEV_BATCH_SIZE=1`, `GRAD_ACCUMULARION_STEPS=16`,  `MAX_SEQ_LEN=2048` 配置下约需要 21GB 显存。
+    - P-Tuning V2 `PRE_SEQ_LEN=128`, `DEV_BATCH_SIZE=1`, `GRAD_ACCUMULARION_STEPS=16`,  `MAX_SEQ_LEN=2048` 配置下约需要 21GB 显存。
+    - 全量微调时，`./scripts/finetune_ds_multiturn.sh` 中的配置（`MAX_SEQ_LEN=2048`, `DEV_BATCH_SIZE=16`, `GRAD_ACCUMULARION_STEPS=1`）恰好用满 4 * 80GB 显存。
 
 3. 若尝试后发现显存不足，可以考虑
     - 尝试降低 `DEV_BATCH_SIZE` 并提升 `GRAD_ACCUMULARION_STEPS`
