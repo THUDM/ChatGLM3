@@ -21,7 +21,7 @@ MASTER_PORT=$(shuf -n 1 -i 10000-65535)
 
 mkdir -p $OUTPUT_DIR
 
-deepspeed --num_gpus=$NUM_GPUS --master_port $MASTER_PORT finetune.py \
+torchrun --standalone --nnodes=1 --nproc_per_node=$NUM_GPUS finetune.py \
     --train_format input-output \
     --train_file $DATASET_PATH \
     --preprocessing_num_workers 1 \

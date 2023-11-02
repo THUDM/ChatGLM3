@@ -4,6 +4,7 @@ import astunparse
 from transformers import PreTrainedTokenizer
 from torch.utils.data import Dataset
 from copy import deepcopy
+from typing import Dict, List
 
 # text constants
 FUNCTION_CALL_NAME     = 'tool_call'
@@ -13,7 +14,7 @@ TOOL_DEFINITION_PREFIX = 'Answer the following questions as best as you can. You
 CONVERSATOIN_KEY       = 'conversations'
 TOOL_DESC_KEY          = 'tools'
 
-def format_function_call(function_name: str, parameters: dict[str, str]):
+def format_function_call(function_name: str, parameters: Dict[str, str]):
     function_name = ast.Name(id=function_name)
     keywords = [
         ast.keyword(arg=arg_name, value=ast.Constant(arg_value)) 
@@ -22,13 +23,13 @@ def format_function_call(function_name: str, parameters: dict[str, str]):
     func_call = ast.Call(func=function_name, args=[], keywords=keywords)
     return astunparse.unparse(func_call).strip()
 
-def format_conversation(item, tokenizer: "ChatGLMTokenizer", conversation_key: str, tool_key: str):
+def format_conversation(item, tokenizer, conversation_key: str, tool_key: str):
     conversations = deepcopy(item[conversation_key])
 
     # Note: `loss_mask` here means whether *the prediction* of the token should take loss
     tokens, loss_masks = [tokenizer.get_command("[gMASK]"), tokenizer.get_command("sop")], [0, 0]
 
-    def _update(_tokens: list[int], value: int = 1):
+    def _update(_tokens: List[int], value: int = 1):
         value = int(value)
         tokens.extend(_tokens)
         loss_masks.extend([value] * len(_tokens))
@@ -67,7 +68,7 @@ def format_conversation(item, tokenizer: "ChatGLMTokenizer", conversation_key: s
     assert len(tokens) == len(loss_masks), f"length mismatch: {len(tokens)} vs {len(loss_masks)}"
     return tokens, loss_masks
 
-def sanity_check(tokens: list[int], target: list[int], tokenizer: PreTrainedTokenizer):
+def sanity_check(tokens: List[int], target: List[int], tokenizer: PreTrainedTokenizer):
     print("Sanity Check >>>>>>>>>>>>>")
     for t, m in zip(tokens, target):
         decoded =  tokenizer.tokenizer.index_special_tokens[t] \
@@ -79,7 +80,7 @@ def sanity_check(tokens: list[int], target: list[int], tokenizer: PreTrainedToke
     assert len(tokens) == len(target), f"length mismatch: {len(tokens)} vs {len(target)}"
 
 class MultiTurnDataset(Dataset):
-    def __init__(self, data: list[dict], tokenizer: PreTrainedTokenizer, max_seq_length: int):
+    def __init__(self, data: List[dict], tokenizer: PreTrainedTokenizer, max_seq_length: int):
         super(MultiTurnDataset, self).__init__()
         self.tokenizer = tokenizer
         self.max_seq_length = max_seq_length
@@ -109,7 +110,7 @@ class MultiTurnDataset(Dataset):
         }
     
 class InputOutputDataset(Dataset):
-    def __init__(self, data: list[dict], tokenizer: PreTrainedTokenizer, max_source_length: int, max_target_length: int):
+    def __init__(self, data: List[dict], tokenizer: PreTrainedTokenizer, max_source_length: int, max_target_length: int):
         super(InputOutputDataset, self).__init__()
         self.tokenizer = tokenizer
         self.max_source_length = max_source_length

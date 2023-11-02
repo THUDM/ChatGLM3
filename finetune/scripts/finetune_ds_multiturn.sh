@@ -19,7 +19,7 @@ OUTPUT_DIR=output/${RUN_NAME}-${DATASTR}-${LR}
 
 mkdir -p $OUTPUT_DIR
 
-torchrun --standalone --nnodes=1 --nproc-per-node=$NUM_GPUS finetune.py \
+torchrun --standalone --nnodes=1 --nproc_per_node=$NUM_GPUS finetune.py \
     --train_format multi-turn \
     --train_file $DATASET_PATH \
     --max_seq_length $MAX_SEQ_LEN \

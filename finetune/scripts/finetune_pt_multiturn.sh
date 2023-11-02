@@ -6,8 +6,8 @@ PRE_SEQ_LEN=128
 LR=2e-2
 NUM_GPUS=1
 MAX_SEQ_LEN=2048
-DEV_BATCH_SIZE=16
-GRAD_ACCUMULARION_STEPS=1
+DEV_BATCH_SIZE=1
+GRAD_ACCUMULARION_STEPS=16
 MAX_STEP=1000
 SAVE_INTERVAL=500
 
@@ -20,7 +20,7 @@ OUTPUT_DIR=output/${RUN_NAME}-${DATASTR}-${PRE_SEQ_LEN}-${LR}
 
 mkdir -p $OUTPUT_DIR
 
-torchrun --standalone --nnodes=1 --nproc-per-node=$NUM_GPUS finetune.py \
+torchrun --standalone --nnodes=1 --nproc_per_node=$NUM_GPUS finetune.py \
     --train_format multi-turn \
     --train_file $DATASET_PATH \
     --max_seq_length $MAX_SEQ_LEN \

@@ -7,8 +7,8 @@ LR=2e-2
 NUM_GPUS=1
 MAX_SOURCE_LEN=1024
 MAX_TARGET_LEN=128
-DEV_BATCH_SIZE=32
-GRAD_ACCUMULARION_STEPS=1
+DEV_BATCH_SIZE=1
+GRAD_ACCUMULARION_STEPS=32
 MAX_STEP=1000
 SAVE_INTERVAL=500
 
@@ -21,7 +21,7 @@ OUTPUT_DIR=output/${RUN_NAME}-${DATASTR}-${PRE_SEQ_LEN}-${LR}
 
 mkdir -p $OUTPUT_DIR
 
-torchrun --standalone --nnodes=1 --nproc-per-node=$NUM_GPUS finetune.py \
+torchrun --standalone --nnodes=1 --nproc_per_node=$NUM_GPUS finetune.py \
     --train_format input-output \
     --train_file $DATASET_PATH \
     --preprocessing_num_workers 1 \
