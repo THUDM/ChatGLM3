@@ -174,7 +174,7 @@ if __name__ == "__main__":
 ```
 
 ### 工具调用
-关于工具调用的方法请参考 [工具调用](tool_using/README.md)。
+关于工具调用的方法请参考 [工具调用](tool_using/README.md)。 我们也提供了[基于 LangChain 的工具调用 Demo](langchain_demo/README.md)。
 
 ## 低成本部署
 
