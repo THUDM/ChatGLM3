@@ -1,8 +1,9 @@
+import abc
 import math
 from langchain.tools import BaseTool
 
 
-class Calculator(BaseTool):
+class Calculator(BaseTool, abc.ABC):
     name = "Calculator"
     description = "Useful for when you need to answer questions about math"
 

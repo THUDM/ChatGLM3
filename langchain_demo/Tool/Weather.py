@@ -1,4 +1,6 @@
 import os
+from typing import Any
+
 import requests
 from langchain.tools import BaseTool
 
@@ -9,6 +11,10 @@ class Weather(BaseTool):
 
     def __init__(self):
         super().__init__()
+
+    async def _arun(self, *args: Any, **kwargs: Any) -> Any:
+        # 用例中没有用到 arun 不予具体实现
+        pass
 
     def get_weather(self, location):
         api_key = os.environ["SENIVERSE_KEY"]
