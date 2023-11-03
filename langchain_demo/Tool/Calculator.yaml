@@ -1,0 +1,10 @@
+name: Calculator
+description: Useful for when you need to answer questions about math
+parameters:
+  type: object
+  properties:
+    formula:
+      type: string
+      description: The formula to be calculated
+  required:
+    - formula
