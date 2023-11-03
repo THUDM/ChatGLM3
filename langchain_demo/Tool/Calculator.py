@@ -9,6 +9,11 @@ class Calculator(BaseTool):
     def __init__(self):
         super().__init__()
 
+    async def _arun(self, *args: Any, **kwargs: Any) -> Any:
+        # 用例中没有用到 arun 不予具体实现
+        pass
+
+
     def _run(self, para: str) -> str:
         para = para.replace("^", "**")
         if "sqrt" in para:
