@@ -7,54 +7,40 @@ from loguru import logger
 from tool_register import get_tools, dispatch_tool
 
 init(autoreset=True)
-openai.api_base = "http://localhost:8000/v1"
+openai.api_base = "http://192.168.20.59:7891/v1"
 openai.api_key = "xxx"
 
-
-system_info = {
-    "role": "system",
-    "content": "Answer the following questions as best as you can. You have access to the following tools:",
-    "tools": get_tools(),
-}
+functions = get_tools()
 
 
-def tool_test(query, stream=False):
-    messages = [
-        system_info,
-        {
-            "role": "user",
-            "content": query,
-        }
-    ]
+def run_conversation(query: str, stream=False, functions=None, max_retry=5):
+    params = dict(model="chatglm3", messages=[{"role": "user", "content": query}], stream=stream)
+    if functions:
+        params["functions"] = functions
+    response = openai.ChatCompletion.create(**params)
 
-    response = openai.ChatCompletion.create(
-        model="chatglm3",
-        messages=messages,
-        temperature=0,
-        return_function_call=True,
-        stream=stream,
-    )
-    for _ in range(5):
+    for _ in range(max_retry):
         if not stream:
-            if response.choices[0].finish_reason == "stop":
-                reply = response["choices"][0]["message"]["content"]
-                logger.info(f"Final Reply: {reply}")
-                return
+            if response.choices[0].message.get("function_call"):
+                function_call = response.choices[0].message.function_call
+                logger.info(f"Function Call Response: {function_call.to_dict_recursive()}")
 
-            elif response.choices[0].finish_reason == "function_call":
-                function_call = json.loads(response.choices[0].message.content)
-                logger.info(f"Function Call Response: {function_call}")
-
-                tool_response = dispatch_tool(function_call["name"], function_call["parameters"])
+                function_args = json.loads(function_call.arguments)
+                tool_response = dispatch_tool(function_call.name, function_args)
                 logger.info(f"Tool Call Response: {tool_response}")
 
-                messages = response.choices[0].history  # 获取历史对话信息
-                messages.append(
+                params["messages"].append(response.choices[0].message)
+                params["messages"].append(
                     {
-                        "role": "observation",
+                        "role": "function",
+                        "name": function_call.name,
                         "content": tool_response,  # 调用函数返回结果
                     }
                 )
+            else:
+                reply = response.choices[0].message.content
+                logger.info(f"Final Reply: \n{reply}")
+                return
 
         else:
             output = ""
@@ -69,31 +55,38 @@ def tool_test(query, stream=False):
                 elif chunk.choices[0].finish_reason == "function_call":
                     print("\n")
 
-                    function_call = chunk.choices[0].function_call.to_dict_recursive()
-                    logger.info(f"Function Call Response: {function_call}")
+                    function_call = chunk.choices[0].delta.function_call
+                    logger.info(f"Function Call Response: {function_call.to_dict_recursive()}")
 
-                    tool_response = dispatch_tool(function_call["name"], function_call["parameters"])
+                    function_args = json.loads(function_call.arguments)
+                    tool_response = dispatch_tool(function_call.name, function_args)
                     logger.info(f"Tool Call Response: {tool_response}")
 
-                    messages = chunk.choices[0].history  # 获取历史对话信息
-                    messages.append(
+                    params["messages"].append(
                         {
-                            "role": "observation",
+                            "role": "assistant",
+                            "content": output
+                        }
+                    )
+                    params["messages"].append(
+                        {
+                            "role": "function",
+                            "name": function_call.name,
                             "content": tool_response,  # 调用函数返回结果
                         }
                     )
 
                     break
 
-        response = openai.ChatCompletion.create(
-            model="chatglm3",
-            messages=messages,
-            temperature=0,
-            return_function_call=True,
-            stream=stream,
-        )
+        response = openai.ChatCompletion.create(**params)
 
 
 if __name__ == "__main__":
+    query = "你是谁"
+    run_conversation(query, stream=True)
+
+    logger.info("\n=========== next conversation ===========")
+
     query = "帮我查询北京的天气怎么样"
-    tool_test(query, stream=True)
+    run_conversation(query, functions=functions, stream=True)
+
