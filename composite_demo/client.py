@@ -7,17 +7,19 @@ from typing import Any, Protocol
 from huggingface_hub.inference._text_generation import TextGenerationStreamResponse, Token
 import streamlit as st
 import torch
-from transformers import AutoModel, AutoTokenizer
+from transformers import AutoModel, AutoTokenizer, AutoConfig
 
 from conversation import Conversation
 
 TOOL_PROMPT = 'Answer the following questions as best as you can. You have access to the following tools:'
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
+PT_PATH = os.environ.get('PT_PATH', None)
+TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
 
 @st.cache_resource
 def get_client() -> Client:
-    client = HFClient(MODEL_PATH)
+    client = HFClient(MODEL_PATH, TOKENIZER_PATH, PT_PATH)
     return client
 
 class Client(Protocol):
@@ -81,15 +83,28 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
                 yield response, new_history
 
 class HFClient(Client):
-    def __init__(self, model_path: str):
+    def __init__(self, model_path: str, tokenizer_path: str, pt_checkpoint: str | None = None,):
         self.model_path = model_path
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
-        self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True).to(
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, trust_remote_code=True)
+
+        if pt_checkpoint is not None:
+            config = AutoConfig.from_pretrained(model_path, trust_remote_code=True, pre_seq_len=128)
+            self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True, config=config)
+            prefix_state_dict = torch.load(os.path.join(pt_checkpoint, "pytorch_model.bin"))
+            new_prefix_state_dict = {}
+            for k, v in prefix_state_dict.items():
+                if k.startswith("transformer.prefix_encoder."):
+                    new_prefix_state_dict[k[len("transformer.prefix_encoder."):]] = v
+            print("Loaded from pt checkpoints", new_prefix_state_dict.keys())
+            self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
+        else:
+            self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
+
+        self.model = self.model.to(
             'cuda' if torch.cuda.is_available() else
             'mps' if torch.backends.mps.is_available() else
             'cpu'
-        )
-        self.model = self.model.eval()
+        ).eval()
 
     def generate_stream(self,
         system: str | None,
