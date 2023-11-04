@@ -4,7 +4,6 @@
 # Visit http://localhost:8000/docs for documents.
 
 
-import json
 import time
 from contextlib import asynccontextmanager
 from typing import List, Literal, Optional, Union
@@ -13,6 +12,7 @@ import torch
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from loguru import logger
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 from transformers import AutoTokenizer, AutoModel
@@ -54,46 +54,48 @@ class ModelList(BaseModel):
     data: List[ModelCard] = []
 
 
+class FunctionCallResponse(BaseModel):
+    name: Optional[str] = None
+    arguments: Optional[str] = None
+
+
 class ChatMessage(BaseModel):
-    role: Literal["user", "assistant", "system", "observation"]
+    role: Literal["user", "assistant", "system", "function"]
     content: str = None
-    metadata: Optional[str] = None
-    tools: Optional[List[dict]] = None
+    name: Optional[str] = None
+    function_call: Optional[FunctionCallResponse] = None
 
 
 class DeltaMessage(BaseModel):
     role: Optional[Literal["user", "assistant", "system"]] = None
     content: Optional[str] = None
+    function_call: Optional[FunctionCallResponse] = None
 
 
 class ChatCompletionRequest(BaseModel):
     model: str
     messages: List[ChatMessage]
-    temperature: Optional[float] = 0.7
-    top_p: Optional[float] = 1.0
+    temperature: Optional[float] = 0.8
+    top_p: Optional[float] = 0.8
     max_tokens: Optional[int] = None
-    stop: Optional[Union[str, List[str]]] = None
     stream: Optional[bool] = False
+    functions: Optional[Union[dict, List[dict]]] = None
 
-    # Additional parameters support for stop generation
-    stop_token_ids: Optional[List[int]] = None
+    # Additional parameters
+    max_length: Optional[int] = None
     repetition_penalty: Optional[float] = 1.1
-
-    # Additional parameters supported by tools
-    return_function_call: Optional[bool] = False
 
 
 class ChatCompletionResponseChoice(BaseModel):
     index: int
     message: ChatMessage
     finish_reason: Literal["stop", "length", "function_call"]
-    history: Optional[List[dict]] = None
 
 
 class ChatCompletionResponseStreamChoice(BaseModel):
     index: int
     delta: DeltaMessage
-    finish_reason: Optional[Literal["stop", "length"]]
+    finish_reason: Optional[Literal["stop", "length", "function_call"]]
 
 
 class UsageInfo(BaseModel):
@@ -120,30 +122,22 @@ async def list_models():
 async def create_chat_completion(request: ChatCompletionRequest):
     global model, tokenizer
 
-    if request.messages[-1].role == "assistant":
+    if len(request.messages) < 1 or request.messages[-1].role == "assistant":
         raise HTTPException(status_code=400, detail="Invalid request")
-
-    with_function_call = bool(request.messages[0].role == "system" and request.messages[0].tools is not None)
-
-    # stop settings
-    request.stop = request.stop or []
-    if isinstance(request.stop, str):
-        request.stop = [request.stop]
-
-    request.stop_token_ids = request.stop_token_ids or []
 
     gen_params = dict(
         messages=request.messages,
         temperature=request.temperature,
         top_p=request.top_p,
         max_tokens=request.max_tokens or 1024,
+        max_length=request.max_length,
         echo=False,
         stream=request.stream,
-        stop_token_ids=request.stop_token_ids,
-        stop=request.stop,
         repetition_penalty=request.repetition_penalty,
-        with_function_call=with_function_call,
+        functions=request.functions,
     )
+
+    logger.debug(f"==== request ====\n{gen_params}")
 
     if request.stream:
         generate = predict(request.model, gen_params)
@@ -152,25 +146,27 @@ async def create_chat_completion(request: ChatCompletionRequest):
     response = generate_chatglm3(model, tokenizer, gen_params)
     usage = UsageInfo()
 
-    finish_reason, history = "stop", None
-    if with_function_call and request.return_function_call:
-        history = [m.dict(exclude_none=True) for m in request.messages]
-        content, history = process_response(response["text"], history)
-        if isinstance(content, dict):
-            message, finish_reason = ChatMessage(
-                role="assistant",
-                content=json.dumps(content, ensure_ascii=False),
-            ), "function_call"
-        else:
-            message = ChatMessage(role="assistant", content=content)
-    else:
-        message = ChatMessage(role="assistant", content=response["text"])
+    function_call, finish_reason = None, "stop"
+    if request.functions:
+        try:
+            function_call = process_response(response["text"], use_tool=True)
+        except:
+            logger.warning("Failed to parse tool call")
+
+    if isinstance(function_call, dict):
+        finish_reason = "function_call"
+        function_call = FunctionCallResponse(**function_call)
+
+    message = ChatMessage(
+        role="assistant",
+        content=response["text"],
+        function_call=function_call if isinstance(function_call, FunctionCallResponse) else None,
+    )
 
     choice_data = ChatCompletionResponseChoice(
         index=0,
         message=message,
         finish_reason=finish_reason,
-        history=history
     )
 
     task_usage = UsageInfo.parse_obj(response["usage"])
@@ -197,13 +193,30 @@ async def predict(model_id: str, params: dict):
         delta_text = decoded_unicode[len(previous_text):]
         previous_text = decoded_unicode
 
-        if len(delta_text) == 0:
-            delta_text = None
+        finish_reason = new_response["finish_reason"]
+        if len(delta_text) == 0 and finish_reason != "function_call":
+            continue
+
+        function_call = None
+        if finish_reason == "function_call":
+            try:
+                function_call = process_response(decoded_unicode, use_tool=True)
+            except:
+                print("Failed to parse tool call")
+
+        if isinstance(function_call, dict):
+            function_call = FunctionCallResponse(**function_call)
+
+        delta = DeltaMessage(
+            content=delta_text,
+            role="assistant",
+            function_call=function_call if isinstance(function_call, FunctionCallResponse) else None,
+        )
 
         choice_data = ChatCompletionResponseStreamChoice(
             index=0,
-            delta=DeltaMessage(content=delta_text),
-            finish_reason=None
+            delta=delta,
+            finish_reason=finish_reason
         )
         chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
         yield "{}".format(chunk.json(exclude_unset=True, ensure_ascii=False))
