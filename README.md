@@ -124,6 +124,9 @@ git clone https://huggingface.co/THUDM/chatglm3-6b
 如果从你从 HuggingFace 下载比较慢，也可以从 [ModelScope](https://modelscope.cn/models/ZhipuAI/chatglm3-6b) 
 中下载。
 
+### 模型微调
+请参考 [ChatGLM3-6B 微调示例](finetune_demo/README.md)。
+
 ### 网页版对话 Demo
 ![web-demo](resources/web-demo.gif)
 可以通过以下命令启动基于 Gradio 的网页版 demo：
