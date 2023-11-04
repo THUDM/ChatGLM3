@@ -49,10 +49,10 @@ if buttonClean:
 for i, message in enumerate(st.session_state.history):
     if message["role"] == "user":
         with st.chat_message(name="user", avatar="user"):
-            st.markdown(message["content"])
+            st.text(message["content"])
     else:
         with st.chat_message(name="assistant", avatar="assistant"):
-            st.markdown(message["content"])
+            st.text(message["content"])
 
 # 输入框和输出框
 with st.chat_message(name="user", avatar="user"):
@@ -79,7 +79,7 @@ if prompt_text:
         temperature=temperature,
         return_past_key_values=True,
     ):
-        message_placeholder.markdown(response)
+        message_placeholder.text(response)
 
     # 更新历史记录和past key values
     st.session_state.history = history
