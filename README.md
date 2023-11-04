@@ -37,6 +37,7 @@ ChatGLM3 开源模型旨在与开源社区一起推动大模型技术发展，�
 ## 友情链接
 对 ChatGLM3 进行加速的开源项目：
 * [chatglm.cpp](https://github.com/li-plus/chatglm.cpp): 类似 llama.cpp 的量化加速推理方案，实现笔记本上实时对话
+* [ChatGLM3-TPU](https://github.com/sophgo/ChatGLM3-TPU): 采用TPU加速推理方案，在算能端侧芯片BM1684X（16T@FP16，内存16G）上实时运行约7.5 token/s
 
 ## 评测结果
 
