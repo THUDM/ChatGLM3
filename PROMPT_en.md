@@ -28,6 +28,9 @@ Where `<|role|>` part is represented in a special token,  which can’t be encod
   - Must be after the message from `<|assistant|>`
 
 ### Example Scenarios
+
+For better readablity, an extra `\n` is added before each role special token. This extra `\n` should not be added in actual use and tokenizer implementation.
+
 #### Multi-turn Dialogue
 * There are only three roles: `<|user|>`, `<|assistant|>`, and `<|system|>`.
 ```text
@@ -190,7 +193,7 @@ plt.show()
 ```
 <|observation|>
 ```result
-【image】
+[Image]
 ```
 <|assistant|>
 This is a shape of heart. I used parametric equations to describe this shape and drew it using Matplotlib. If you have any other needs or questions, please feel free to let me know.
