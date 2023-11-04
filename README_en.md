@@ -37,6 +37,7 @@ Although every effort has been made to ensure the compliance and accuracy of the
 ## Projects
 Open source projects that accelerate ChatGLM3:
 * [chatglm.cpp](https://github.com/li-plus/chatglm.cpp): Real-time inference on your laptop accelerated by quantization, similar to llama.cpp.
+* [ChatGLM3-TPU](https://github.com/sophgo/ChatGLM3-TPU): Using the TPU accelerated inference solution, it runs about 7.5 token/s in real time on the end-side chip BM1684X (16T@FP16, 16G DDR).
 
 ## Evaluation Results
 
