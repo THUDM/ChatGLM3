@@ -83,9 +83,9 @@ We provide an integrated demo that incorporates the following three functionalit
 
 - Chat: Dialogue mode, where you can interact with the model.
 - Tool: Tool mode, where in addition to dialogue, the model can also perform other operations using tools.
-    ![tool](resources/tool.png)
+    ![tool](resources/tool_en.png)
 - Code Interpreter: Code interpreter mode, where the model can execute code in a Jupyter environment and obtain results to complete complex tasks.
-    ![code](resources/heart.png)
+    ![code](resources/code_en.gif)
 
 ### Usage 
 
