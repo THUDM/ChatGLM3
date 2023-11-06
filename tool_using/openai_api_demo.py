@@ -65,7 +65,8 @@ def run_conversation(query: str, stream=False, functions=None, max_retry=5):
                     params["messages"].append(
                         {
                             "role": "assistant",
-                            "content": output
+                            "content": output,
+                            "function_call": function_call
                         }
                     )
                     params["messages"].append(
