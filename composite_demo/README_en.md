@@ -27,7 +27,7 @@ ipython kernel install --name chatglm3-demo --user
 Run the following command to load the model locally and start the demo:
 
 ```bash
-streamlit run main.py
+streamlit run web_demo.py
 ```
 
 Afterward, the address of the demo can be seen from the command line; click to access. The first visit requires the download and loading of the model, which may take some time.
