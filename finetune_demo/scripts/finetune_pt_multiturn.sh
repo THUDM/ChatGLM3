@@ -11,12 +11,12 @@ GRAD_ACCUMULARION_STEPS=16
 MAX_STEP=1000
 SAVE_INTERVAL=500
 
-DATASTR=`date +%Y%m%d-%H%M%S`
+DATESTR=`date +%Y%m%d-%H%M%S`
 RUN_NAME=tool_alpaca_pt
 
 BASE_MODEL_PATH=THUDM/chatglm3-6b
 DATASET_PATH=formatted_data/tool_alpaca.jsonl
-OUTPUT_DIR=output/${RUN_NAME}-${DATASTR}-${PRE_SEQ_LEN}-${LR}
+OUTPUT_DIR=output/${RUN_NAME}-${DATESTR}-${PRE_SEQ_LEN}-${LR}
 
 mkdir -p $OUTPUT_DIR
 

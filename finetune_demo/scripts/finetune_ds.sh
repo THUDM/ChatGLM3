@@ -15,8 +15,8 @@ RUN_NAME=advertise_gen_ft
 BASE_MODEL_PATH=THUDM/chatglm3-6b
 DATASET_PATH=formatted_data/advertise_gen.jsonl
 
-DATASTR=`date +%Y%m%d-%H%M%S`
-OUTPUT_DIR=output/${RUN_NAME}-${DATASTR}-${LR}
+DATESTR=`date +%Y%m%d-%H%M%S`
+OUTPUT_DIR=output/${RUN_NAME}-${DATESTR}-${LR}
 MASTER_PORT=$(shuf -n 1 -i 10000-65535)
 
 mkdir -p $OUTPUT_DIR
