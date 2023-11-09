@@ -12,6 +12,7 @@ Hello
 <|assistant|>
 Hello, I'm ChatGLM3. What can I assist you today?
 ```
+**实际中每轮对话内容并不一定以换行符结尾，这里只是为了美观，下同**
 
 #### 对话头
 对话头占完整的一行，格式为
