@@ -13,17 +13,17 @@ Users should keep the following points in mind when submitting PRs:
 
 ## 不应该提出的PR / PRs that should not be proposed
 
-If a developer proposes a PR in github about any of the following, it may be closed.
+If a developer proposes a PR about any of the following, it may be closed or Rejected.
 
-1. those that don't describe improvement options
-2. Changes to the Readme and configuration files only
-3. multiple issues of different types combined in one PR
+1. those that don't describe improvement options.
+2. multiple issues of different types combined in one PR.
+3. The proposed PR is highly duplicative of already existing PRs.
 
-如果开发者在github中提出关于以下方面的PR，则可能会被直接关闭。
+如果开发者提出关于以下方面的PR，则可能会被直接关闭或拒绝通过。
 
-1. 没有说明改进方案的
-2. 仅对Readme和配置文件做出修改的
-3. 多个不同类型的问题合并在一个PR中的
+1. 没有说明改进方案的。
+2. 多个不同类型的问题合并在一个PR中的。
+3. 提出的PR与已经存在的PR高度重复的。
 
 
 # 检查您的PR
