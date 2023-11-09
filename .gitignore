@@ -7,3 +7,4 @@ finetune_demo/formatted_data
 ToolAlpaca/
 AdvertiseGen/
 *.gz
+*.idea
