@@ -16,6 +16,23 @@ run_tool(["arxiv"], llm, [
 ])
 ```
 
+#### Calculator、Weather Tool配置 
+
+如果你的 Python 环境中 `LangChain` 的版本低于  **`0.0.278`**  则需要在这两个预定义工具类中实现 `_arun` 方法
+否则将会出现 
+`TypeError: Can't instantiate abstract class Weather with abstract method _arun`
+
+示例如下：
+```python
+class Weather(BaseTool):
+    name = "weather"
+    description = "Use for searching weather at a specific location"
+
+    async def _arun(self, *args: Any, **kwargs: Any) -> Any:
+        # 用例中没有用到 arun 不予具体实现
+        pass
+```
+
 运行 `main.py` 文件
 
 ```

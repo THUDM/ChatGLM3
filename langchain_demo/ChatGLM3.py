@@ -100,7 +100,7 @@ Action:
 
     def _call(self, prompt: str, history: List = [], stop: Optional[List[str]] = ["<|user|>"]):
         print("======")
-        print(self.prompt)
+        print(prompt)
         print("======")
         if not self.has_search:
             self.history, query = self._tool_history(prompt)
@@ -108,7 +108,7 @@ Action:
             self._extract_observation(prompt)
             query = ""
         # print("======")
-        # print(self.history)
+        # print(history)
         # print("======")
         _, self.history = self.model.chat(
             self.tokenizer,

@@ -32,7 +32,7 @@ class Client(Protocol):
         ...
 
 def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = None, role: str = "user",
-                    past_key_values=None,max_length: int = 8192, do_sample=True, top_p=0.8, temperature=0.8,
+                    past_key_values=None, max_length: int = 8192, do_sample=True, top_p=0.8, temperature=0.8,
                     logits_processor=None, return_past_key_values=False, **kwargs):
         
     from transformers.generation.logits_process import LogitsProcessor
@@ -68,6 +68,22 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
         attention_mask = torch.cat((attention_mask.new_ones(1, past_length), attention_mask), dim=1)
         inputs['attention_mask'] = attention_mask
     history.append({"role": role, "content": query})
+    print("input_shape>", inputs['input_ids'].shape)
+
+    input_sequence_length = inputs['input_ids'].shape[1]
+
+    if max_length < input_sequence_length <= self.config.seq_length:
+        yield "Current input sequence length {} exceeds sequence length set in generation parameters {}. The maximum model sequence length is {}. You may adjust the generation parameter to enable longer chat history.".format(
+            input_sequence_length, max_length, self.config.seq_length
+        ), history
+        return
+
+    if input_sequence_length > self.config.seq_length:
+        yield "Current input sequence length {} exceeds maximum model sequence length {}. Unable to generate tokens.".format(
+            input_sequence_length, self.config.seq_length
+        ), history
+        return
+
     for outputs in self.stream_generate(**inputs, past_key_values=past_key_values,
                                         eos_token_id=eos_token_id, return_past_key_values=return_past_key_values,
                                         **gen_kwargs):
