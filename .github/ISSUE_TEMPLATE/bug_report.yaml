@@ -46,11 +46,11 @@ body:
         - label: "My own modified scripts / 我自己修改的脚本和任务"
 
   - type: textarea
-    id: reproduction / 复现过程
+    id: reproduction
     validations:
       required: true
     attributes:
-      label: Reproduction
+      label: Reproduction / 复现过程
       description: |
         Please provide a code example that reproduces the problem you encountered, preferably with a minimal reproduction unit.
         If you have code snippets, error messages, stack traces, please provide them here as well.
