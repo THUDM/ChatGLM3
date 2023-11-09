@@ -39,7 +39,7 @@ def format_conversation(item, tokenizer, conversation_key: str, tool_key: str):
         conversations.insert(0, 
             {
                 "role": "system", 
-                "content": TOOL_DEFINITION_PREFIX + json.dumps(item[tool_key], ensure_ascii=False)
+                "content": TOOL_DEFINITION_PREFIX + json.dumps(item[tool_key], indent=4, ensure_ascii=False)
             }
         )
     
