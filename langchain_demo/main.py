@@ -27,7 +27,7 @@ def run_tool(tools, llm, prompt_chain: List[str]):
 
 
 if __name__ == "__main__":
-    model_path = "/sz_nfs/shared/models/chatglm3-6b"
+    model_path = "THUDM/chatglm3-6b"
     llm = ChatGLM3()
     llm.load_model(model_name_or_path=model_path)
 
