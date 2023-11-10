@@ -2,8 +2,7 @@
 # WebSocket API for ChatGLM3-6B
 import asyncio
 from contextlib import asynccontextmanager
-from typing import Optional, Literal, List
-
+from typing import Optional, Literal
 import torch
 import uvicorn
 from fastapi import FastAPI, HTTPException
