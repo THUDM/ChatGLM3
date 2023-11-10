@@ -1,8 +1,6 @@
 import os
 import platform
-import signal
 from transformers import AutoTokenizer, AutoModel
-import readline
 
 tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True)
 model = AutoModel.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True).cuda()
@@ -23,11 +21,6 @@ def build_prompt(history):
         prompt += f"\n\n用户：{query}"
         prompt += f"\n\nChatGLM3-6B：{response}"
     return prompt
-
-
-def signal_handler(signal, frame):
-    global stop_stream
-    stop_stream = True
 
 
 def main():

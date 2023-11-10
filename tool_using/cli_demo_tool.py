@@ -1,8 +1,6 @@
 import os
 import platform
-import signal
 from transformers import AutoTokenizer, AutoModel
-import readline
 
 tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True)
 model = AutoModel.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True).cuda()
@@ -23,10 +21,6 @@ def build_prompt(history):
         prompt += f"\n\nChatGLM3-6B：{response}"
     return prompt
 
-
-def signal_handler(signal, frame):
-    global stop_stream
-    stop_stream = True
 
 tools = [{'name': 'track', 'description': '追踪指定股票的实时价格', 'parameters': {'type': 'object', 'properties': {'symbol': {'description': '需要追踪的股票代码'}}, 'required': []}}, {'name': '/text-to-speech', 'description': '将文本转换为语音', 'parameters': {'type': 'object', 'properties': {'text': {'description': '需要转换成语音的文本'}, 'voice': {'description': '要使用的语音类型（男声、女声等）'}, 'speed': {'description': '语音的速度（快、中等、慢等）'}}, 'required': []}}, {'name': '/image_resizer', 'description': '调整图片的大小和尺寸', 'parameters': {'type': 'object', 'properties': {'image_file': {'description': '需要调整大小的图片文件'}, 'width': {'description': '需要调整的宽度值'}, 'height': {'description': '需要调整的高度值'}}, 'required': []}}, {'name': '/foodimg', 'description': '通过给定的食品名称生成该食品的图片', 'parameters': {'type': 'object', 'properties': {'food_name': {'description': '需要生成图片的食品名称'}}, 'required': []}}]
 system_item = {"role": "system",
