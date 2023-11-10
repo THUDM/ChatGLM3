@@ -36,6 +36,7 @@ If you have multiple GPUs, but each GPU's VRAM size is not enough to accommodate
 
 ```python
 from utils import load_model_on_gpus
+
 model = load_model_on_gpus("THUDM/chatglm3-6b", num_gpus=2)
 ```
 

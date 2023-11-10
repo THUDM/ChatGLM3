@@ -1,11 +1,12 @@
 import os
 import platform
-import signal
-from transformers import AutoTokenizer, AutoModel
-import readline
 
-tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True)
-model = AutoModel.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True).cuda()
+from transformers import AutoTokenizer, AutoModel
+
+model_path = "THUDM/chatglm3-6b"
+
+tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+model = AutoModel.from_pretrained(model_path, trust_remote_code=True).cuda()
 # 多显卡支持，使用下面两行代替上面一行，将num_gpus改为你实际的显卡数量
 # from utils import load_model_on_gpus
 # model = load_model_on_gpus("THUDM/chatglm3-6b", num_gpus=2)
@@ -23,12 +24,6 @@ def build_prompt(history):
         prompt += f"\n\n用户：{query}"
         prompt += f"\n\nChatGLM3-6B：{response}"
     return prompt
-
-
-def signal_handler(signal, frame):
-    global stop_stream
-    stop_stream = True
-
 
 def main():
     past_key_values, history = None, []

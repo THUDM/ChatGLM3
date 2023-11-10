@@ -1,13 +1,12 @@
+import os
 import gc
 import json
-import os
-from typing import Dict, Union, Optional, Tuple
-
 import torch
 from torch.nn import Module
-from transformers import AutoModel, PreTrainedModel, PreTrainedTokenizer
+from transformers import PreTrainedModel, PreTrainedTokenizer
+from transformers import AutoModel
 from transformers.generation.logits_process import LogitsProcessor
-
+from typing import Dict, Union, Optional,Tuple
 
 def auto_configure_device_map(num_gpus: int) -> Dict[str, int]:
     # transformer.word_embeddings 占用1层
@@ -61,8 +60,6 @@ def load_model_on_gpus(checkpoint_path: Union[str, os.PathLike], num_gpus: int =
         model = dispatch_model(model, device_map=device_map)
 
     return model
-
-
 class InvalidScoreLogitsProcessor(LogitsProcessor):
     def __call__(
         self, input_ids: torch.LongTensor, scores: torch.FloatTensor
