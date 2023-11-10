@@ -7,7 +7,7 @@ from loguru import logger
 from tool_register import get_tools, dispatch_tool
 
 init(autoreset=True)
-openai.api_base = "http://192.168.20.59:7891/v1"
+openai.api_base = "http://127.0.0.1:8000/v1"
 openai.api_key = "xxx"
 
 functions = get_tools()
@@ -89,4 +89,3 @@ if __name__ == "__main__":
 
     query = "帮我查询北京的天气怎么样"
     run_conversation(query, functions=functions, stream=True)
-

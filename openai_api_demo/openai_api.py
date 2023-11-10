@@ -3,6 +3,7 @@
 # Usage: python openai_api.py
 # Visit http://localhost:8000/docs for documents.
 
+# 请在当前目录运行
 
 import time
 from contextlib import asynccontextmanager
@@ -71,7 +72,6 @@ class DeltaMessage(BaseModel):
     content: Optional[str] = None
     function_call: Optional[FunctionCallResponse] = None
 
-
 class ChatCompletionRequest(BaseModel):
     model: str
     messages: List[ChatMessage]
@@ -80,9 +80,7 @@ class ChatCompletionRequest(BaseModel):
     max_tokens: Optional[int] = None
     stream: Optional[bool] = False
     functions: Optional[Union[dict, List[dict]]] = None
-
     # Additional parameters
-    max_length: Optional[int] = None
     repetition_penalty: Optional[float] = 1.1
 
 
@@ -114,7 +112,7 @@ class ChatCompletionResponse(BaseModel):
 
 @app.get("/v1/models", response_model=ModelList)
 async def list_models():
-    model_card = ModelCard(id="gpt-3.5-turbo")
+    model_card = ModelCard(id="chatglm3-6b")
     return ModelList(data=[model_card])
 
 
@@ -130,7 +128,6 @@ async def create_chat_completion(request: ChatCompletionRequest):
         temperature=request.temperature,
         top_p=request.top_p,
         max_tokens=request.max_tokens or 1024,
-        max_length=request.max_length,
         echo=False,
         stream=request.stream,
         repetition_penalty=request.repetition_penalty,
@@ -232,8 +229,11 @@ async def predict(model_id: str, params: dict):
 
 
 if __name__ == "__main__":
-    tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True)
-    model = AutoModel.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True).cuda()
+
+    model_path = "THUDM/chatglm3-6b"
+    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+    model = AutoModel.from_pretrained(model_path, trust_remote_code=True).cuda()
+
     # 多显卡支持，使用下面两行代替上面一行，将num_gpus改为你实际的显卡数量
     # from utils import load_model_on_gpus
     # model = load_model_on_gpus("THUDM/chatglm3-6b", num_gpus=2)

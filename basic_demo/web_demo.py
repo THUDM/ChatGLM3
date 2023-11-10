@@ -3,11 +3,15 @@ import gradio as gr
 import mdtex2html
 from utils import load_model_on_gpus
 
-tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True)
-model = AutoModel.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True).cuda()
+model_path = "THUDM/chatglm3-6b"
+
+tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+model = AutoModel.from_pretrained(model_path, trust_remote_code=True).cuda()
+
 # 多显卡支持，使用下面两行代替上面一行，将num_gpus改为你实际的显卡数量
 # from utils import load_model_on_gpus
 # model = load_model_on_gpus("THUDM/chatglm3-6b", num_gpus=2)
+
 model = model.eval()
 
 """Override Chatbot.postprocess"""
@@ -55,14 +59,15 @@ def parse_text(text):
                     line = line.replace("(", "&#40;")
                     line = line.replace(")", "&#41;")
                     line = line.replace("$", "&#36;")
-                lines[i] = "<br>"+line
+                lines[i] = "<br>" + line
     text = "".join(lines)
     return text
 
 
 def predict(input, chatbot, max_length, top_p, temperature, history, past_key_values):
     chatbot.append((parse_text(input), ""))
-    for response, history, past_key_values in model.stream_chat(tokenizer, input, history, past_key_values=past_key_values,
+    for response, history, past_key_values in model.stream_chat(tokenizer, input, history,
+                                                                past_key_values=past_key_values,
                                                                 return_past_key_values=True,
                                                                 max_length=max_length, top_p=top_p,
                                                                 temperature=temperature):
@@ -105,4 +110,4 @@ with gr.Blocks() as demo:
 
     emptyBtn.click(reset_state, outputs=[chatbot, history, past_key_values], show_progress=True)
 
-demo.queue().launch(share=False, inbrowser=True)
+demo.queue().launch(share=False, server_port=8501, inbrowser=True) #在这里修改demo的端口号

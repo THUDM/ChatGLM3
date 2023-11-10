@@ -144,7 +144,7 @@ The web-based demo will run a Web Server and output an address. You can use it b
 
 ![cli-demo](resources/cli-demo.png)
 
-Run [cli_demo.py](cli_demo.py) in the repository:
+Run [cli_demo.py](basic_demo/cli_demo.py) in the repository:
 
 ```shell
 python cli_demo.py
@@ -153,26 +153,24 @@ python cli_demo.py
 The program will interact in the command line, enter instructions in the command line and hit enter to generate a response. Enter `clear` to clear the dialogue history, enter `stop` to terminate the program.
 
 ### API Deployment
-Thanks to [@xusenlinzy](https://github.com/xusenlinzy) for implementing the OpenAI format streaming API deployment, which can serve as the backend for any ChatGPT-based application, such as [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web). You can deploy it by running [openai_api.py](openai_api.py) in the repository:
+Thanks to [@xusenlinzy](https://github.com/xusenlinzy) for implementing the OpenAI format streaming API deployment, which can serve as the backend for any ChatGPT-based application, such as [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web). You can deploy it by running [openai_api.py](openai_api_demo/openai_api.py) in the repository:
 ```shell
+cd openai_api_demo
 python openai_api.py
 ```
-The example code for API calls is as follows:
-```python
-import openai
-if __name__ == "__main__":
-    openai.api_base = "http://localhost:8000/v1"
-    openai.api_key = "none"
-    for chunk in openai.ChatCompletion.create(
-        model="chatglm3-6b",
-        messages=[
-            {"role": "user", "content": "你好"}
-        ],
-        stream=True
-    ):
-        if hasattr(chunk.choices[0].delta, "content"):
-            print(chunk.choices[0].delta.content, end="", flush=True)
+Also, we have written a sample code to test the performance of the API calls. This can be tested by running [openai_api_request.py](openai_api_demo/openai_api_request.py) in the repository
++ Test with Curl
+```shell
+curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
+-H "Content-Type: application/json" \\
+-d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"system\", \"content\": \"You are ChatGLM3, a large language model trained by Zhipu. Follow the user's instructions carefully. Respond using markdown.\"}, {\"role\": \"user\", \"content\": \"Hello, tell me a story, about 100 words\"}], \"stream\": false, \"max_title": \"\". false, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
+````
++ Testing with Python
+```shell
+cd openai_api_demo
+python openai_api_request.py
 ```
+If the test is successful, the model should return a story.
 
 ### Tool Invocation
 
@@ -216,6 +214,7 @@ If you have multiple GPUs, but each GPU's VRAM size is not enough to accommodate
 
 ```python
 from utils import load_model_on_gpus
+
 model = load_model_on_gpus("THUDM/chatglm3-6b", num_gpus=2)
 ```
 
