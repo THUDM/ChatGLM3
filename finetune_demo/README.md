@@ -18,12 +18,11 @@ pip install transformers==4.30.2 accelerate sentencepiece astunparse deepspeed
 
 对于数据文件，样例采用如下格式
 
+如果您仅希望微调模型的对话能力，而非工具能力，您应该按照以下格式整理数据。
+
 ```json
 [
   {
-    "tools": [
-      // available tools, format is not restricted
-    ],
     "conversations": [
       {
         "role": "system",
@@ -31,23 +30,75 @@ pip install transformers==4.30.2 accelerate sentencepiece astunparse deepspeed
       },
       {
         "role": "user",
-        "content": "<user prompt text>",
+        "content": "<user prompt text>"
       },
       {
         "role": "assistant",
         "content": "<assistant response text>"
+      }, 
+       // ... Muti Turn
+      {
+        "role": "user",
+        "content": "<user prompt text>"
       },
       {
-        "role": "tool",
-        "name": "<name of the tool to be called",
-        "parameters": {
-          "<parameter_name>": "<parameter_value>"
-        },
-        "observation": "<observation>" // don't have to be string
+        "role": "assistant",
+        "content": "<assistant response text>"
       }
     ]
   }
   // ...
+]
+```
+
+**请注意，这种方法在微调的step较多的情况下会影响到模型的工具调用功能**
+
+如果您希望微调模型的对话和工具能力，您应该按照以下格式整理数据。
+
+```json
+[
+   {
+      "tools": [
+         // available tools, format is not restricted
+      ],
+      "conversations": [
+         {
+            "role": "system",
+            "content": "<system prompt text>"
+         },
+         {
+            "role": "user",
+            "content": "<user prompt text>"
+         },
+         {
+            "role": "assistant",
+            "content": "<assistant thought to text>"
+         },
+         {
+            "role": "tool",
+            "name": "<name of the tool to be called",
+            "parameters": {
+               "<parameter_name>": "<parameter_value>"
+            },
+            "observation": "<observation>"
+            // don't have to be string
+         },
+         {
+            "role": "assistant",
+            "content": "<assistant response to observation>"
+         },
+         // ... Muti Turn
+         {
+            "role": "user",
+            "content": "<user prompt text>"
+         },
+         {
+            "role": "assistant",
+            "content": "<assistant response text>"
+         }
+      ]
+   }
+   // ...
 ]
 ```
 
@@ -56,6 +107,10 @@ pip install transformers==4.30.2 accelerate sentencepiece astunparse deepspeed
 - 每种角色可以附带一个 `bool` 类型的 `loss` 字段，表示该字段所预测的内容是否参与 `loss` 计算。若没有该字段，样例实现中默认对 `system`, `user` 不计算 `loss`，其余角色则计算 `loss`。
 
 - `tool` 并不是 ChatGLM3 中的原生角色，这里的 `tool` 在预处理阶段将被自动转化为一个具有工具调用 `metadata` 的 `assistant` 角色（默认计算 `loss`）和一个表示工具返回值的 `observation` 角色（不计算 `loss`）。
+
+- 目前暂未实现 `Code interpreter`的微调任务。
+
+- `system` 角色为可选角色，但若存在 `system` 角色，其必须出现在 `user` 角色之前，且一个完整的对话数据（无论单轮或者多轮对话）只能出现一次 `system` 角色。
 
 作为示例，我们使用 ToolAlpaca 数据集来进行微调。首先，克隆 [ToolAlpaca 数据集](https://github.com/tangqiaoyu/ToolAlpaca)，并使用
 
