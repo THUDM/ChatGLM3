@@ -108,9 +108,7 @@ pip install transformers==4.30.2 accelerate sentencepiece astunparse deepspeed
 
 - `tool` 并不是 ChatGLM3 中的原生角色，这里的 `tool` 在预处理阶段将被自动转化为一个具有工具调用 `metadata` 的 `assistant` 角色（默认计算 `loss`）和一个表示工具返回值的 `observation` 角色（不计算 `loss`）。
 
-- 不支持`tool`角色的连续调用，即`tool`角色只能出现一次。
-
-- 不支持`Code interpreter`的微调任务。
+- 目前暂未实现 `Code interpreter`的微调任务。
 
 - `system` 角色为可选角色，但若存在 `system` 角色，其必须出现在 `user` 角色之前，且一个完整的对话数据（无论单轮或者多轮对话）只能出现一次 `system` 角色。
 
