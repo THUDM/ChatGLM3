@@ -19,6 +19,13 @@ from sse_starlette.sse import EventSourceResponse
 from transformers import AutoTokenizer, AutoModel
 
 from utils import process_response, generate_chatglm3, generate_stream_chatglm3
+import pprint
+
+pp = pprint.PrettyPrinter(indent=4)
+
+
+def pretty_print(message: Union[str, object]):
+    logger.info(pp.pformat(message).replace("\\n", "\n"))
 
 
 @asynccontextmanager
@@ -134,7 +141,8 @@ async def create_chat_completion(request: ChatCompletionRequest):
         functions=request.functions,
     )
 
-    logger.debug(f"==== request ====\n{gen_params}")
+    logger.debug(f"==== request ====")
+    pretty_print(gen_params)
 
     if request.stream:
         generate = predict(request.model, gen_params)
@@ -169,6 +177,9 @@ async def create_chat_completion(request: ChatCompletionRequest):
     task_usage = UsageInfo.parse_obj(response["usage"])
     for usage_key, usage_value in task_usage.dict().items():
         setattr(usage, usage_key, getattr(usage, usage_key) + usage_value)
+
+    logger.info("==== response ====")
+    pretty_print(choice_data)
 
     return ChatCompletionResponse(model=request.model, choices=[choice_data], object="chat.completion", usage=usage)
 
@@ -215,6 +226,11 @@ async def predict(model_id: str, params: dict):
             delta=delta,
             finish_reason=finish_reason
         )
+
+        if finish_reason == "stop":
+            logger.info("==== response ====")
+            pretty_print(choice_data)
+
         chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
         yield "{}".format(chunk.json(exclude_unset=True))
 
