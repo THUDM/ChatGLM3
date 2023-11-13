@@ -25,7 +25,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 
 def pretty_print(message: Union[str, object]):
-    logger.info(pp.pformat(message).replace("\\n", "\n"))
+    logger.info(pp.pformat(message))
 
 
 @asynccontextmanager
