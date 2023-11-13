@@ -114,6 +114,8 @@ def generate_stream_chatglm3(model: PreTrainedModel, tokenizer: PreTrainedTokeni
     query, role = messages[-1]["content"], messages[-1]["role"]
 
     inputs = tokenizer.build_chat_input(query, history=messages[:-1], role=role)
+    tokens = tokenizer.convert_ids_to_tokens(inputs, skip_special_tokens=False)
+    print(tokens)
     inputs = inputs.to(model.device)
     input_echo_len = len(inputs["input_ids"][0])
 
