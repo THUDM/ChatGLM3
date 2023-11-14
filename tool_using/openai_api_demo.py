@@ -9,7 +9,7 @@ from tool_register import get_tools, dispatch_tool
 init(autoreset=True)
 client = OpenAI(
   base_url="http://127.0.0.1:8000/v1",
-  api_key = "123"
+  api_key = "xxx"
 )
 
 functions = get_tools()
