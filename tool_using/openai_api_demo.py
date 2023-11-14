@@ -23,9 +23,9 @@ def run_conversation(query: str, stream=False, functions=None, max_retry=5):
 
     for _ in range(max_retry):
         if not stream:
-            if response.choices[0].message.get("function_call"):
+            if response.choices[0].message.function_call:
                 function_call = response.choices[0].message.function_call
-                logger.info(f"Function Call Response: {function_call.to_dict_recursive()}")
+                logger.info(f"Function Call Response: {function_call.model_dump()}")
 
                 function_args = json.loads(function_call.arguments)
                 tool_response = dispatch_tool(function_call.name, function_args)
