@@ -13,3 +13,4 @@ typing_extensions==4.4.0
 uvicorn
 sse_starlette
 loguru
+openai>=1.0.0
