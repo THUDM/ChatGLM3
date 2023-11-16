@@ -57,7 +57,7 @@ def append_conversation(
     history.append(conversation)
     conversation.show(placeholder)
 
-def main(top_p: float, temperature: float, prompt_text: str):
+def main(top_p: float, temperature: float, prompt_text: str, repetition_penalty: float):
     manual_mode = st.toggle('Manual mode',
         help='Define your tools in YAML format. You need to supply tool call results manually.'
     )
@@ -117,6 +117,8 @@ def main(top_p: float, temperature: float, prompt_text: str):
                 temperature=temperature,
                 top_p=top_p,
                 stop_sequences=[str(r) for r in (Role.USER, Role.OBSERVATION)],
+                repetition_penalty=repetition_penalty,
+                length_penalty=length_penalty,
             ):
                 token = response.token
                 if response.token.special:

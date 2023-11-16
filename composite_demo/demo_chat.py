@@ -8,16 +8,18 @@ MAX_LENGTH = 8192
 
 client = get_client()
 
+
 # Append a conversation into history, while show it in a new markdown block
 def append_conversation(
-    conversation: Conversation,
-    history: list[Conversation],
-    placeholder: DeltaGenerator | None=None,
+        conversation: Conversation,
+        history: list[Conversation],
+        placeholder: DeltaGenerator | None = None,
 ) -> None:
     history.append(conversation)
     conversation.show(placeholder)
 
-def main(top_p: float, temperature: float, system_prompt: str, prompt_text: str):
+
+def main(top_p: float, temperature: float, system_prompt: str, prompt_text: str, repetition_penalty: float):
     placeholder = st.empty()
     with placeholder.container():
         if 'chat_history' not in st.session_state:
@@ -48,14 +50,15 @@ def main(top_p: float, temperature: float, system_prompt: str, prompt_text: str)
 
         output_text = ''
         for response in client.generate_stream(
-            system_prompt,
-            tools=None, 
-            history=history,
-            do_sample=True,
-            max_length=MAX_LENGTH,
-            temperature=temperature,
-            top_p=top_p,
-            stop_sequences=[str(Role.USER)],
+                system_prompt,
+                tools=None,
+                history=history,
+                do_sample=True,
+                max_length=MAX_LENGTH,
+                temperature=temperature,
+                top_p=top_p,
+                stop_sequences=[str(Role.USER)],
+                repetition_penalty=repetition_penalty,
         ):
             token = response.token
             if response.token.special:
@@ -70,7 +73,7 @@ def main(top_p: float, temperature: float, system_prompt: str, prompt_text: str)
                         break
             output_text += response.token.text
             markdown_placeholder.markdown(postprocess_text(output_text + '▌'))
-        
+
         append_conversation(Conversation(
             Role.ASSISTANT,
             postprocess_text(output_text),

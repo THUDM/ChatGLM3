@@ -75,7 +75,10 @@ cd ChatGLM3
 ```
 pip install -r requirements.txt
 ```
-其中 `transformers` 库版本推荐为 `4.30.2`，`torch` 推荐使用 2.0 及以上的版本，以获得最佳的推理性能。
+
++ `transformers` 库版本应该 `4.30.2` 以及以上的版本 ，`torch` 库版本应为 2.0 及以上的版本，以获得最佳的推理性能。
++ 为了保证 `torch` 的版本正确，请严格按照 [官方文档](https://pytorch.org/get-started/locally/) 的说明安装。
++ `gradio` 库版本应该为 `3.x` 的版本。
 
 ### 综合 Demo
 

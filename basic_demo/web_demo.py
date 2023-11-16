@@ -110,4 +110,4 @@ with gr.Blocks() as demo:
 
     emptyBtn.click(reset_state, outputs=[chatbot, history, past_key_values], show_progress=True)
 
-demo.queue().launch(share=False, server_port=8501, inbrowser=True) #在这里修改demo的端口号
+demo.queue().launch(share=False, server_name="127.0.0.1", server_port=8501, inbrowser=True)
