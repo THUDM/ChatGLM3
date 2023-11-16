@@ -115,7 +115,8 @@ class HFClient(Client):
             self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
         else:
             self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
-
+            if !torch.cuda.is_available():
+                self.model = self.model.float()
         self.model = self.model.to(
             'cuda' if torch.cuda.is_available() else
             'mps' if torch.backends.mps.is_available() else
