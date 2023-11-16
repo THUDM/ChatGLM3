@@ -114,7 +114,10 @@ class HFClient(Client):
             print("Loaded from pt checkpoints", new_prefix_state_dict.keys())
             self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
         else:
-            self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
+            if torch.cuda.is_available():
+                self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
+            else:
+                self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True).float()
 
         self.model = self.model.to(
             'cuda' if torch.cuda.is_available() else
