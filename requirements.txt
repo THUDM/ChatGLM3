@@ -9,7 +9,6 @@ accelerate
 sse-starlette
 streamlit>=1.24.0
 fastapi>=0.95.1
-typing_extensions
 uvicorn
 sse_starlette
 loguru
