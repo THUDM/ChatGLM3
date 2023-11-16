@@ -75,7 +75,10 @@ Then use pip to install the dependencies:
 ```
 pip install -r requirements.txt
 ```
-It is recommended to use version `4.30.2` for the `transformers` library, and version 2.0 or above for `torch`, to achieve the best inference performance.
++ The `transformers` library version should be `4.30.2` and above, and `torch` library should be 2.0 and above to obtain the best inference performance.
++ In order to ensure that the version of `torch` is correct, please strictly follow the instructions of [official documentation](https://pytorch.org/get-started/locally/) for installation.
++ The `gradio` library version should be the `3.x` version.
+
 
 ### Integrated Demo
 
