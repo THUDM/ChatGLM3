@@ -129,12 +129,16 @@ class HFClient(Client):
             self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
         else:
             self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
-
-        self.model = self.model.to(
-            'cuda' if torch.cuda.is_available() else
-            'mps' if torch.backends.mps.is_available() else
-            'cpu'
-        ).eval()
+        
+        backend = 'cpu'
+        if torch.cuda.is_available():
+            backend = 'cuda'
+        elif torch.backends.mps.is_available():
+            backend = 'mps'
+        self.model = self.model.to(backend)
+        if backend == 'cpu':
+            self.model = self.model.float()
+        self.model.eval()
 
     def generate_stream(self,
                         system: str | None,
