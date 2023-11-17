@@ -1,4 +1,4 @@
-from copy import deepcopy
+import copy
 import inspect
 from pprint import pformat
 import traceback
@@ -56,7 +56,7 @@ def dispatch_tool(tool_name: str, tool_params: dict) -> str:
     return str(ret)
 
 def get_tools() -> dict:
-    return deepcopy(_TOOL_DESCRIPTIONS)
+    return copy.deepcopy(_TOOL_DESCRIPTIONS)
 
 # Tool Definitions
 
