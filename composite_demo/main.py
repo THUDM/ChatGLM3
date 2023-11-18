@@ -14,6 +14,11 @@ DEFAULT_SYSTEM_PROMPT = '''
 You are ChatGLM3, a large language model trained by Zhipu.AI. Follow the user's instructions carefully. Respond using markdown.
 '''.strip()
 
+# Set the title of the demo
+st.title("ChatGLM3 Demo")
+
+# Add your custom text here, with smaller font size
+st.markdown("<sub>智谱AI 公开在线技术文档: https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof </sub> \n\n <sub> 更多 ChatGLM3-6B 的使用方法请参考文档。</sub>", unsafe_allow_html=True)
 
 class Mode(str, Enum):
     CHAT, TOOL, CI = '💬 Chat', '🛠️ Tool', '🧑‍💻 Code Interpreter'
@@ -34,8 +39,6 @@ with st.sidebar:
         height=300,
         value=DEFAULT_SYSTEM_PROMPT,
     )
-
-st.title("ChatGLM3 Demo")
 
 prompt_text = st.chat_input(
     'Chat with ChatGLM3!',
