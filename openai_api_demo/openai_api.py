@@ -20,6 +20,35 @@ from sse_starlette.sse import EventSourceResponse
 from transformers import AutoTokenizer, AutoModel
 
 from utils import process_response, generate_chatglm3, generate_stream_chatglm3
+from fastapi import Depends, HTTPException
+from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
+import os
+
+
+API_KEYS = os.environ["API_KEYS"] or None
+
+async def check_api_key(
+    auth: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False)),
+):
+    global API_KEYS
+    if API_KEYS is not None:
+        key_list = API_KEYS.split(",")
+        if auth is None or (token := auth.credentials) not in key_list:
+            raise HTTPException(
+                status_code=401,
+                detail={
+                    "error": {
+                        "message": "",
+                        "type": "invalid_request_error",
+                        "param": None,
+                        "code": "invalid_api_key",
+                    }
+                },
+            )
+        return token
+    else:
+        # api_keys not set; allow all
+        return None
 
 
 @asynccontextmanager
@@ -117,7 +146,7 @@ async def list_models():
     return ModelList(data=[model_card])
 
 
-@app.post("/v1/chat/completions", response_model=ChatCompletionResponse)
+@app.post("/v1/chat/completions", response_model=ChatCompletionResponse, dependencies=[Depends(check_api_key)])
 async def create_chat_completion(request: ChatCompletionRequest):
     global model, tokenizer
 
