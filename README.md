@@ -12,7 +12,7 @@
 
 [Read this in English.](./README_en.md)
 
-📔 更为详细的使用信息，可以参考：![ChatGLM3技术文档](https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof?from=from_copylink)
+📔 更为详细的使用信息，可以参考：[ChatGLM3技术文档](https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof?from=from_copylink)
 
 ## 介绍
 
