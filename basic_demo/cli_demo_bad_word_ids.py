@@ -4,11 +4,17 @@ This script demonstrates how to use the `bad_words_ids` argument to filter out.
 import os
 import platform
 from transformers import AutoTokenizer, AutoModel
+import torch
 
-model_path = "THUDM/chatglm3-6b"
-tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
-model = AutoModel.from_pretrained(model_path, trust_remote_code=True).cuda()
-model = model.eval()
+MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
+TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
+DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
+if 'cuda' in DEVICE: # AMD, NVIDIA GPU can use Half Precision
+    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).to(DEVICE).eval()
+else: # CPU, Intel GPU and other GPU can use Float16 Precision Only
+    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).float().to(DEVICE).eval()
 
 os_name = platform.system()
 clear_command = 'cls' if os_name == 'Windows' else 'clear'
