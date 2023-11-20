@@ -238,7 +238,7 @@ async def predict(model_id: str, params: dict):
 if __name__ == "__main__":
 
     tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
-    if DEVICE == 'cuda':  # AMD, NVIDIA GPU can use Half Precision
+    if 'cuda' in DEVICE:  # AMD, NVIDIA GPU can use Half Precision
         model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).to(DEVICE).eval()
     else:  # CPU, Intel GPU and other GPU can use Float16 Precision Only
         model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).float().to(DEVICE).eval()

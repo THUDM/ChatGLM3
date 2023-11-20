@@ -148,7 +148,7 @@ class HFClient(Client):
         else:
             self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
 
-        self.model = self.model.to(DEVICE).eval() if DEVICE == 'cuda' else self.model.float().to(DEVICE).eval()
+        self.model = self.model.to(DEVICE).eval() if 'cuda' in DEVICE else self.model.float().to(DEVICE).eval()
 
 
     def generate_stream(self,
