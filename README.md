@@ -75,7 +75,10 @@ cd ChatGLM3
 ```
 pip install -r requirements.txt
 ```
-其中 `transformers` 库版本推荐为 `4.30.2`，`torch` 推荐使用 2.0 及以上的版本，以获得最佳的推理性能。
+
++ `transformers` 库版本应该 `4.30.2` 以及以上的版本 ，`torch` 库版本应为 2.0 及以上的版本，以获得最佳的推理性能。
++ 为了保证 `torch` 的版本正确，请严格按照 [官方文档](https://pytorch.org/get-started/locally/) 的说明安装。
++ `gradio` 库版本应该为 `3.x` 的版本。
 
 ### 综合 Demo
 
@@ -147,7 +150,7 @@ streamlit run web_demo2.py
 
 ![cli-demo](resources/cli-demo.png)
 
-运行仓库中 [cli_demo.py](cli_demo.py)：
+运行仓库中 [cli_demo.py](basic_demo/cli_demo.py)：
 
 ```shell
 python cli_demo.py
@@ -162,26 +165,24 @@ python cli_demo.py
 关于工具调用的方法请参考 [工具调用](tool_using/README.md)。 
 
 ### API 部署
-感谢 [@xusenlinzy](https://github.com/xusenlinzy) 实现了 OpenAI 格式的流式 API 部署，可以作为任意基于 ChatGPT 的应用的后端，比如 [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web)。可以通过运行仓库中的[openai_api.py](openai_api.py) 进行部署：
+感谢 [@xusenlinzy](https://github.com/xusenlinzy) 实现了 OpenAI 格式的流式 API 部署，可以作为任意基于 ChatGPT 的应用的后端，比如 [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web)。可以通过运行仓库中的[openai_api.py](openai_api_demo/openai_api.py) 进行部署：
 ```shell
+cd openai_api_demo
 python openai_api.py
 ```
-进行 API 调用的示例代码为
-```python
-import openai
-if __name__ == "__main__":
-    openai.api_base = "http://localhost:8000/v1"
-    openai.api_key = "none"
-    for chunk in openai.ChatCompletion.create(
-        model="chatglm3-6b",
-        messages=[
-            {"role": "user", "content": "你好"}
-        ],
-        stream=True
-    ):
-        if hasattr(chunk.choices[0].delta, "content"):
-            print(chunk.choices[0].delta.content, end="", flush=True)
+同时，我们也书写了一个示例代码，用来测试API调用的性能。可以通过运行仓库中的[openai_api_request.py](openai_api_demo/openai_api_request.py) 进行测试
++ 使用Curl进行测试
+```shell
+curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
+-H "Content-Type: application/json" \
+-d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"system\", \"content\": \"You are ChatGLM3, a large language model trained by Zhipu.AI. Follow the user's instructions carefully. Respond using markdown.\"}, {\"role\": \"user\", \"content\": \"你好，给我讲一个故事，大概100字\"}], \"stream\": false, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
+````
++ 使用Python进行测试
+```shell
+cd openai_api_demo
+python openai_api_request.py
 ```
+如果测试成功，则模型应该返回一段故事。
 
 ## 低成本部署
 
@@ -215,8 +216,10 @@ model = AutoModel.from_pretrained("your local path", trust_remote_code=True).to(
 
 ### 多卡部署
 如果你有多张 GPU，但是每张 GPU 的显存大小都不足以容纳完整的模型，那么可以将模型切分在多张GPU上。首先安装 accelerate: `pip install accelerate`，然后通过如下方法加载模型：
+
 ```python
 from utils import load_model_on_gpus
+
 model = load_model_on_gpus("THUDM/chatglm3-6b", num_gpus=2)
 ```
 即可将模型部署到两张 GPU 上进行推理。你可以将 `num_gpus` 改为你希望使用的 GPU 数。默认是均匀切分的，你也可以传入 `device_map` 参数来自己指定。 

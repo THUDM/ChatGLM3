@@ -3,6 +3,8 @@
 # Usage: python openai_api.py
 # Visit http://localhost:8000/docs for documents.
 
+# 在OpenAI的API中，max_tokens 等价于 HuggingFace 的 max_new_tokens 而不是 max_length，。
+# 例如，对于6b模型，设置max_tokens = 8192，则会报错，因为扣除历史记录和提示词后，模型不能输出那么多的tokens。
 
 import time
 from contextlib import asynccontextmanager
@@ -71,7 +73,6 @@ class DeltaMessage(BaseModel):
     content: Optional[str] = None
     function_call: Optional[FunctionCallResponse] = None
 
-
 class ChatCompletionRequest(BaseModel):
     model: str
     messages: List[ChatMessage]
@@ -80,9 +81,7 @@ class ChatCompletionRequest(BaseModel):
     max_tokens: Optional[int] = None
     stream: Optional[bool] = False
     functions: Optional[Union[dict, List[dict]]] = None
-
     # Additional parameters
-    max_length: Optional[int] = None
     repetition_penalty: Optional[float] = 1.1
 
 
@@ -114,7 +113,7 @@ class ChatCompletionResponse(BaseModel):
 
 @app.get("/v1/models", response_model=ModelList)
 async def list_models():
-    model_card = ModelCard(id="gpt-3.5-turbo")
+    model_card = ModelCard(id="chatglm3-6b")
     return ModelList(data=[model_card])
 
 
@@ -130,7 +129,6 @@ async def create_chat_completion(request: ChatCompletionRequest):
         temperature=request.temperature,
         top_p=request.top_p,
         max_tokens=request.max_tokens or 1024,
-        max_length=request.max_length,
         echo=False,
         stream=request.stream,
         repetition_penalty=request.repetition_penalty,
@@ -169,8 +167,8 @@ async def create_chat_completion(request: ChatCompletionRequest):
         finish_reason=finish_reason,
     )
 
-    task_usage = UsageInfo.parse_obj(response["usage"])
-    for usage_key, usage_value in task_usage.dict().items():
+    task_usage = UsageInfo.model_validate(response["usage"])
+    for usage_key, usage_value in task_usage.model_dump().items():
         setattr(usage, usage_key, getattr(usage, usage_key) + usage_value)
 
     return ChatCompletionResponse(model=request.model, choices=[choice_data], object="chat.completion", usage=usage)
@@ -185,7 +183,7 @@ async def predict(model_id: str, params: dict):
         finish_reason=None
     )
     chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
-    yield "{}".format(chunk.json(exclude_unset=True))
+    yield "{}".format(chunk.model_dump_json(exclude_unset=True))
 
     previous_text = ""
     for new_response in generate_stream_chatglm3(model, tokenizer, params):
@@ -219,7 +217,7 @@ async def predict(model_id: str, params: dict):
             finish_reason=finish_reason
         )
         chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
-        yield "{}".format(chunk.json(exclude_unset=True))
+        yield "{}".format(chunk.model_dump_json(exclude_unset=True))
 
     choice_data = ChatCompletionResponseStreamChoice(
         index=0,
@@ -227,13 +225,16 @@ async def predict(model_id: str, params: dict):
         finish_reason="stop"
     )
     chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
-    yield "{}".format(chunk.json(exclude_unset=True))
+    yield "{}".format(chunk.model_dump_json(exclude_unset=True))
     yield '[DONE]'
 
 
 if __name__ == "__main__":
-    tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True)
-    model = AutoModel.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True).cuda()
+
+    model_path = "THUDM/chatglm3-6b"
+    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+    model = AutoModel.from_pretrained(model_path, trust_remote_code=True).cuda()
+
     # 多显卡支持，使用下面两行代替上面一行，将num_gpus改为你实际的显卡数量
     # from utils import load_model_on_gpus
     # model = load_model_on_gpus("THUDM/chatglm3-6b", num_gpus=2)

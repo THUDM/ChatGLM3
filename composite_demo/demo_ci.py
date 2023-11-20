@@ -216,7 +216,7 @@ def append_conversation(
     history.append(conversation)
     conversation.show(placeholder)
 
-def main(top_p: float, temperature: float, prompt_text: str):
+def main(top_p: float, temperature: float, prompt_text: str, repetition_penalty: float):
     if 'ci_history' not in st.session_state:
         st.session_state.ci_history = []
 
@@ -255,6 +255,7 @@ def main(top_p: float, temperature: float, prompt_text: str):
                 temperature=temperature,
                 top_p=top_p,
                 stop_sequences=[str(r) for r in (Role.USER, Role.OBSERVATION)],
+                repetition_penalty=repetition_penalty,
             ):
                 token = response.token
                 if response.token.special:
@@ -325,3 +326,4 @@ def main(top_p: float, temperature: float, prompt_text: str):
                     postprocess_text(output_text),
                 ), history, markdown_placeholder)
                 return
+

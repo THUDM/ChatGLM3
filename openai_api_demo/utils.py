@@ -1,12 +1,12 @@
+import os
 import gc
 import json
-import os
-from typing import Dict, Union, Optional, Tuple
-
 import torch
 from torch.nn import Module
-from transformers import AutoModel, PreTrainedModel, PreTrainedTokenizer
+from transformers import PreTrainedModel, PreTrainedTokenizer
+from transformers import AutoModel
 from transformers.generation.logits_process import LogitsProcessor
+from typing import Dict, Union, Optional, Tuple
 
 
 def auto_configure_device_map(num_gpus: int) -> Dict[str, int]:
@@ -65,7 +65,7 @@ def load_model_on_gpus(checkpoint_path: Union[str, os.PathLike], num_gpus: int =
 
 class InvalidScoreLogitsProcessor(LogitsProcessor):
     def __call__(
-        self, input_ids: torch.LongTensor, scores: torch.FloatTensor
+            self, input_ids: torch.LongTensor, scores: torch.FloatTensor
     ) -> torch.FloatTensor:
         if torch.isnan(scores).any() or torch.isinf(scores).any():
             scores.zero_()
@@ -108,9 +108,7 @@ def generate_stream_chatglm3(model: PreTrainedModel, tokenizer: PreTrainedTokeni
     repetition_penalty = float(params.get("repetition_penalty", 1.0))
     top_p = float(params.get("top_p", 1.0))
     max_new_tokens = int(params.get("max_tokens", 256))
-    max_length = params.get("max_length", None)
     echo = params.get("echo", True)
-
     messages = process_chatglm_messages(messages, functions=functions)
     query, role = messages[-1]["content"], messages[-1]["role"]
 
@@ -121,16 +119,13 @@ def generate_stream_chatglm3(model: PreTrainedModel, tokenizer: PreTrainedTokeni
     if input_echo_len >= model.config.seq_length:
         print(f"Input length larger than {model.config.seq_length}")
 
-    if max_length is None:
-        max_length = min(max_new_tokens + input_echo_len, model.config.seq_length)
-
     eos_token_id = [
         tokenizer.eos_token_id,
         tokenizer.get_command("<|user|>"),
     ]
 
     gen_kwargs = {
-        "max_length": max_length,
+        "max_new_tokens": max_new_tokens,
         "do_sample": True if temperature > 1e-5 else False,
         "top_p": top_p,
         "repetition_penalty": repetition_penalty,
