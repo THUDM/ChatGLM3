@@ -16,11 +16,29 @@ TOOL_PROMPT = 'Answer the following questions as best as you can. You have acces
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 PT_PATH = os.environ.get('PT_PATH', None)
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
+DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+# for Mac Computer like M1
+# You Need Use Pytorch compiled with Metal
+# DEVICE = 'mps'
+
+# for AMD gpu likes MI100 (Not Official Steady Support yet)
+# You Need Use Pytorch compiled with ROCm
+# DEVICE = 'cuda'
+
+# for Intel gpu likes A770 (Not Official Steady Support yet)
+# You Need Use Pytorch compiled with oneDNN and install intel-extension-for-pytorch
+# import intel_extension_for_pytorch as ipex
+# DEVICE = 'xpu'
+
+# for Moore Threads gpu like MTT S80 (Not Official Steady Support yet)
+# You Need Use Pytorch compiled with Musa
+# DEVICE = 'musa'
 
 
 @st.cache_resource
 def get_client() -> Client:
-    client = HFClient(MODEL_PATH, TOKENIZER_PATH, PT_PATH)
+    client = HFClient(MODEL_PATH, TOKENIZER_PATH, PT_PATH, DEVICE)
     return client
 
 
@@ -113,7 +131,7 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
 
 
 class HFClient(Client):
-    def __init__(self, model_path: str, tokenizer_path: str, pt_checkpoint: str | None = None, ):
+    def __init__(self, model_path: str, tokenizer_path: str, pt_checkpoint: str | None = None, DEVICE = 'cpu'):
         self.model_path = model_path
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, trust_remote_code=True)
 
@@ -130,11 +148,8 @@ class HFClient(Client):
         else:
             self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
 
-        self.model = self.model.to(
-            'cuda' if torch.cuda.is_available() else
-            'mps' if torch.backends.mps.is_available() else
-            'cpu'
-        ).eval()
+        self.model = self.model.to(DEVICE).eval() if 'cuda' in DEVICE else self.model.float().to(DEVICE).eval()
+
 
     def generate_stream(self,
                         system: str | None,

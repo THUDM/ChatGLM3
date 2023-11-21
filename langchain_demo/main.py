@@ -1,13 +1,14 @@
+import os
 from typing import List
 from ChatGLM3 import ChatGLM3
 
 from langchain.agents import load_tools
 from Tool.Weather import Weather
 from Tool.Calculator import Calculator
-
 from langchain.agents import initialize_agent
 from langchain.agents import AgentType
 
+MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 
 def run_tool(tools, llm, prompt_chain: List[str]):
     loaded_tolls = []
@@ -27,9 +28,8 @@ def run_tool(tools, llm, prompt_chain: List[str]):
 
 
 if __name__ == "__main__":
-    model_path = "THUDM/chatglm3-6b"
     llm = ChatGLM3()
-    llm.load_model(model_name_or_path=model_path)
+    llm.load_model(model_name_or_path=MODEL_PATH)
 
     # arxiv: 单个工具调用示例 1
     run_tool(["arxiv"], llm, [

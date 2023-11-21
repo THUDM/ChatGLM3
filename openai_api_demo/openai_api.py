@@ -6,6 +6,7 @@
 # 在OpenAI的API中，max_tokens 等价于 HuggingFace 的 max_new_tokens 而不是 max_length，。
 # 例如，对于6b模型，设置max_tokens = 8192，则会报错，因为扣除历史记录和提示词后，模型不能输出那么多的tokens。
 
+import os
 import time
 from contextlib import asynccontextmanager
 from typing import List, Literal, Optional, Union
@@ -27,6 +28,10 @@ pp = pprint.PrettyPrinter(indent=4)
 
 def pretty_print(message: Union[str, object]):
     logger.info(pp.pformat(message))
+
+MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
+TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
+DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 @asynccontextmanager
@@ -79,6 +84,7 @@ class DeltaMessage(BaseModel):
     role: Optional[Literal["user", "assistant", "system"]] = None
     content: Optional[str] = None
     function_call: Optional[FunctionCallResponse] = None
+
 
 class ChatCompletionRequest(BaseModel):
     model: str
@@ -248,13 +254,9 @@ async def predict(model_id: str, params: dict):
 
 if __name__ == "__main__":
 
-    model_path = "THUDM/chatglm3-6b"
-    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
-    model = AutoModel.from_pretrained(model_path, trust_remote_code=True).cuda()
-
-    # 多显卡支持，使用下面两行代替上面一行，将num_gpus改为你实际的显卡数量
-    # from utils import load_model_on_gpus
-    # model = load_model_on_gpus("THUDM/chatglm3-6b", num_gpus=2)
-    model = model.eval()
-
+    tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
+    if 'cuda' in DEVICE:  # AMD, NVIDIA GPU can use Half Precision
+        model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).to(DEVICE).eval()
+    else:  # CPU, Intel GPU and other GPU can use Float16 Precision Only
+        model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).float().to(DEVICE).eval()
     uvicorn.run(app, host='0.0.0.0', port=8000, workers=1)
