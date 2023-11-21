@@ -13,9 +13,6 @@
 ## 安装依赖
 pip3 install -r requirements.txt  
 
-## 下载模型
-python download_model.py 
-
 ## 处理数据
 python cover_alpaca2jsonl.py  --data_path ./alpaca_data.json  --save_path ./alpaca_data.jsonl  
 python tokenize_dataset_rows.py  --jsonl_path ./alpaca_data.jsonl --save_path ./alpaca  --max_seq_length 200  
