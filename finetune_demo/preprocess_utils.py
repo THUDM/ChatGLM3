@@ -29,10 +29,16 @@ def format_conversation(item, tokenizer, conversation_key: str, tool_key: str):
     # Note: `loss_mask` here means whether *the prediction* of the token should take loss
     tokens, loss_masks = [tokenizer.get_command("[gMASK]"), tokenizer.get_command("sop")], [0, 0]
 
-    def _update(_tokens: List[int], value: int = 1):
+    def _update(_tokens: List[int], value: int = 1, add_eos_token: bool=False):
+        """
+        The first token is role token, loss should not be calculated, its loss_mask should be set to 0.
+        Should add stop token at the end of every assistant's reply, so that model can learn to stop appropriately during inference.
+        """
         value = int(value)
+        if add_eos_token:
+            _tokens.append(tokenizer.eos_token_id)
         tokens.extend(_tokens)
-        loss_masks.extend([value] * len(_tokens))
+        loss_masks.extend([0] + [value] * (len(_tokens) -1))
 
     # insert system prompt for tools
     if tool_key in item:
@@ -51,19 +57,22 @@ def format_conversation(item, tokenizer, conversation_key: str, tool_key: str):
             # function call python code
             value = FUNCTION_CALL_PREFIX + format_function_call(FUNCTION_CALL_NAME, conv["parameters"]) + FUNCTION_CALL_POSTFIX
             text = tokenizer.build_single_message("assistant", conv["name"], value)
-            _update(text, loss)
+            _update(text, loss, add_eos_token=True)
 
             # function call result
             value = conv.get('observation', None)
             if not isinstance(value, str):
                 value = json.dumps(value, ensure_ascii=False)
             text = tokenizer.build_single_message("observation", "", value)
-            _update(text, False)
+            _update(text, False, add_eos_token=False)
         else:
             text = tokenizer.build_single_message(conv['role'], "", conv["content"])
-            _update(text, loss)
+            if conv['role'] == 'assistant':
+                _update(text, loss, add_eos_token=True)
+            else:
+                _update(text, False, add_eos_token=False)
 
-    _update([tokenizer.eos_token_id], False)
+    # _update([tokenizer.eos_token_id], False)
 
     assert len(tokens) == len(loss_masks), f"length mismatch: {len(tokens)} vs {len(loss_masks)}"
     return tokens, loss_masks
