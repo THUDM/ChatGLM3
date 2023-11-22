@@ -142,8 +142,8 @@ def main(top_p: float, temperature: float, prompt_text: str, repetition_penalty:
                             markdown_placeholder = message_placeholder.empty()
                             continue
                         case '<|observation|>':
-                            tool, *output_text = output_text.strip().split('\n')
-                            output_text = '\n'.join(output_text)
+                            tool, *call_args_text = output_text.strip().split('\n')
+                            call_args_text = '\n'.join(call_args_text)
                             
                             append_conversation(Conversation(
                                 Role.TOOL,
@@ -154,7 +154,7 @@ def main(top_p: float, temperature: float, prompt_text: str, repetition_penalty:
                             markdown_placeholder = message_placeholder.empty()
                             
                             try:
-                                code = extract_code(output_text)
+                                code = extract_code(call_args_text)
                                 args = eval(code, {'tool_call': tool_call}, {})
                             except:
                                 st.error('Failed to parse tool call')
