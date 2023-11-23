@@ -1,23 +1,23 @@
-# #!/usr/bin/env python
-# # coding=utf-8
-# # Copyright 2021 The HuggingFace Team. All rights reserved.
-# #
-# # Licensed under the Apache License, Version 2.0 (the "License");
-# # you may not use this file except in compliance with the License.
-# # You may obtain a copy of the License at
-# #
-# #     http://www.apache.org/licenses/LICENSE-2.0
-# #
-# # Unless required by applicable law or agreed to in writing, software
-# # distributed under the License is distributed on an "AS IS" BASIS,
-# # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# # See the License for the specific language governing permissions and
-# # limitations under the License.
-# """
-# Fine-tuning the library models for sequence to sequence.
-# """
-# # You can also adapt this script on your own sequence to sequence task. Pointers for this are left as comments.
-# # Adapted from
+#!/usr/bin/env python
+# coding=utf-8
+# Copyright 2021 The HuggingFace Team. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""
+Fine-tuning the library models for sequence to sequence.
+"""
+# You can also adapt this script on your own sequence to sequence task. Pointers for this are left as comments.
+# Adapted from
 
 import logging
 import os
@@ -26,7 +26,6 @@ import torch
 import json
 import transformers
 from transformers import (
-    AutoConfig,
     AutoModel,
     AutoTokenizer,
     DataCollatorForSeq2Seq,
@@ -121,16 +120,15 @@ def main():
             inference_mode=False,
             r=model_args.lora_rank,
             target_modules=['query_key_value'],
-            lora_alpha=32,
-            lora_dropout=0.1,
+            lora_alpha=32, # suggested
+            lora_dropout=0.1, # suggested
         )
         model = get_peft_model(model, peft_config).to("cuda")
 
-        # 确保梯度检查点和模型并行化设置正确
         #model.gradient_checkpointing_enable()
         model.enable_input_require_grads()
         model.is_parallelizable = True
-        model.model_parallel = True  # 可以尝试暂时关闭模型并行化来看是否解决问题
+        model.model_parallel = True
         model.lm_head = CastOutputToFloat(model.transformer.output_layer)
         model.config.use_cache = False
 
@@ -154,10 +152,10 @@ def main():
     checkpoint = None
     if training_args.resume_from_checkpoint is not None:
         checkpoint = training_args.resume_from_checkpoint
-    #model.gradient_checkpointing_enable()
+    #model.gradient_checkpointing_enable() # TODO: enable this， but it will cause error now
     model.enable_input_require_grads()
     trainer.train(resume_from_checkpoint=checkpoint)
-    trainer.save_model()  # Saves the tokenizer too for easy upload
+    trainer.save_model()
     trainer.save_state()
 
 
