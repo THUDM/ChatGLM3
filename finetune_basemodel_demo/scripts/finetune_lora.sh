@@ -2,20 +2,22 @@
 
 set -ex
 
-LR=2e-4
+LR=1e-4
 NUM_GPUS=2
 LORA_RANK=8
-MAX_SOURCE_LEN=512
-MAX_TARGET_LEN=128
-DEV_BATCH_SIZE=4
-GRAD_ACCUMULARION_STEPS=2
+MAX_SOURCE_LEN=2048
+MAX_TARGET_LEN=2048
+DEV_BATCH_SIZE=1
+GRAD_ACCUMULARION_STEPS=1
 MAX_STEP=40
 SAVE_INTERVAL=20
-MAX_SEQ_LEN=512
+MAX_SEQ_LEN=2048
 
 RUN_NAME=text
 BASE_MODEL_PATH=/data/share/models/chatglm3-6b-base
+#BASE_MODEL_PATH=/opt/tiger/xuxuanwen/workspace/chatglm3-finetune/model
 DATASET_PATH=/data/yuxuan/Code/ChatGLM3/finetune_basemodel_demo/data/alpaca_data.jsonl
+#DATASET_PATH=/opt/tiger/xuxuanwen/workspace/chatglm3-finetune/data/train_data1.jsonl
 
 DATESTR=`date +%Y%m%d-%H%M%S`
 OUTPUT_DIR=output/${RUN_NAME}-${DATESTR}-${LR}
