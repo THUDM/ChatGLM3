@@ -148,6 +148,11 @@ async def create_chat_completion(request: ChatCompletionRequest):
         return EventSourceResponse(generate, media_type="text/event-stream")
 
     response = generate_chatglm3(model, tokenizer, gen_params)
+
+    # Remove the first newline character
+    if response["text"].startswith("\n"):
+        response["text"] = response["text"][1:]
+    response["text"] = response["text"].strip()
     usage = UsageInfo()
 
     function_call, finish_reason = None, "stop"
