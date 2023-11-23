@@ -1,6 +1,6 @@
 from transformers import PreTrainedTokenizer
 from torch.utils.data import Dataset
-from typing import List
+from typing import Dict, List
 
 
 def sanity_check(tokens: List[int], target: List[int], tokenizer: PreTrainedTokenizer):
@@ -29,6 +29,7 @@ class InputOutputDataset(Dataset):
     
     def __getitem__(self, i) -> dict:
         data_item = self.data[i]
+
         a_ids = self.tokenizer.encode(text=data_item['context'], add_special_tokens=True, truncation=True,
                                          max_length=self.max_source_length)
         b_ids = self.tokenizer.encode(text=data_item['target'], add_special_tokens=False, truncation=True,

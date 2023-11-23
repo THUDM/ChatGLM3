@@ -19,6 +19,7 @@ Fine-tuning the library models for sequence to sequence.
 # You can also adapt this script on your own sequence to sequence task. Pointers for this are left as comments.
 # Adapted from
 
+
 import logging
 import os
 import sys
@@ -26,6 +27,7 @@ import torch
 import json
 import transformers
 from transformers import (
+    AutoConfig,
     AutoModel,
     AutoTokenizer,
     DataCollatorForSeq2Seq,
@@ -89,7 +91,7 @@ def main():
 
     # Load pretrained model and tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path, trust_remote_code=True)
-    model = AutoModel.from_pretrained(model_args.model_name_or_path, trust_remote_code=True).cuda()
+    model = AutoModel.from_pretrained(model_args.model_name_or_path, trust_remote_code=True).half().cuda()
 
     if model_args.quantization_bit is not None:
         print(f"Quantized to {model_args.quantization_bit} bit")
@@ -111,26 +113,27 @@ def main():
     else:
         raise ValueError(f"Unknown train format: {data_args.train_format}")
     print(f"Train dataset size: {len(train_dataset)}")
-    if training_args.local_rank < 1:
-        sanity_check(train_dataset[0]['input_ids'], train_dataset[0]['labels'], tokenizer)
+    #if training_args.local_rank < 1:
+    sanity_check(train_dataset[0]['input_ids'], train_dataset[0]['labels'], tokenizer)
 
-        # Apply PEFT configuration
-        peft_config = LoraConfig(
-            task_type=TaskType.CAUSAL_LM,
-            inference_mode=False,
-            r=model_args.lora_rank,
-            target_modules=['query_key_value'],
-            lora_alpha=32, # suggested
-            lora_dropout=0.1, # suggested
-        )
-        model = get_peft_model(model, peft_config).to("cuda")
+    # Apply PEFT configuration
+    peft_config = LoraConfig(
+        task_type=TaskType.CAUSAL_LM,
+        inference_mode=False,
+        r=model_args.lora_rank,
+        target_modules=['query_key_value'],
+        lora_alpha=32,
+        lora_dropout=0.1,
+    )
+    model = get_peft_model(model, peft_config).to("cuda")
 
-        #model.gradient_checkpointing_enable()
-        model.enable_input_require_grads()
-        model.is_parallelizable = True
-        model.model_parallel = True
-        model.lm_head = CastOutputToFloat(model.transformer.output_layer)
-        model.config.use_cache = False
+    # 确保梯度检查点和模型并行化设置正确
+    #model.gradient_checkpointing_enable()
+    model.enable_input_require_grads()
+    model.is_parallelizable = True
+    model.model_parallel = True  # 可以尝试暂时关闭模型并行化来看是否解决问题
+    model.lm_head = CastOutputToFloat(model.transformer.output_layer)
+    model.config.use_cache = False
 
     # Data collator
     data_collator = DataCollatorForSeq2Seq(
@@ -152,12 +155,87 @@ def main():
     checkpoint = None
     if training_args.resume_from_checkpoint is not None:
         checkpoint = training_args.resume_from_checkpoint
-    #model.gradient_checkpointing_enable() # TODO: enable this， but it will cause error now
+    #model.gradient_checkpointing_enable()
     model.enable_input_require_grads()
-    trainer.train(resume_from_checkpoint=checkpoint)
-    trainer.save_model()
+    trainer.train()
+    trainer.save_model()  # Saves the tokenizer too for easy upload
     trainer.save_state()
 
 
 if __name__ == "__main__":
     main()
+
+#     # Set seed before initializing model.
+#     set_seed(training_args.seed)
+#
+#     # Load pretrained model and tokenizer
+#     config = AutoConfig.from_pretrained(model_args.model_name_or_path, trust_remote_code=True)
+#
+#     tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path, trust_remote_code=True)
+#
+    # if model_args.lora_checkpoint is not None:
+    #     model = AutoModel.from_pretrained(model_args.model_name_or_path, config=config, trust_remote_code=True).cuda()
+    #     prefix_state_dict = torch.load(os.path.join(model_args.lora_checkpoint, "pytorch_model.bin"))
+    #     new_prefix_state_dict = {}
+    #     for k, v in prefix_state_dict.items():
+    #         if k.startswith("transformer.prefix_encoder."):
+    #             new_prefix_state_dict[k[len("transformer.prefix_encoder."):]] = v
+    #     model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
+    # else:
+    #     model = AutoModel.from_pretrained(model_args.model_name_or_path, config=config, trust_remote_code=True).cuda()
+    #
+    # if model_args.quantization_bit is not None:
+    #     print(f"Quantized to {model_args.quantization_bit} bit")
+    #     model = model.quantize(model_args.quantization_bit)
+    #     # model = model.float()
+    #
+    # with open(data_args.train_file, "r", encoding="utf-8") as f:
+    #     if data_args.train_file.endswith(".json"):
+    #         train_data = json.load(f)
+    #     elif data_args.train_file.endswith(".jsonl"):
+    #         train_data = [json.loads(line) for line in f]
+    #
+    # if data_args.train_format == "input-output":
+    #     train_dataset = InputOutputDataset(
+    #         train_data,
+    #         tokenizer,
+    #         data_args.max_source_length,
+    #         data_args.max_target_length,
+    #     )
+    # else:
+    #     raise ValueError(f"Unknown train format: {data_args.train_format}")
+    # print(f"Train dataset size: {len(train_dataset)}")
+    # if training_args.local_rank < 1:
+    #     sanity_check(train_dataset[0]['input_ids'], train_dataset[0]['labels'], tokenizer)
+#
+#     # Data collator
+#     data_collator = DataCollatorForSeq2Seq(
+#         tokenizer,
+#         model=model,
+#         label_pad_token_id=-100,
+#         pad_to_multiple_of=None,
+#         padding=False
+#     )
+#
+#     # Initialize our Trainer
+#     trainer = LoRATrainer(
+#         model=model,
+#         args=training_args,
+#         train_dataset=train_dataset,
+#         tokenizer=tokenizer,
+#         data_collator=data_collator,
+#         save_changed=model_args.lora_rank is not None
+#     )
+#
+    # checkpoint = None
+    # if training_args.resume_from_checkpoint is not None:
+    #     checkpoint = training_args.resume_from_checkpoint
+    # model.gradient_checkpointing_enable()
+    # model.enable_input_require_grads()
+    # trainer.train(resume_from_checkpoint=checkpoint)
+    # trainer.save_model()  # Saves the tokenizer too for easy upload
+    # trainer.save_state()
+#
+#
+# if __name__ == "__main__":
+#     main()
