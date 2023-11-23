@@ -130,7 +130,7 @@ git clone https://huggingface.co/THUDM/chatglm3-6b
 中下载。
 
 ### 模型微调
-请参考 [ChatGLM3-6B 微调示例](finetune_demo/README.md)。
+请参考 [ChatGLM3-6B 微调示例](finetune_chatmodel_demo/README.md)。
 
 ### 网页版对话 Demo
 ![web-demo](resources/web-demo.gif)
