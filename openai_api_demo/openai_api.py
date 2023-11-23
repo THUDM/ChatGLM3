@@ -13,6 +13,7 @@ from typing import List, Literal, Optional, Union
 
 import torch
 import uvicorn
+import pydantic
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
@@ -173,9 +174,15 @@ async def create_chat_completion(request: ChatCompletionRequest):
         finish_reason=finish_reason,
     )
 
-    task_usage = UsageInfo.model_validate(response["usage"])
-    for usage_key, usage_value in task_usage.model_dump().items():
-        setattr(usage, usage_key, getattr(usage, usage_key) + usage_value)
+    if pydantic.__version__.startswith("1"):
+        # This happens, especially when "fastapi==0.95.1", pandatic will be 1.x
+        task_usage = UsageInfo.parse_obj(response["usage"])
+        for usage_key, usage_value in task_usage.dict().items():
+            setattr(usage, usage_key, getattr(usage, usage_key) + usage_value)
+    else:
+        task_usage = UsageInfo.model_validate(response["usage"])
+        for usage_key, usage_value in task_usage.model_dump().items():
+            setattr(usage, usage_key, getattr(usage, usage_key) + usage_value)
 
     return ChatCompletionResponse(model=request.model, choices=[choice_data], object="chat.completion", usage=usage)
 
