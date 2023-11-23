@@ -18,8 +18,8 @@ if args.tokenizer is None:
 
 if args.pt_checkpoint:
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer, trust_remote_code=True)
-    config = AutoConfig.from_pretrained(args.model, trust_remote_code=True, pre_seq_len=128)
-    model = AutoModel.from_pretrained(args.model, config=config, trust_remote_code=True)
+    config = AutoConfig.from_pretrained(args.model, trust_remote_code=True, pre_seq_len=args.pt_pre_seq_len)
+    model = AutoModel.from_pretrained(args.model, config=config, trust_remote_code=True).cuda()
     prefix_state_dict = torch.load(os.path.join(args.pt_checkpoint, "pytorch_model.bin"))
     new_prefix_state_dict = {}
     for k, v in prefix_state_dict.items():

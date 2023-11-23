@@ -7,7 +7,7 @@
 import requests
 import json
 
-base_url = "http://127.0.0.1:8000" # 本地部署的地址,或者使用你访问模型的API地址
+base_url = "http://127.0.0.1:8000"
 
 def create_chat_completion(model, messages, use_stream=False):
     data = {
@@ -55,5 +55,3 @@ if __name__ == "__main__":
         }
     ]
     create_chat_completion("chatglm3-6b", chat_messages, use_stream=False)
-
-
