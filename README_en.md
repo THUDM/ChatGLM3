@@ -127,6 +127,10 @@ git clone https://huggingface.co/THUDM/chatglm3-6b
 
 If the download from HuggingFace is slow, you can also download it from [ModelScope](https://modelscope.cn/models/ZhipuAI/chatglm3-6b).
 
+# Model Fine-tuning
+Please refer to the dialog model fine-tuning [ChatGLM3-6B fine-tuning example](finetune_chatmodel_demo/README.md), or the base model fine-tuning [ChatGLM3-6B-base fine-tuning example](finetune_basemodel_demo/README.md).
+Please note that different fine-tuning scripts correspond to different models. Please select the corresponding model according to your needs.
+
 ### Web-based Dialogue Demo
 ![web-demo](resources/web-demo.gif)
 You can launch a web-based demo using Gradio with the following command:

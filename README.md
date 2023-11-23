@@ -130,7 +130,9 @@ git clone https://huggingface.co/THUDM/chatglm3-6b
 中下载。
 
 ### 模型微调
-请参考对话模型微调 [ChatGLM3-6B 微调示例](finetune_chatmodel_demo/README.md),或基础模型微调[ChatGLM3-6B-base 微调示例](finetune_basemodel_demo/README.md)。（该内容处于更新中）
+
+请参考对话模型微调 [ChatGLM3-6B 微调示例](finetune_chatmodel_demo/README.md),或基座模型微调 [ChatGLM3-6B-base 微调示例](finetune_basemodel_demo/README.md)。
+请注意，不同的微调脚本对应的模型并不相同，请根据需要选择对应的模型。
 
 ### 网页版对话 Demo
 ![web-demo](resources/web-demo.gif)
