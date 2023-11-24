@@ -1,10 +1,23 @@
 # ChatGLM3-6B-base 微调示例
 
 本目录提供 ChatGLM3-6B-base 模型的微调示例，目前，仅包含了Lora微调。
+
 如果将模型下载到了本地，本文和代码中的 `THUDM/chatglm3-6b-base` 字段均应替换为相应地址以从本地加载模型。
 
+运行示例需要 `python>=3.10`，除基础的 `torch` 依赖外，示例代码运行还需要依赖 
+
+```bash
+pip install requirements.txt
+```
+## 多轮对话格式
+
+`base`模型不具备对话能力，仅能够生成单轮回复。如果你希望使用多轮对话模型，使用`Chat`模型进行微调。
+
+
 ## 数据集要求
+
 格式上，请使用`alpaca`数据集。
+
 ```bash
 
 {"context": "hello", "target": "hi,I am ChatGLM3"}
@@ -62,5 +75,3 @@
 ## 注意事项
 + 基座模型不具备对话能力，仅能够生成单轮回复。如果你希望使用多轮对话模型，使用Chat模型进行微调。
 + 请注意，运行本脚本，你还需要安装本目录下的 `requirements.txt` 中的所有内容。
-+ 此Readme还在完善阶段，将在后续中不断更新。
-

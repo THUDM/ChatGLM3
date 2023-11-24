@@ -13,6 +13,9 @@ parser.add_argument("--lora-path", type=str, default=None,
                     help="Path to the LoRA model checkpoint")
 parser.add_argument("--device", type=str, default="cuda", help="Device to use for computation")
 parser.add_argument("--max-new-tokens", type=int, default=128, help="Maximum new tokens for generation")
+parser.add_argument("--lora-alpha", type=float, default=32, help="LoRA alpha")
+parser.add_argument("--lora-rank", type=int, default=8, help="LoRA r")
+parser.add_argument("--lora-dropout", type=float, default=0.1, help="LoRA dropout")
 
 args = parser.parse_args()
 
@@ -28,7 +31,7 @@ model = AutoModel.from_pretrained(args.model, load_in_8bit=False, trust_remote_c
 peft_config = LoraConfig(
     task_type=TaskType.CAUSAL_LM, inference_mode=True,
     target_modules=['query_key_value'],
-    r=8, lora_alpha=32, lora_dropout=0.1
+    r=args.lora_rank, lora_alpha=args.lora_alpha, lora_dropout=args.lora_dropout
 )
 model = get_peft_model(model, peft_config)
 if os.path.exists(args.lora_path):
