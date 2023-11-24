@@ -27,7 +27,6 @@ import torch
 import json
 import transformers
 from transformers import (
-    AutoConfig,
     AutoModel,
     AutoTokenizer,
     DataCollatorForSeq2Seq,
@@ -122,8 +121,8 @@ def main():
         inference_mode=False,
         r=model_args.lora_rank,
         target_modules=['query_key_value'],
-        lora_alpha=32,
-        lora_dropout=0.1,
+        lora_alpha=model_args.lora_alpha,
+        lora_dropout=model_args.lora_dropout,
     )
     model = get_peft_model(model, peft_config).to("cuda")
 

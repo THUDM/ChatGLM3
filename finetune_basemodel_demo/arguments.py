@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Optional
 
+
 @dataclass
 class ModelArguments:
     """
@@ -51,11 +52,46 @@ class ModelArguments:
         },
     )
     quantization_bit: Optional[int] = field(
-        default=None
+        default=None,
+        metadata={
+            "help": (
+                "An optional parameter specifying the number of bits used for quantization. "
+                "Quantization is a process that reduces the model size by limiting the number of "
+                "bits that represent each weight in the model. A lower number of bits can reduce "
+                "the model size and speed up inference, but might also decrease model accuracy. "
+                "If not set (None), quantization is not applied."
+            )
+        },
     )
+
     lora_rank: Optional[int] = field(
-        default=None
+        default=8,
+        metadata={
+            "help": (
+                "balancing between complexity and model flexibility. A higher rank allows more "
+                "complex adaptations but increases the number of parameters and computational cost."
+            )
+        },
     )
+    lora_alpha: Optional[float] = field(
+        default=32,
+        metadata={
+            "help": (
+                "A higher value results in more significant adjustments, potentially improving adaptation to new tasks or data, "
+                "but might also risk overfitting. A lower value makes smaller adjustments, possibly maintaining better generalization."
+            )
+        }, )
+
+    lora_dropout: Optional[float] = field(
+        default=0.1,
+        metadata={
+            "help": (
+                "during training to prevent the model from overly relying on specific patterns in the training data. "
+                "Higher dropout rates can improve model generalization but may reduce learning efficiency."
+            )
+        },
+    )
+
 
 @dataclass
 class DataTrainingArguments:
