@@ -154,13 +154,12 @@ async def create_chat_completion(request: ChatCompletionRequest):
         response["text"] = response["text"][1:]
     response["text"] = response["text"].strip()
     usage = UsageInfo()
-
     function_call, finish_reason = None, "stop"
     if request.functions:
         try:
             function_call = process_response(response["text"], use_tool=True)
         except:
-            logger.warning("Failed to parse tool call")
+            logger.warning("Failed to parse tool call, maybe the response is not a tool call or have been answered.")
 
     if isinstance(function_call, dict):
         finish_reason = "function_call"
@@ -172,16 +171,16 @@ async def create_chat_completion(request: ChatCompletionRequest):
         function_call=function_call if isinstance(function_call, FunctionCallResponse) else None,
     )
 
+    logger.debug(f"==== message ====\n{message}")
+
     choice_data = ChatCompletionResponseChoice(
         index=0,
         message=message,
         finish_reason=finish_reason,
     )
-
     task_usage = UsageInfo.model_validate(response["usage"])
     for usage_key, usage_value in task_usage.model_dump().items():
         setattr(usage, usage_key, getattr(usage, usage_key) + usage_value)
-
     return ChatCompletionResponse(model=request.model, choices=[choice_data], object="chat.completion", usage=usage)
 
 
@@ -211,7 +210,7 @@ async def predict(model_id: str, params: dict):
             try:
                 function_call = process_response(decoded_unicode, use_tool=True)
             except:
-                print("Failed to parse tool call")
+                logger.warning("Failed to parse tool call, maybe the response is not a tool call or have been answered.")
 
         if isinstance(function_call, dict):
             function_call = FunctionCallResponse(**function_call)
