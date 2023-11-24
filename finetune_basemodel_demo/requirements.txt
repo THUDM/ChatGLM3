@@ -2,3 +2,4 @@ tqdm
 datasets
 fsspec
 astunparse
+peft

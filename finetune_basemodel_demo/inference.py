@@ -6,10 +6,10 @@ from peft import get_peft_model, LoraConfig, TaskType
 
 # Argument Parser Setup
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", type=str, default="/data/share/models/chatglm3-6b-base",
+parser.add_argument("--model", type=str, default=None,
                     help="The directory of the model")
 parser.add_argument("--tokenizer", type=str, default=None, help="Tokenizer path")
-parser.add_argument("--lora-path", type=str, default="/data/yuxuan/Code/ChatGLM3//output/chatglm-lora.pt",
+parser.add_argument("--lora-path", type=str, default=None,
                     help="Path to the LoRA model checkpoint")
 parser.add_argument("--device", type=str, default="cuda", help="Device to use for computation")
 parser.add_argument("--max-new-tokens", type=int, default=128, help="Maximum new tokens for generation")
