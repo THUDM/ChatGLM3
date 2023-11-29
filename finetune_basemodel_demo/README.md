@@ -7,7 +7,7 @@
 运行示例需要 `python>=3.10`，除基础的 `torch` 依赖外，示例代码运行还需要依赖 
 
 ```bash
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 ## 多轮对话格式
 
@@ -31,6 +31,15 @@ pip install requirements.txt
 ```bash
 ./scripts/finetune_lora.sh  # 使用Lora微调
 ```
+如果你使用的是windows系统，请将脚本改为`bat`文件执行。同时，如果你是单卡运行环境，也可以将脚本中中的这行代码
+```
+torchrun --standalone --nnodes=1 --nproc_per_node=$NUM_GPUS finetune.py 
+```
+修改为
+```
+python finetune.py 
+```
+请注意，这样修改后，你需要手动设置`CUDA_VISIBLE_DEVICES`环境变量，以控制使用哪张显卡。
 
 ### 提示
 
@@ -64,14 +73,18 @@ pip install requirements.txt
                     '':      0 ->   -100 （有若干个）
     <<<<<<<<<<<<< Sanity Check
     ```
-
     字样，每行依次表示一个 detokenized string, token_id 和 target_id。可在日志中查看这部分的 `loss_mask` 是否符合预期。若不符合，可能需要调整代码或数据。
 2. 参考显存用量
    - 按照官方脚本的默认参数运行，每一张显卡占用显存为 `23GB`。
 3. 若尝试后发现显存不足，可以考虑
     - 尝试降低 `DEV_BATCH_SIZE` 并提升 `GRAD_ACCUMULARION_STEPS`
     - 尝试降低 `MAX_SEQ_LEN`，但是这可能会影响模型的性能
+4. 数据量和 loss 衰减
+    - 训练中 loss 在数个 step 中回升属于正常现象，但是如果连续不降，则需要检查数据集是否存在问题（覆盖范围过广，相关性太低等）。你也可以选择降低 `LEARNING_RATE` 或者提升 `WARMUP_STEPS`。
+    - 通常来说，loss值在 `0.5` 以下时，就属于比较好的状态。
+5. 训练数据和轮次
+    - `Max Steps` 为训练执行的步骤，与数据集的数量无关，这个参数不等于`Epoch`。
+    - `Batch Size` 为每个GPU的batch size，如果你使用了多卡训练，那么实际的batch size为 `Batch Size * GPU数量`。
 
 ## 注意事项
-+ 基座模型不具备对话能力，仅能够生成单轮回复。如果你希望使用多轮对话模型，使用Chat模型进行微调。
-+ 请注意，运行本脚本，你还需要安装本目录下的 `requirements.txt` 中的所有内容。
++ 基座模型不支持对话，工具，代码生成等能力，仅支持文本生成。如果你需要对话能力，请使用`Chat`模型和对应的微调框架。

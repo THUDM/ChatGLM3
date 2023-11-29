@@ -12,7 +12,7 @@ base_url = "http://127.0.0.1:8000"
 
 def create_chat_completion(model, messages, functions, use_stream=False):
     data = {
-        "function": functions,  # 函数定义
+        "functions": functions,  # 函数定义
         "model": model,  # 模型名称
         "messages": messages,  # 会话历史
         "stream": use_stream,  # 是否流式响应
