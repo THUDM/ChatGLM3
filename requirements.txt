@@ -9,5 +9,4 @@ sse-starlette
 streamlit>=1.24.0
 fastapi>=0.104.1
 uvicorn~=0.24.0
-sse_starlette
 loguru~=0.7.2
