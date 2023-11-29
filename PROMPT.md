@@ -132,6 +132,7 @@ data[:5]
 <|assistant|>
 该文件看起来包含有关某些条目的元数据，每个条目有以下字段：
 
+
 - `file_name`: 文件名称
 - `name`: 名称
 - `type`: 类型（例如 "survivor" 或 "killer"）
