@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "composite-demo"
+version = "0.1.0"
+description = ""
+authors = ["Hubert Shelley <hubertshelley@163.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+huggingface-hub = "^0.19.4"
+streamlit = "^1.29.0"
+ipykernel = "^6.27.1"
+ipython = "^8.18.1"
+jupyter-client = "^8.6.0"
+pillow = "^10.1.0"
+sentencepiece = "^0.1.99"
+tokenizers = "^0.15.0"
+torch = "^2.1.1"
+transformers = "^4.35.2"
+pyyaml = "^6.0.1"
+requests = "^2.31.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
