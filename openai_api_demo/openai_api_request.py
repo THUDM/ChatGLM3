@@ -109,5 +109,5 @@ def simple_chat(use_stream=True):
 
 
 if __name__ == "__main__":
-    function_chat(use_stream=False)
+    function_chat(use_stream=True)
     # simple_chat(use_stream=True)
