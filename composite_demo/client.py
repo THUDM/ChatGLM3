@@ -84,7 +84,6 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
                   **kwargs
                   }
 
-    print(gen_kwargs)
     if past_key_values is None:
         inputs = tokenizer.build_chat_input(query, history=history, role=role)
     else:
@@ -131,11 +130,11 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
 
 
 class HFClient(Client):
-    def __init__(self, model_path: str, tokenizer_path: str, pt_checkpoint: str | None = None, DEVICE = 'cpu'):
+    def __init__(self, model_path: str, tokenizer_path: str, pt_checkpoint: str = None, DEVICE = 'cpu'):
         self.model_path = model_path
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, trust_remote_code=True)
 
-        if pt_checkpoint is not None:
+        if pt_checkpoint is not None and os.path.exists(pt_checkpoint):
             config = AutoConfig.from_pretrained(model_path, trust_remote_code=True, pre_seq_len=128)
             self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True, config=config)
             prefix_state_dict = torch.load(os.path.join(pt_checkpoint, "pytorch_model.bin"))
@@ -146,8 +145,8 @@ class HFClient(Client):
             print("Loaded from pt checkpoints", new_prefix_state_dict.keys())
             self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
         else:
+            # self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True).quantize(4).cuda() # 4Bit量化
             self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
-
         self.model = self.model.to(DEVICE).eval() if 'cuda' in DEVICE else self.model.float().to(DEVICE).eval()
 
 
