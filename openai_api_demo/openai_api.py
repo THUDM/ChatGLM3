@@ -317,6 +317,22 @@ def predict_stream(model_id, gen_params):
 
             # Non-function call, direct stream output
             finish_reason = new_response["finish_reason"]
+
+            # Send an empty string first to avoid truncation by subsequent next() operations.
+            if not has_send_first_chunk:
+                message = DeltaMessage(
+                    content="",
+                    role="assistant",
+                    function_call=None,
+                )
+                choice_data = ChatCompletionResponseStreamChoice(
+                    index=0,
+                    delta=message,
+                    finish_reason=finish_reason
+                )
+                chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
+                yield "{}".format(chunk.model_dump_json(exclude_unset=True))
+
             send_msg = delta_text if has_send_first_chunk else output
             has_send_first_chunk = True
             message = DeltaMessage(
