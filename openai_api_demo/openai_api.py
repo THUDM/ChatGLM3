@@ -19,9 +19,8 @@ from loguru import logger
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 from transformers import AutoTokenizer, AutoModel
-from utils import auto_configure_device_map_bygpus, load_model_on_gpus
 
-from utils import process_response, generate_chatglm3, generate_stream_chatglm3
+from utils import process_response, generate_chatglm3, generate_stream_chatglm3, auto_configure_device_map_bygpus, load_model_on_gpus
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
