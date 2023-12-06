@@ -74,7 +74,7 @@ def run_conversation(query: str, stream=False, functions=None, max_retry=5):
                         {
                             "role": "function",
                             "name": function_call.name,
-                            "content": tool_response,  # 调用函数返回结果
+                            "content": tool_response,
                         }
                     )
 
