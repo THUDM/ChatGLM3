@@ -16,6 +16,8 @@ TOOL_PROMPT = 'Answer the following questions as best as you can. You have acces
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 PT_PATH = os.environ.get('PT_PATH', None)
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
+PRE_SEQ_LEN = int(os.environ.get("PRE_SEQ_LEN", 128))
+MAX_LENGTH = int(os.environ.get("MAX_LENGTH", 8192))
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # for Mac Computer like M1
@@ -38,7 +40,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 @st.cache_resource
 def get_client() -> Client:
-    client = HFClient(MODEL_PATH, TOKENIZER_PATH, PT_PATH, DEVICE)
+    client = HFClient(MODEL_PATH, TOKENIZER_PATH, PRE_SEQ_LEN, PT_PATH, DEVICE)
     return client
 
 
@@ -53,7 +55,7 @@ class Client(Protocol):
 
 
 def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = None, role: str = "user",
-                past_key_values=None, max_length: int = 8192, do_sample=True, top_p=0.8, temperature=0.8,
+                past_key_values=None, max_length: int = MAX_LENGTH, do_sample=True, top_p=0.8, temperature=0.8,
                 repetition_penalty=1.0, length_penalty=1.0, num_beams=1,
                 logits_processor=None, return_past_key_values=False, **kwargs):
     from transformers.generation.logits_process import LogitsProcessor
@@ -84,6 +86,7 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
                   **kwargs
                   }
 
+    print(gen_kwargs)
     if past_key_values is None:
         inputs = tokenizer.build_chat_input(query, history=history, role=role)
     else:
@@ -102,15 +105,15 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
 
     input_sequence_length = inputs['input_ids'].shape[1]
 
-    if max_length < input_sequence_length <= self.config.seq_length:
+    if max_length < input_sequence_length <= MAX_LENGTH:
         yield "Current input sequence length {} exceeds sequence length set in generation parameters {}. The maximum model sequence length is {}. You may adjust the generation parameter to enable longer chat history.".format(
-            input_sequence_length, max_length, self.config.seq_length
+            input_sequence_length, max_length, MAX_LENGTH
         ), history
         return
 
-    if input_sequence_length > self.config.seq_length:
+    if input_sequence_length > MAX_LENGTH:
         yield "Current input sequence length {} exceeds maximum model sequence length {}. Unable to generate tokens.".format(
-            input_sequence_length, self.config.seq_length
+            input_sequence_length, MAX_LENGTH
         ), history
         return
 
@@ -121,7 +124,7 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
             outputs, past_key_values = outputs
         outputs = outputs.tolist()[0][len(inputs["input_ids"][0]):]
         response = tokenizer.decode(outputs)
-        if response and response[-1] != "�":
+        if response and response[-1] != " ":
             new_history = history
             if return_past_key_values:
                 yield response, new_history, past_key_values
@@ -130,12 +133,12 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
 
 
 class HFClient(Client):
-    def __init__(self, model_path: str, tokenizer_path: str, pt_checkpoint: str = None, DEVICE = 'cpu'):
+    def __init__(self, model_path: str, tokenizer_path: str, pre_seq_len: int, pt_checkpoint: str | None = None, DEVICE = 'cpu'):
         self.model_path = model_path
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, trust_remote_code=True)
 
-        if pt_checkpoint is not None and os.path.exists(pt_checkpoint):
-            config = AutoConfig.from_pretrained(model_path, trust_remote_code=True, pre_seq_len=128)
+        if pt_checkpoint is not None:
+            config = AutoConfig.from_pretrained(model_path, trust_remote_code=True, pre_seq_len=pre_seq_len)
             self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True, config=config)
             prefix_state_dict = torch.load(os.path.join(pt_checkpoint, "pytorch_model.bin"))
             new_prefix_state_dict = {}
@@ -145,8 +148,8 @@ class HFClient(Client):
             print("Loaded from pt checkpoints", new_prefix_state_dict.keys())
             self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
         else:
-            # self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True).quantize(4).cuda() # 4Bit量化
             self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
+
         self.model = self.model.to(DEVICE).eval() if 'cuda' in DEVICE else self.model.float().to(DEVICE).eval()
 
 
