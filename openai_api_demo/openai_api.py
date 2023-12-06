@@ -3,7 +3,7 @@
 # Usage: python openai_api.py
 # Visit http://localhost:8000/docs for documents.
 
-# 在OpenAI的API中，max_tokens 等价于 HuggingFace 的 max_new_tokens 而不是 max_length，。
+# 在OpenAI的API中，max_tokens 等价于 HuggingFace 的 max_new_tokens 而不是 max_length，
 # 例如，对于6b模型，设置max_tokens = 8192，则会报错，因为扣除历史记录和提示词后，模型不能输出那么多的tokens。
 
 import os
@@ -20,8 +20,6 @@ from loguru import logger
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 from transformers import AutoTokenizer, AutoModel
-
-from tool_using.tool_register import dispatch_tool
 from utils import process_response, generate_chatglm3, generate_stream_chatglm3
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
@@ -166,9 +164,16 @@ async def create_chat_completion(request: ChatCompletionRequest):
         # CallFunction
         if isinstance(function_call, dict):
             function_call = FunctionCallResponse(**function_call)
-            function_args = json.loads(function_call.arguments)
-            # Call the tool request api, time-consuming operation
-            tool_response = dispatch_tool(function_call.name, function_args)
+
+
+            """
+            In this demo, we did not register any tools.
+            You can use the tools that have been implemented in our `tool_using` and implement your own streaming tool implementation here.
+            Similar to the following method:
+                function_args = json.loads(function_call.arguments)
+                tool_response = dispatch_tool(tool_name: str, tool_params: dict)
+            """
+            tool_response = ""
 
             if not gen_params.get("messages"):
                 gen_params["messages"] = []
