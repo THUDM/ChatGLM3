@@ -12,7 +12,7 @@
 
 [Read this in English.](./README_en.md)
 
-📔 更为详细的使用信息，可以参考：[ChatGLM3技术文档](https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof?from=from_copylink)
+📔 更为详细的使用信息，可以参考：[ChatGLM3技术文档](https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof?from=from_copylink) 或 [B站视频](https://www.bilibili.com/video/BV1uC4y1J7yA)、[YouTube视频](https://www.youtube.com/watch?v=Pw9PB6R7ORA)
 
 ## 介绍
 
@@ -130,7 +130,9 @@ git clone https://huggingface.co/THUDM/chatglm3-6b
 中下载。
 
 ### 模型微调
-请参考 [ChatGLM3-6B 微调示例](finetune_demo/README.md)。
+
+请参考对话模型微调 [ChatGLM3-6B 微调示例](finetune_chatmodel_demo/README.md),或基座模型微调 [ChatGLM3-6B-base 微调示例](finetune_basemodel_demo/README.md)。
+请注意，不同的微调脚本对应的模型并不相同，请根据需要选择对应的模型。
 
 ### 网页版对话 Demo
 ![web-demo](resources/web-demo.gif)

@@ -1,0 +1,5 @@
+transformers==4.30.2
+accelerate
+sentencepiece
+astunparse
+deepspeed

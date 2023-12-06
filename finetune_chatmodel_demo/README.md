@@ -4,10 +4,10 @@
 
 如果将模型下载到了本地，本文和代码中的 `THUDM/chatglm3-6b` 字段均应替换为相应地址以从本地加载模型。
 
-运行示例需要 `python>=3.9`，除基础的 `torch` 依赖外，示例代码运行还需要依赖 
+运行示例需要 `python>=3.10`，除基础的 `torch` 依赖外，示例代码运行还需要依赖 
 
 ```bash
-pip install transformers==4.30.2 accelerate sentencepiece astunparse deepspeed
+pip install requirements.txt
 ```
 
 ## 多轮对话格式

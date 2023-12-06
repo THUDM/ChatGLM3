@@ -1,0 +1,7 @@
+tqdm
+datasets
+fsspec
+astunparse
+peft
+accelerate
+sentencepiece

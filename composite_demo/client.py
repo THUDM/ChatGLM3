@@ -15,8 +15,11 @@ TOOL_PROMPT = 'Answer the following questions as best as you can. You have acces
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 PT_PATH = os.environ.get('PT_PATH', None)
+PRE_SEQ_LEN = int(os.environ.get("PRE_SEQ_LEN", 128))  # mark sure your have pt_path with finetune model
+
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 
 # for Mac Computer like M1
 # You Need Use Pytorch compiled with Metal
@@ -84,7 +87,6 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
                   **kwargs
                   }
 
-    print(gen_kwargs)
     if past_key_values is None:
         inputs = tokenizer.build_chat_input(query, history=history, role=role)
     else:
@@ -99,7 +101,7 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
         attention_mask = torch.cat((attention_mask.new_ones(1, past_length), attention_mask), dim=1)
         inputs['attention_mask'] = attention_mask
     history.append({"role": role, "content": query})
-    print("input_shape>", inputs['input_ids'].shape)
+    # print("input_shape>", inputs['input_ids'].shape)
 
     input_sequence_length = inputs['input_ids'].shape[1]
 
@@ -131,12 +133,12 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
 
 
 class HFClient(Client):
-    def __init__(self, model_path: str, tokenizer_path: str, pt_checkpoint: str | None = None, DEVICE = 'cpu'):
+    def __init__(self, model_path: str, tokenizer_path: str, pt_checkpoint: str = None, DEVICE='cpu'):
         self.model_path = model_path
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, trust_remote_code=True)
 
-        if pt_checkpoint is not None:
-            config = AutoConfig.from_pretrained(model_path, trust_remote_code=True, pre_seq_len=128)
+        if pt_checkpoint is not None and os.path.exists(pt_checkpoint):
+            config = AutoConfig.from_pretrained(model_path, trust_remote_code=True, pre_seq_len=PRE_SEQ_LEN)
             self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True, config=config)
             prefix_state_dict = torch.load(os.path.join(pt_checkpoint, "pytorch_model.bin"))
             new_prefix_state_dict = {}
@@ -146,10 +148,10 @@ class HFClient(Client):
             print("Loaded from pt checkpoints", new_prefix_state_dict.keys())
             self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
         else:
+            # If you need 4bit quantization, run:
+            # self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True).quantize(4).cuda()
             self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
-
         self.model = self.model.to(DEVICE).eval() if 'cuda' in DEVICE else self.model.float().to(DEVICE).eval()
-
 
     def generate_stream(self,
                         system: str | None,
