@@ -18,10 +18,8 @@ IPYKERNEL = os.environ.get('IPYKERNEL', 'chatglm3-demo')
 
 SYSTEM_PROMPT = '你是一位智能AI助手，你叫ChatGLM，你连接着一台电脑，但请注意不能联网。在使用Python解决任务时，你可以运行代码并得到结果，如果运行结果有错误，你需要尽可能对代码进行改进。你可以处理用户上传到电脑上的文件，文件默认存储路径是/mnt/data/。'
 
-MAX_LENGTH = 8192
-TRUNCATE_LENGTH = 1024
-
 client = get_client()
+
 
 class CodeKernel(object):
     def __init__(self,
@@ -40,14 +38,14 @@ class CodeKernel(object):
         self.ipython_path = ipython_path
         self.init_file_path = init_file_path
         self.verbose = verbose
-        
+
         if python_path is None and ipython_path is None:
             env = None
         else:
             env = {"PATH": self.python_path + ":$PATH", "PYTHONPATH": self.python_path}
 
         # Initialize the backend kernel
-        self.kernel_manager = jupyter_client.KernelManager(kernel_name=IPYKERNEL, 
+        self.kernel_manager = jupyter_client.KernelManager(kernel_name=IPYKERNEL,
                                                            connection_file=self.kernel_config_path,
                                                            exec_files=[self.init_file_path],
                                                            env=env)
@@ -84,7 +82,7 @@ class CodeKernel(object):
                         break
                 except queue.Empty:
                     break
-            
+
             return shell_msg, msg_out
         except Exception as e:
             print(e)
@@ -153,15 +151,18 @@ class CodeKernel(object):
 
     def is_alive(self):
         return self.kernel.is_alive()
-    
+
+
 def b64_2_img(data):
     buff = BytesIO(base64.b64decode(data))
     return Image.open(buff)
 
+
 def clean_ansi_codes(input_string):
     ansi_escape = re.compile(r'(\x9B|\x1B\[|\u001b\[)[0-?]*[ -/]*[@-~]')
     return ansi_escape.sub('', input_string)
-    
+
+
 def execute(code, kernel: CodeKernel) -> tuple[str, str | Image.Image]:
     res = ""
     res_type = None
@@ -171,12 +172,12 @@ def execute(code, kernel: CodeKernel) -> tuple[str, str | Image.Image]:
     code = code.replace("<|user|>", "")
     code = code.replace("<|system|>", "")
     msg, output = kernel.execute(code)
-    
+
     if msg['metadata']['status'] == "timeout":
         return res_type, 'Timed out'
     elif msg['metadata']['status'] == 'error':
         return res_type, clean_ansi_codes('\n'.join(kernel.get_error_msg(msg, verbose=True)))
-    
+
     if 'text' in output:
         res_type = "text"
         res = output['text']
@@ -194,29 +195,38 @@ def execute(code, kernel: CodeKernel) -> tuple[str, str | Image.Image]:
         return res_type, b64_2_img(res)
     elif res_type == "text" or res_type == "traceback":
         res = res
-    
+
     return res_type, res
+
 
 @st.cache_resource
 def get_kernel():
     kernel = CodeKernel()
     return kernel
 
+
 def extract_code(text: str) -> str:
     pattern = r'```([^\n]*)\n(.*?)```'
     matches = re.findall(pattern, text, re.DOTALL)
     return matches[-1][1]
 
+
 # Append a conversation into history, while show it in a new markdown block
 def append_conversation(
-    conversation: Conversation,
-    history: list[Conversation],
-    placeholder: DeltaGenerator | None=None,
+        conversation: Conversation,
+        history: list[Conversation],
+        placeholder: DeltaGenerator | None = None,
 ) -> None:
     history.append(conversation)
     conversation.show(placeholder)
 
-def main(top_p: float, temperature: float, prompt_text: str, repetition_penalty: float):
+
+def main(top_p: float,
+         temperature: float,
+         prompt_text: str,
+         repetition_penalty: float,
+         max_new_tokens: int,
+         truncate_length: int = 1024):
     if 'ci_history' not in st.session_state:
         st.session_state.ci_history = []
 
@@ -247,15 +257,15 @@ def main(top_p: float, temperature: float, prompt_text: str, repetition_penalty:
         for _ in range(5):
             output_text = ''
             for response in client.generate_stream(
-                system=SYSTEM_PROMPT,
-                tools=None,
-                history=history,
-                do_sample=True,
-                max_length=MAX_LENGTH,
-                temperature=temperature,
-                top_p=top_p,
-                stop_sequences=[str(r) for r in (Role.USER, Role.OBSERVATION)],
-                repetition_penalty=repetition_penalty,
+                    system=SYSTEM_PROMPT,
+                    tools=None,
+                    history=history,
+                    do_sample=True,
+                    max_new_token=max_new_tokens,
+                    temperature=temperature,
+                    top_p=top_p,
+                    stop_sequences=[str(r) for r in (Role.USER, Role.OBSERVATION)],
+                    repetition_penalty=repetition_penalty,
             ):
                 token = response.token
                 if response.token.special:
@@ -281,7 +291,6 @@ def main(top_p: float, temperature: float, prompt_text: str, repetition_penalty:
                             continue
                         case '<|observation|>':
                             code = extract_code(output_text)
-                            print("Code:", code)
 
                             display_text = output_text.split('interpreter')[-1].strip()
                             append_conversation(Conversation(
@@ -291,7 +300,7 @@ def main(top_p: float, temperature: float, prompt_text: str, repetition_penalty:
                             message_placeholder = placeholder.chat_message(name="observation", avatar="user")
                             markdown_placeholder = message_placeholder.empty()
                             output_text = ''
-                            
+
                             with markdown_placeholder:
                                 with st.spinner('Executing code...'):
                                     try:
@@ -300,9 +309,9 @@ def main(top_p: float, temperature: float, prompt_text: str, repetition_penalty:
                                         st.error(f'Error when executing code: {e}')
                                         return
                             print("Received:", res_type, res)
-
-                            if res_type == 'text' and len(res) > TRUNCATE_LENGTH:
-                                res = res[:TRUNCATE_LENGTH] + ' [TRUNCATED]'
+                            if truncate_length:
+                                if res_type == 'text' and len(res) > truncate_length:
+                                    res = res[:truncate_length] + ' [TRUNCATED]'
 
                             append_conversation(Conversation(
                                 Role.OBSERVATION,
@@ -326,4 +335,3 @@ def main(top_p: float, temperature: float, prompt_text: str, repetition_penalty:
                     postprocess_text(output_text),
                 ), history, markdown_placeholder)
                 return
-

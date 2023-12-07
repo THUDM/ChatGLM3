@@ -70,7 +70,7 @@ class Conversation:
         text = postprocess_text(self.content)
         match self.role.value:
             case Role.TOOL.value:
-                text = f'Calling tool `{self.tool}`:\n{text}'
+                text = f'Calling tool `{self.tool}`:\n\n{text}'
             case Role.INTERPRETER.value:
                 text = f'{text}'
             case Role.OBSERVATION.value:

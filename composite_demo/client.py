@@ -55,10 +55,18 @@ class Client(Protocol):
         ...
 
 
-def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = None, role: str = "user",
-                past_key_values=None, max_length: int = 8192, do_sample=True, top_p=0.8, temperature=0.8,
-                repetition_penalty=1.0, length_penalty=1.0, num_beams=1,
-                logits_processor=None, return_past_key_values=False, **kwargs):
+def stream_chat(self, tokenizer, query: str,
+                history: list[tuple[str, str]] = None,
+                role: str = "user",
+                past_key_values=None,
+                max_new_tokens: int = 256,
+                do_sample=True, top_p=0.8,
+                temperature=0.8,
+                repetition_penalty=1.0,
+                length_penalty=1.0, num_beams=1,
+                logits_processor=None,
+                return_past_key_values=False,
+                **kwargs):
     from transformers.generation.logits_process import LogitsProcessor
     from transformers.generation.utils import LogitsProcessorList
 
@@ -76,7 +84,7 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
     logits_processor.append(InvalidScoreLogitsProcessor())
     eos_token_id = [tokenizer.eos_token_id, tokenizer.get_command("<|user|>"),
                     tokenizer.get_command("<|observation|>")]
-    gen_kwargs = {"max_length": max_length,
+    gen_kwargs = {"max_new_tokens": max_new_tokens,
                   "do_sample": do_sample,
                   "top_p": top_p,
                   "temperature": temperature,
@@ -102,12 +110,10 @@ def stream_chat(self, tokenizer, query: str, history: list[tuple[str, str]] = No
         inputs['attention_mask'] = attention_mask
     history.append({"role": role, "content": query})
     # print("input_shape>", inputs['input_ids'].shape)
-
     input_sequence_length = inputs['input_ids'].shape[1]
-
-    if max_length < input_sequence_length <= self.config.seq_length:
-        yield "Current input sequence length {} exceeds sequence length set in generation parameters {}. The maximum model sequence length is {}. You may adjust the generation parameter to enable longer chat history.".format(
-            input_sequence_length, max_length, self.config.seq_length
+    if input_sequence_length + max_new_tokens >= self.config.seq_length:
+        yield "Current input sequence length {} plus max_new_tokens {} is too long. The maximum model sequence length is {}. You may adjust the generation parameter to enable longer chat history.".format(
+            input_sequence_length, max_new_tokens, self.config.seq_length
         ), history
         return
 
