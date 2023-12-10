@@ -159,6 +159,11 @@ class HFClient(Client):
             self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
         self.model = self.model.to(DEVICE).eval() if 'cuda' in DEVICE else self.model.float().to(DEVICE).eval()
 
+            #使用下面三行替换上面两行，以支持多卡部署
+            #from utils import load_model_on_gpus
+            #model = load_model_on_gpus(MODEL_PATH, num_gpus=2)
+            #self.model = model.eval()
+
     def generate_stream(self,
                         system: str | None,
                         tools: list[dict] | None,
