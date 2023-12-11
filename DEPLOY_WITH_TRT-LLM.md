@@ -1,9 +1,9 @@
 # 使用NVIDIA TensorRT-LLM部署ChatGLM3
 
-[TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM/tree/main)是NVIDIA开发的高性能推理框架，您可以按照以下步骤来使用TRTLLM部署ChatGLM3模型。
+[TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM/tree/main)是NVIDIA开发的高性能推理框架，您可以按照以下步骤来使用TensorRT-LLM部署ChatGLM3模型。
 
-## 1. 安装TRT-LLM
-#### 获取trt-llm代码：
+## 1. 安装TensorRT-LLM
+#### 获取TensorRT-LLM代码：
 
 ```bash
 # TensorRT-LLM代码需要使用git-lfs拉取
@@ -16,7 +16,7 @@ git lfs install
 git lfs pull
 ```
 
-#### 构建docker镜像并安装TRT-LLM：
+#### 构建docker镜像并安装TensorRT-LLM：
 ```bash
 make -C docker release_build
 ```
@@ -26,7 +26,7 @@ make -C docker release_build
 make -C docker release_run
 ```
 
-## 3. 为ChatGLM3模型构建TRT-LLM推理引擎：
+## 3. 为ChatGLM3模型构建TensorRT-LLM推理引擎：
 
 #### 安装Python依赖
 ```bash
@@ -35,7 +35,7 @@ pip install -r requirements.txt
 apt-get update
 apt-get install git-lfs
 ```
-#### 从Huggingface下载chatglm3模型：
+#### 从Huggingface下载ChatGLM3模型：
 ```
 # 您可以选择具体想部署的模型下载
 git clone https://huggingface.co/THUDM/chatglm3-6b      chatglm3_6b
@@ -67,31 +67,31 @@ python3 build.py -m chatglm3_6b-32k --output_dir trt_engines/chatglm3_6b-32k/fp1
 
 #### 可配置的plugin参数
 
-* 使用 `--use_gpt_attention_plugin <DataType>` 来配置 GPT Attention plugin (默认使用float16)
-* 使用 `--use_gemm_plugin <DataType>` 来配置 GEMM plugin (默认使用float16)
-* 使用 `--use_rmsnorm_plugin <DataType>` 来配置 RMS normolization plugin (默认使用float16)
+* 使用 `--use_gpt_attention_plugin <DataType>` 来配置 GPT Attention plugin (默认使用float16)。
+* 使用 `--use_gemm_plugin <DataType>` 来配置 GEMM plugin (默认使用float16)。
+* 使用 `--use_rmsnorm_plugin <DataType>` 来配置 RMS normolization plugin (默认使用float16)。
 
-#### Fused MultiHead Attention (FMHA)
+#### Fused Multi-Head Attention (FMHA)
 
-* 使用 `--enable_context_fmha` 或 `--enable_context_fmha_fp32_acc` 参数来开启FMHA kernels, 可以获得更好的性能的同时降低显存开销.
+* 使用 `--enable_context_fmha` 或 `--enable_context_fmha_fp32_acc` 参数来开启FMHA kernels, 可以获得更好的性能的同时降低显存开销。
 
 * `--use_gpt_attention_plugin` 如果被设置为关闭的话将无法使用FMHA功能。
 
 * `--enable_context_fmha` 将会使用FP16 accumulator, 可能会略微降低精度. 您也可以选择使用`--enable_context_fmha_fp32_acc` 来保护精度，但这会略微降低FMHA的性能提升。
 
-#### Weight Only 量化
+#### Weight-Only 量化
 
 * 使用 `--use_weight_only` 来开启 Weight-Only 量化, 这样可以加速推理并减少显存开销。
 
-* 你还可以通过切换 `--weight_only_precision int8` 或者 `--weight_only_precision int4` 来选择具体是使用int8还是int4量化，默认为Int8.
+* 你还可以通过切换 `--weight_only_precision int8` 或者 `--weight_only_precision int4` 来选择具体是使用int8还是int4量化，默认为Int8。
 
-#### In-flight batching（仅限使用c++ runtime推理）
+#### In-flight Batching（须使用NVIDIA Triton进行推理）
 
 * 使用 `--use_inflight_batching` 来开启 In-flight Batching，启用后，Paged KV Cache也会自动启用。
 
 * Paged KV cache中block的数量可以用`--tokens_per_block` 来配置。
 
-### 3. 使用python runtime进行推理
+## 3. 使用TensorRT-LLM Python Runtime进行推理
 
 #### 单机单卡的推理示例：
 
@@ -114,15 +114,17 @@ mpirun -n 2
 
 * `--allow-run-as-root` might be needed if using `mpirun` as root.
 
-#### 运行summarize.py进行文章总结任务,并测试性能和精度
+#### 运行summarize.py进行文章总结任务
 
 ```bash
-# 
 python3 ../summarize.py --test_trt_llm \
                         --hf_model_dir chatglm3_6b \
                         --engine_dir trt_engines/chatglm3_6b/fp16/1-gpu
 ```
 
-## 性能测试
+#### 性能测试
 
-* 您可以在[这里](https://github.com/NVIDIA/TensorRT-LLM/tree/main/benchmarks/python)查阅到如何测试 TensorRT-LLM 上运行 ChatGLM3 的性能。
+您可以在[这里](https://github.com/NVIDIA/TensorRT-LLM/tree/main/benchmarks/python)查阅到如何测试 TensorRT-LLM 上运行 ChatGLM3 的性能。
+
+## 4. 使用NVIDIA Triton部署在线推理服务器
+使用 NVIDIA Triton 可以部署高性能，高拓展性，高稳定性的推理服务，并且可以开启In-flight Batching功能提升实际推理服务时的吞吐。详见[In-flight Batching Triton Backend](https://github.com/triton-inference-server/tensorrtllm_backend/tree/main/inflight_batcher_llm)。
