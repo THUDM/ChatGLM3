@@ -28,7 +28,7 @@ make -C docker release_run
 
 ## 3. 为ChatGLM3模型构建TensorRT-LLM推理引擎：
 
-#### 安装Python依赖
+#### 安装Python依赖：
 ```bash
 cd ./examples/chatglm
 pip install -r requirements.txt
@@ -43,7 +43,7 @@ git clone https://huggingface.co/THUDM/chatglm3-6b-base chatglm3_6b_base
 git clone https://huggingface.co/THUDM/chatglm3-6b-32k  chatglm3_6b_32k
 ```
 
-#### 使用build.py来构建推理引擎
+#### 使用build.py来构建推理引擎：
 以下是一些使用build.py构建推理引擎的示例：
 ```bash
 # 构建一个默认的精度为fp16的引擎
@@ -112,9 +112,9 @@ mpirun -n 2
                      --engine_dir trt_engines/chatglm3_6b/fp16/2-gpu
 ```
 
-* `--allow-run-as-root` might be needed if using `mpirun` as root.
+* 如果您以root权限运行 `mpirun`，则可能需要添加 `--allow-run-as-root` 参数。
 
-#### 运行summarize.py进行文章总结任务
+#### 运行summarize.py进行文章总结任务：
 
 ```bash
 python3 ../summarize.py --test_trt_llm \
@@ -122,7 +122,7 @@ python3 ../summarize.py --test_trt_llm \
                         --engine_dir trt_engines/chatglm3_6b/fp16/1-gpu
 ```
 
-#### 性能测试
+#### 性能测试：
 
 您可以在[这里](https://github.com/NVIDIA/TensorRT-LLM/tree/main/benchmarks/python)查阅到如何测试 TensorRT-LLM 上运行 ChatGLM3 的性能。
 
