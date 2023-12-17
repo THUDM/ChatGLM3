@@ -8,3 +8,4 @@ ToolAlpaca/
 AdvertiseGen/
 *.gz
 *.idea
+.DS_Store

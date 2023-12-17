@@ -221,12 +221,15 @@ def append_conversation(
     conversation.show(placeholder)
 
 
-def main(top_p: float,
-         temperature: float,
-         prompt_text: str,
-         repetition_penalty: float,
-         max_new_tokens: int,
-         truncate_length: int = 1024):
+def main(
+        prompt_text: str,
+        top_p: float = 0.2,
+        temperature: float = 0.1,
+        repetition_penalty: float = 1.1,
+        max_new_tokens: int = 1024,
+        truncate_length: int = 1024,
+        retry: bool = False
+):
     if 'ci_history' not in st.session_state:
         st.session_state.ci_history = []
 
@@ -234,6 +237,15 @@ def main(top_p: float,
 
     for conversation in history:
         conversation.show()
+
+    if retry:
+        last_user_conversation_idx = None
+        for idx, conversation in enumerate(history):
+            if conversation.role == Role.USER:
+                last_user_conversation_idx = idx
+        if last_user_conversation_idx is not None:
+            prompt_text = history[last_user_conversation_idx].content
+            del history[last_user_conversation_idx:]
 
     if prompt_text:
         prompt_text = prompt_text.strip()
@@ -245,10 +257,6 @@ def main(top_p: float,
             None,
             history,
         )
-        print("=== Input:")
-        print(input_text)
-        print("=== History:")
-        print(history)
 
         placeholder = st.container()
         message_placeholder = placeholder.chat_message(name="assistant", avatar="assistant")
@@ -269,9 +277,7 @@ def main(top_p: float,
             ):
                 token = response.token
                 if response.token.special:
-                    print("=== Output:")
-                    print(output_text)
-
+                    print("\n==Output:==\n", output_text)
                     match token.text.strip():
                         case '<|user|>':
                             append_conversation(Conversation(
@@ -335,3 +341,5 @@ def main(top_p: float,
                     postprocess_text(output_text),
                 ), history, markdown_placeholder)
                 return
+    else:
+        st.session_state.chat_history = []

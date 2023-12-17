@@ -40,6 +40,12 @@ with st.sidebar:
     max_new_token = st.slider(
         'Output length', 5, 32000, 256, step=1
     )
+
+    cols = st.columns(2)
+    export_btn = cols[0]
+    clear_history = cols[1].button("Clear History", use_container_width=True)
+    retry = export_btn.button("Retry", use_container_width=True)
+
     system_prompt = st.text_area(
         label="System Prompt (Only for chat mode)",
         height=300,
@@ -58,27 +64,37 @@ tab = st.radio(
     label_visibility='hidden',
 )
 
+if clear_history or retry:
+    prompt_text = ""
+
 match tab:
     case Mode.CHAT:
-        demo_chat.main(top_p=top_p,
-                       temperature=temperature,
-                       prompt_text=prompt_text,
-                       system_prompt=system_prompt,
-                       repetition_penalty=repetition_penalty,
-                       max_new_tokens=max_new_token)
+        demo_chat.main(
+            retry=retry,
+            top_p=top_p,
+            temperature=temperature,
+            prompt_text=prompt_text,
+            system_prompt=system_prompt,
+            repetition_penalty=repetition_penalty,
+            max_new_tokens=max_new_token
+        )
     case Mode.TOOL:
-        demo_tool.main(top_p=top_p,
-                       temperature=temperature,
-                       prompt_text=prompt_text,
-                       repetition_penalty=repetition_penalty,
-                       max_new_tokens=max_new_token,
-                       truncate_length=1024)
+        demo_tool.main(
+            retry=retry,
+            top_p=top_p,
+            temperature=temperature,
+            prompt_text=prompt_text,
+            repetition_penalty=repetition_penalty,
+            max_new_tokens=max_new_token,
+            truncate_length=1024)
     case Mode.CI:
-        demo_ci.main(top_p=top_p,
-                     temperature=temperature,
-                     prompt_text=prompt_text,
-                     repetition_penalty=repetition_penalty,
-                     max_new_tokens=max_new_token,
-                     truncate_length=1024)
+        demo_ci.main(
+            retry=retry,
+            top_p=top_p,
+            temperature=temperature,
+            prompt_text=prompt_text,
+            repetition_penalty=repetition_penalty,
+            max_new_tokens=max_new_token,
+            truncate_length=1024)
     case _:
         st.error(f'Unexpected tab: {tab}')

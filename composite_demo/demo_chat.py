@@ -17,12 +17,15 @@ def append_conversation(
     conversation.show(placeholder)
 
 
-def main(top_p: float,
-         temperature: float,
-         system_prompt: str,
-         prompt_text: str,
-         repetition_penalty: float,
-         max_new_tokens: int):
+def main(
+        prompt_text: str,
+        system_prompt: str,
+        top_p: float = 0.8,
+        temperature: float = 0.95,
+        repetition_penalty: float = 1.0,
+        max_new_tokens: int = 1024,
+        retry: bool = False
+):
     placeholder = st.empty()
     with placeholder.container():
         if 'chat_history' not in st.session_state:
@@ -33,6 +36,16 @@ def main(top_p: float,
         for conversation in history:
             conversation.show()
 
+    if retry:
+        last_user_conversation_idx = None
+        for idx, conversation in enumerate(history):
+            if conversation.role == Role.USER:
+                last_user_conversation_idx = idx
+        if last_user_conversation_idx is not None:
+            prompt_text = history[last_user_conversation_idx].content
+            del history[last_user_conversation_idx:]
+
+
     if prompt_text:
         prompt_text = prompt_text.strip()
         append_conversation(Conversation(Role.USER, prompt_text), history)
@@ -42,11 +55,6 @@ def main(top_p: float,
             tools=None,
             history=history,
         )
-        print("=== Input:")
-        print(input_text)
-        print("=== History:")
-        print(history)
-
         placeholder = st.empty()
         message_placeholder = placeholder.chat_message(name="assistant", avatar="assistant")
         markdown_placeholder = message_placeholder.empty()
@@ -65,9 +73,7 @@ def main(top_p: float,
         ):
             token = response.token
             if response.token.special:
-                print("=== Output:")
-                print(output_text)
-
+                print("\n==Output:==\n", output_text)
                 match token.text.strip():
                     case '<|user|>':
                         break
@@ -81,3 +87,5 @@ def main(top_p: float,
             Role.ASSISTANT,
             postprocess_text(output_text),
         ), history, markdown_placeholder)
+    else:
+        st.session_state.chat_history = []
