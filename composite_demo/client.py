@@ -79,6 +79,10 @@ def stream_chat(self, tokenizer, query: str,
 
     if history is None:
         history = []
+
+    print("\n== Input ==\n", query)
+    print("\n==History==\n", history)
+
     if logits_processor is None:
         logits_processor = LogitsProcessorList()
     logits_processor.append(InvalidScoreLogitsProcessor())
@@ -109,7 +113,6 @@ def stream_chat(self, tokenizer, query: str,
         attention_mask = torch.cat((attention_mask.new_ones(1, past_length), attention_mask), dim=1)
         inputs['attention_mask'] = attention_mask
     history.append({"role": role, "content": query})
-    # print("input_shape>", inputs['input_ids'].shape)
     input_sequence_length = inputs['input_ids'].shape[1]
     if input_sequence_length + max_new_tokens >= self.config.seq_length:
         yield "Current input sequence length {} plus max_new_tokens {} is too long. The maximum model sequence length is {}. You may adjust the generation parameter to enable longer chat history.".format(
@@ -181,9 +184,7 @@ class HFClient(Client):
 
         query = history[-1].content
         role = str(history[-1].role).removeprefix('<|').removesuffix('|>')
-
         text = ''
-
         for new_text, _ in stream_chat(self.model,
                                        self.tokenizer,
                                        query,
