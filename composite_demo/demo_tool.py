@@ -92,12 +92,20 @@ def main(
     if 'calling_tool' not in st.session_state:
         st.session_state.calling_tool = False
 
-    history: list[Conversation] = st.session_state.tool_history
+    if 'chat_history' not in st.session_state:
+        st.session_state.chat_history = []
 
+    if prompt_text == "" and retry == False:
+        print("\n== Clean ==\n")
+        st.session_state.chat_history = []
+        return
+
+    history: list[Conversation] = st.session_state.chat_history
     for conversation in history:
         conversation.show()
 
     if retry:
+        print("\n== Retry ==\n")
         last_user_conversation_idx = None
         for idx, conversation in enumerate(history):
             if conversation.role == Role.USER:
@@ -198,5 +206,3 @@ def main(
                     postprocess_text(output_text),
                 ), history, markdown_placeholder)
                 return
-    else:
-        st.session_state.chat_history = []
