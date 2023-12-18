@@ -31,12 +31,17 @@ def main(
         if 'chat_history' not in st.session_state:
             st.session_state.chat_history = []
 
-        history: list[Conversation] = st.session_state.chat_history
+    if prompt_text == "" and retry == False:
+        print("\n== Clean ==\n")
+        st.session_state.chat_history = []
+        return
 
-        for conversation in history:
-            conversation.show()
+    history: list[Conversation] = st.session_state.chat_history
+    for conversation in history:
+        conversation.show()
 
     if retry:
+        print("\n== Retry ==\n")
         last_user_conversation_idx = None
         for idx, conversation in enumerate(history):
             if conversation.role == Role.USER:
@@ -49,12 +54,6 @@ def main(
     if prompt_text:
         prompt_text = prompt_text.strip()
         append_conversation(Conversation(Role.USER, prompt_text), history)
-
-        input_text = preprocess_text(
-            system_prompt,
-            tools=None,
-            history=history,
-        )
         placeholder = st.empty()
         message_placeholder = placeholder.chat_message(name="assistant", avatar="assistant")
         markdown_placeholder = message_placeholder.empty()
@@ -87,5 +86,3 @@ def main(
             Role.ASSISTANT,
             postprocess_text(output_text),
         ), history, markdown_placeholder)
-    else:
-        st.session_state.chat_history = []
