@@ -1,45 +1,60 @@
+"""
+This script is a simple web demo based on Streamlit, showcasing the use of the ChatGLM3-6B model. For a more comprehensive web demo,
+it is recommended to use 'composite_demo'.
+
+Usage:
+- Run the script using Streamlit: `streamlit run web_demo_streamlit.py`
+- Adjust the model parameters from the sidebar.
+- Enter questions in the chat input box and interact with the ChatGLM3-6B model.
+
+Note: Ensure 'streamlit' and 'transformers' libraries are installed and the required model checkpoints are available.
+"""
+
 import os
 import streamlit as st
 import torch
 from transformers import AutoModel, AutoTokenizer
 
+from utils import load_model_on_gpus
+
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-# 设置页面标题、图标和布局
+
 st.set_page_config(
-    page_title="ChatGLM3-6B 演示",
+    page_title="ChatGLM3-6B Streamlit Simple Demo",
     page_icon=":robot:",
     layout="wide"
 )
 
+
 @st.cache_resource
 def get_model():
     tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
+
+    # if you use single GPU, you can use like this
     if 'cuda' in DEVICE:  # AMD, NVIDIA GPU can use Half Precision
         model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).to(DEVICE).eval()
     else:  # CPU, Intel GPU and other GPU can use Float16 Precision Only
         model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).float().to(DEVICE).eval()
-    # 多显卡支持,使用下面两行代替上面一行,将num_gpus改为你实际的显卡数量
-    # from utils import load_model_on_gpus
-    # model = load_model_on_gpus("THUDM/chatglm3-6b", num_gpus=2)
+    # if you use multi GPU, you can use like this
+    # model = load_model_on_gpus(MODEL_PATH, num_gpus=2)
+
     return tokenizer, model
+
 
 # 加载Chatglm3的model和tokenizer
 tokenizer, model = get_model()
 
-# 初始化历史记录和past key values
 if "history" not in st.session_state:
     st.session_state.history = []
 if "past_key_values" not in st.session_state:
     st.session_state.past_key_values = None
 
-# 设置max_length、top_p和temperature
 max_length = st.sidebar.slider("max_length", 0, 32768, 8192, step=1)
 top_p = st.sidebar.slider("top_p", 0.0, 1.0, 0.8, step=0.01)
 temperature = st.sidebar.slider("temperature", 0.0, 1.0, 0.6, step=0.01)
 
-# 清理会话历史
 buttonClean = st.sidebar.button("清理会话历史", key="clean")
 if buttonClean:
     st.session_state.history = []
@@ -48,7 +63,6 @@ if buttonClean:
         torch.cuda.empty_cache()
     st.rerun()
 
-# 渲染聊天历史记录
 for i, message in enumerate(st.session_state.history):
     if message["role"] == "user":
         with st.chat_message(name="user", avatar="user"):
@@ -57,33 +71,26 @@ for i, message in enumerate(st.session_state.history):
         with st.chat_message(name="assistant", avatar="assistant"):
             st.markdown(message["content"])
 
-# 输入框和输出框
 with st.chat_message(name="user", avatar="user"):
     input_placeholder = st.empty()
 with st.chat_message(name="assistant", avatar="assistant"):
     message_placeholder = st.empty()
 
-# 获取用户输入
 prompt_text = st.chat_input("请输入您的问题")
-
-# 如果用户输入了内容,则生成回复
 if prompt_text:
-
     input_placeholder.markdown(prompt_text)
     history = st.session_state.history
     past_key_values = st.session_state.past_key_values
     for response, history, past_key_values in model.stream_chat(
-        tokenizer,
-        prompt_text,
-        history,
-        past_key_values=past_key_values,
-        max_length=max_length,
-        top_p=top_p,
-        temperature=temperature,
-        return_past_key_values=True,
+            tokenizer,
+            prompt_text,
+            history,
+            past_key_values=past_key_values,
+            max_length=max_length,
+            top_p=top_p,
+            temperature=temperature,
+            return_past_key_values=True,
     ):
         message_placeholder.markdown(response)
-
-    # 更新历史记录和past key values
     st.session_state.history = history
     st.session_state.past_key_values = past_key_values

@@ -1,15 +1,19 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
 import os
-from typing import Any, Protocol
-
-from huggingface_hub.inference._text_generation import TextGenerationStreamResponse, Token
 import streamlit as st
 import torch
+
+from collections.abc import Iterable
+from typing import Any, Protocol
+from huggingface_hub.inference._text_generation import TextGenerationStreamResponse, Token
 from transformers import AutoModel, AutoTokenizer, AutoConfig
+from transformers.generation.logits_process import LogitsProcessor
+from transformers.generation.utils import LogitsProcessorList
 
 from conversation import Conversation
+
+from basic_demo.utils import load_model_on_gpus
 
 TOOL_PROMPT = 'Answer the following questions as best as you can. You have access to the following tools:'
 
@@ -55,21 +59,20 @@ class Client(Protocol):
         ...
 
 
-def stream_chat(self, tokenizer, query: str,
-                history: list[tuple[str, str]] = None,
-                role: str = "user",
-                past_key_values=None,
-                max_new_tokens: int = 256,
-                do_sample=True, top_p=0.8,
-                temperature=0.8,
-                repetition_penalty=1.0,
-                length_penalty=1.0, num_beams=1,
-                logits_processor=None,
-                return_past_key_values=False,
-                **kwargs):
-    from transformers.generation.logits_process import LogitsProcessor
-    from transformers.generation.utils import LogitsProcessorList
-
+def stream_chat(
+        self, tokenizer, query: str,
+        history: list[tuple[str, str]] = None,
+        role: str = "user",
+        past_key_values=None,
+        max_new_tokens: int = 256,
+        do_sample=True, top_p=0.8,
+        temperature=0.8,
+        repetition_penalty=1.0,
+        length_penalty=1.0, num_beams=1,
+        logits_processor=None,
+        return_past_key_values=False,
+        **kwargs
+):
     class InvalidScoreLogitsProcessor(LogitsProcessor):
         def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
             if torch.isnan(scores).any() or torch.isinf(scores).any():
@@ -157,17 +160,25 @@ class HFClient(Client):
             print("Loaded from pt checkpoints", new_prefix_state_dict.keys())
             self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
         else:
+
             # If you need 4bit quantization, run:
             # self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True).quantize(4).cuda()
+
+            # if you use single GPU, you can use like this
             self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
+
+            # if you use multi GPU, you can use like this
+            # self.model = load_model_on_gpus(MODEL_PATH, num_gpus=2)
+
         self.model = self.model.to(DEVICE).eval() if 'cuda' in DEVICE else self.model.float().to(DEVICE).eval()
 
-    def generate_stream(self,
-                        system: str | None,
-                        tools: list[dict] | None,
-                        history: list[Conversation],
-                        **parameters: Any
-                        ) -> Iterable[TextGenerationStreamResponse]:
+    def generate_stream(
+            self,
+            system: str | None,
+            tools: list[dict] | None,
+            history: list[Conversation],
+            **parameters: Any
+    ) -> Iterable[TextGenerationStreamResponse]:
         chat_history = [{
             'role': 'system',
             'content': system if not tools else TOOL_PROMPT,
@@ -185,13 +196,14 @@ class HFClient(Client):
         query = history[-1].content
         role = str(history[-1].role).removeprefix('<|').removesuffix('|>')
         text = ''
-        for new_text, _ in stream_chat(self.model,
-                                       self.tokenizer,
-                                       query,
-                                       chat_history,
-                                       role,
-                                       **parameters,
-                                       ):
+        for new_text, _ in stream_chat(
+                self.model,
+                self.tokenizer,
+                query,
+                chat_history,
+                role,
+                **parameters,
+        ):
             word = new_text.removeprefix(text)
             word_stripped = word.strip()
             text = new_text

@@ -1,3 +1,32 @@
+"""
+This utils script is designed to efficiently distribute the layers of a transformer-based language model across multiple GPUs.
+It primarily addresses the challenge of ensuring that all components of the model are correctly allocated to the available GPUs,
+which is essential for efficient parallel processing and preventing runtime errors, particularly in different operating systems.
+
+The script contains two main functions:
+
+1. auto_configure_device_map(num_gpus: int) -> Dict[str, int]:
+   - This function automatically configures a device map for the language model layers, given the number of GPUs available.
+   The model is assumed to have 30 layers in total, including word embeddings, final layer normalization, and 28 transformer layers.
+   - The function calculates how to distribute these 30 layers across the specified number of GPUs. It ensures that certain layers
+   (word embeddings, final layer normalization, and the output layer) are always placed on the first GPU to
+   avoid runtime errors that can occur due to mismatched device allocations in different operating systems.
+
+2. load_model_on_gpus(checkpoint_path: Union[str, os.PathLike], num_gpus: int = 2, device_map: Optional[Dict[str, int]] = None, **kwargs) -> Module:
+   - This function loads a transformer model from a specified checkpoint path onto the available GPUs.
+   - If a custom device map is not provided, it uses the auto_configure_device_map function to create one.
+   - The model is loaded in half precision (model.half()) for memory efficiency and dispatched across the GPUs as per the device map.
+
+The script is adapted from the original source at https://github.com/THUDM/ChatGLM-6B, with modifications to support the
+ChatGLM3 model and ensure compatibility across different operating systems, particularly addressing the device allocation issue in Linux.
+
+Note: This script requires the 'transformers' and 'accelerate' libraries from Hugging Face for model loading and GPU dispatching.
+
+Usage Example:
+# Load a model onto 4 GPUs
+model = load_model_on_gpus('path_to_checkpoint', num_gpus=4)
+"""
+
 import os
 from typing import Dict, Union, Optional
 from torch.nn import Module
@@ -5,21 +34,8 @@ from transformers import AutoModel
 
 
 def auto_configure_device_map(num_gpus: int) -> Dict[str, int]:
-    # transformer.word_embeddings 占用1层
-    # transformer.final_layernorm 和 lm_head 占用1层
-    # transformer.layers 占用 28 层
-    # 总共30层分配到num_gpus张卡上
     num_trans_layers = 28
     per_gpu_layers = 30 / num_gpus
-
-    # bugfix: 在linux中调用torch.embedding传入的weight,input不在同一device上,导致RuntimeError
-    # windows下 model.device 会被设置成 transformer.word_embeddings.device
-    # linux下 model.device 会被设置成 lm_head.device
-    # 在调用chat或者stream_chat时,input_ids会被放到model.device上
-    # 如果transformer.word_embeddings.device和model.device不同,则会导致RuntimeError
-    # 因此这里将transformer.word_embeddings,transformer.final_layernorm,lm_head都放到第一张卡上
-    # 本文件来源于https://github.com/THUDM/ChatGLM-6B/blob/main/utils.py
-    # 仅此处做少许修改以支持ChatGLM3
     device_map = {
         'transformer.embedding.word_embeddings': 0,
         'transformer.encoder.final_layernorm': 0,
@@ -39,7 +55,6 @@ def auto_configure_device_map(num_gpus: int) -> Dict[str, int]:
         used += 1
 
     return device_map
-
 
 def load_model_on_gpus(checkpoint_path: Union[str, os.PathLike], num_gpus: int = 2,
                        device_map: Optional[Dict[str, int]] = None, **kwargs) -> Module:

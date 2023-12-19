@@ -135,14 +135,14 @@ Please note that different fine-tuning scripts correspond to different models. P
 ![web-demo](resources/web-demo.gif)
 You can launch a web-based demo using Gradio with the following command:
 ```shell
-python web_demo.py
+python web_demo_gradio.py
 ```
 
 ![web-demo](resources/web-demo2.png)
 
 You can launch a web-based demo using Streamlit with the following command:
 ```shell
-streamlit run web_demo2.py
+streamlit run web_demo_streamlit.py
 ```
 
 The web-based demo will run a Web Server and output an address. You can use it by opening the output address in a browser. Based on tests, the web-based demo using Streamlit runs more smoothly.
