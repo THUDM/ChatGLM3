@@ -1,13 +1,14 @@
-from enum import Enum
 import streamlit as st
-import demo_chat, demo_ci, demo_tool
-
 st.set_page_config(
     page_title="ChatGLM3 Demo",
     page_icon=":robot:",
     layout='centered',
     initial_sidebar_state='expanded',
 )
+
+
+import demo_chat, demo_ci, demo_tool
+from enum import Enum
 
 DEFAULT_SYSTEM_PROMPT = '''
 You are ChatGLM3, a large language model trained by Zhipu.AI. Follow the user's instructions carefully. Respond using markdown.
