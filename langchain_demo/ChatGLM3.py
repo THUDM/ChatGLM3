@@ -33,8 +33,7 @@ class ChatGLM3(LLM):
             trust_remote_code=True
         )
         self.model = AutoModel.from_pretrained(
-            model_name_or_path, config=model_config, trust_remote_code=True
-        ).half().cuda()
+            model_name_or_path, config=model_config, trust_remote_code=True, device_map="auto").eval()
 
     def _tool_history(self, prompt: str):
         ans = []
@@ -99,17 +98,11 @@ Action:
 ```"""
 
     def _call(self, prompt: str, history: List = [], stop: Optional[List[str]] = ["<|user|>"]):
-        print("======")
-        print(prompt)
-        print("======")
         if not self.has_search:
             self.history, query = self._tool_history(prompt)
         else:
             self._extract_observation(prompt)
             query = ""
-        # print("======")
-        # print(history)
-        # print("======")
         _, self.history = self.model.chat(
             self.tokenizer,
             query,

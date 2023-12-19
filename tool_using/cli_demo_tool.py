@@ -1,17 +1,17 @@
+"""
+This demo script is designed for interacting with the ChatGLM3-6B in Function, to show Function Call capabilities.
+"""
+
 import os
 import platform
-from transformers import AutoTokenizer, AutoModel
 import torch
+from transformers import AutoTokenizer, AutoModel
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
-if 'cuda' in DEVICE: # AMD, NVIDIA GPU can use Half Precision
-    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).to(DEVICE).eval()
-else: # CPU, Intel GPU and other GPU can use Float16 Precision Only
-    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).float().to(DEVICE).eval()
+model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
 
 os_name = platform.system()
 clear_command = 'cls' if os_name == 'Windows' else 'clear'
@@ -26,10 +26,28 @@ def build_prompt(history):
     return prompt
 
 
-tools = [{'name': 'track', 'description': '追踪指定股票的实时价格', 'parameters': {'type': 'object', 'properties': {'symbol': {'description': '需要追踪的股票代码'}}, 'required': []}}, {'name': '/text-to-speech', 'description': '将文本转换为语音', 'parameters': {'type': 'object', 'properties': {'text': {'description': '需要转换成语音的文本'}, 'voice': {'description': '要使用的语音类型（男声、女声等）'}, 'speed': {'description': '语音的速度（快、中等、慢等）'}}, 'required': []}}, {'name': '/image_resizer', 'description': '调整图片的大小和尺寸', 'parameters': {'type': 'object', 'properties': {'image_file': {'description': '需要调整大小的图片文件'}, 'width': {'description': '需要调整的宽度值'}, 'height': {'description': '需要调整的高度值'}}, 'required': []}}, {'name': '/foodimg', 'description': '通过给定的食品名称生成该食品的图片', 'parameters': {'type': 'object', 'properties': {'food_name': {'description': '需要生成图片的食品名称'}}, 'required': []}}]
+tools = [{'name': 'track', 'description': '追踪指定股票的实时价格',
+          'parameters': {'type': 'object', 'properties': {'symbol': {'description': '需要追踪的股票代码'}},
+                         'required': []}}, {'name': '/text-to-speech', 'description': '将文本转换为语音',
+                                            'parameters': {'type': 'object', 'properties': {
+                                                'text': {'description': '需要转换成语音的文本'},
+                                                'voice': {'description': '要使用的语音类型（男声、女声等）'},
+                                                'speed': {'description': '语音的速度（快、中等、慢等）'}}, 'required': []}},
+         {'name': '/image_resizer', 'description': '调整图片的大小和尺寸', 'parameters': {'type': 'object',
+                                                                                          'properties': {'image_file': {
+                                                                                              'description': '需要调整大小的图片文件'},
+                                                                                                         'width': {
+                                                                                                             'description': '需要调整的宽度值'},
+                                                                                                         'height': {
+                                                                                                             'description': '需要调整的高度值'}},
+                                                                                          'required': []}},
+         {'name': '/foodimg', 'description': '通过给定的食品名称生成该食品的图片',
+          'parameters': {'type': 'object', 'properties': {'food_name': {'description': '需要生成图片的食品名称'}},
+                         'required': []}}]
 system_item = {"role": "system",
                "content": "Answer the following questions as best as you can. You have access to the following tools:",
                "tools": tools}
+
 
 def main():
     past_key_values, history = None, [system_item]
@@ -41,7 +59,7 @@ def main():
         if query.strip() == "stop":
             break
         if query.strip() == "clear":
-            past_key_values, history = None,  [system_item]
+            past_key_values, history = None, [system_item]
             role = "user"
             os.system(clear_command)
             print("欢迎使用 ChatGLM3-6B 模型，输入内容即可进行对话，clear 清空对话历史，stop 终止程序")

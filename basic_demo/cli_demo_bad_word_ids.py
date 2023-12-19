@@ -1,20 +1,26 @@
 """
-This script demonstrates how to use the `bad_words_ids` argument to filter out.
+This script demonstrates how to use the `bad_words_ids` argument in the context of a conversational AI model to filter out unwanted words or phrases from the model's responses. It's designed to showcase a fundamental method of content moderation within AI-generated text, particularly useful in scenarios where maintaining the decorum of the conversation is essential.
+
+Usage:
+
+- Interact with the model by typing queries. The model will generate responses while avoiding the specified bad words.
+- Use 'clear' to clear the conversation history and 'stop' to exit the program.
+
+Requirements:
+- The script requires the Transformers library and an appropriate model checkpoint.
+
+Note: The `bad_words_ids` feature is an essential tool for controlling the output of language models, particularly in user-facing applications where content moderation is crucial.
 """
 import os
 import platform
+
 from transformers import AutoTokenizer, AutoModel
-import torch
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
-if 'cuda' in DEVICE: # AMD, NVIDIA GPU can use Half Precision
-    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).to(DEVICE).eval()
-else: # CPU, Intel GPU and other GPU can use Float16 Precision Only
-    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).float().to(DEVICE).eval()
+model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
 
 os_name = platform.system()
 clear_command = 'cls' if os_name == 'Windows' else 'clear'
@@ -22,11 +28,9 @@ stop_stream = False
 
 welcome_prompt = "欢迎使用 ChatGLM3-6B 模型，输入内容即可进行对话，clear 清空对话历史，stop 终止程序"
 
-# 定义不希望出现的词汇, 你可以自定义, 在这个例子中，如果模型回答包含 "你好" 或 "ChatGLM"，则会出现这个报错
 # probability tensor contains either `inf`, `nan` or element < 0
 
 bad_words = ["你好", "ChatGLM"]
-# 将这些词汇转换为token ID列表，每个短语是一个子列表
 bad_word_ids = [tokenizer.encode(bad_word, add_special_tokens=False) for bad_word in bad_words]
 
 
@@ -66,7 +70,7 @@ def main():
                 response_generated = True
                 # Check if the response contains any bad words
                 if any(bad_word in response for bad_word in bad_words):
-                    print("我的回答涉嫌了bad word")
+                    print("我的回答涉嫌了 bad word")
                     break  # Break the loop if a bad word is detected
 
                 # Otherwise, print the generated response

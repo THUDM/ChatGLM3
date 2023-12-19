@@ -135,14 +135,14 @@ Please note that different fine-tuning scripts correspond to different models. P
 ![web-demo](resources/web-demo.gif)
 You can launch a web-based demo using Gradio with the following command:
 ```shell
-python web_demo.py
+python web_demo_gradio.py
 ```
 
 ![web-demo](resources/web-demo2.png)
 
 You can launch a web-based demo using Streamlit with the following command:
 ```shell
-streamlit run web_demo2.py
+streamlit run web_demo_streamlit.py
 ```
 
 The web-based demo will run a Web Server and output an address. You can use it by opening the output address in a browser. Based on tests, the web-based demo using Streamlit runs more smoothly.
@@ -217,16 +217,7 @@ Loading the half-precision ChatGLM3-6B model requires about 13GB of memory. Mach
 
 ### Multi-GPU Deployment
 
-If you have multiple GPUs, but each GPU's VRAM size is not enough to accommodate the complete model, then the model can be split across multiple GPUs. First, install accelerate: `pip install accelerate`, and then load the model through the following methods:
-
-```python
-from utils import load_model_on_gpus
-
-model = load_model_on_gpus("THUDM/chatglm3-6b", num_gpus=2)
-```
-
-This allows the model to be deployed on two GPUs for inference. You can change `num_gpus` to the number of GPUs you want to use. It is evenly split by default, but you can also pass the `device_map` parameter to specify it yourself.
-
+If you have multiple GPUs, but each GPU's VRAM size is not enough to accommodate the complete model, then the model can be split across multiple GPUs. First, install accelerate: `pip install accelerate`, and then load the model as usual.
 ## Citation
 
 If you find our work helpful, please consider citing the following papers.

@@ -1,25 +1,27 @@
+"""
+This script creates an interactive web demo for the ChatGLM3-6B model using Gradio, a Python library for building quick and easy UI components for machine learning models. It's designed to showcase the capabilities of the ChatGLM3-6B model in a user-friendly interface, allowing users to interact with the model through a chat-like interface.
+
+Usage:
+- Run the script to start the Gradio web server.
+- Interact with the model by typing questions and receiving responses.
+
+Requirements:
+- Gradio (required with 3.39 version, not support for 4.x), Transformers, and other necessary Python libraries should be installed.
+- The model checkpoint should be accessible at the specified paths.
+
+Note: The script includes a modification to the Chatbot's postprocess method to handle markdown to HTML conversion, ensuring that the chat interface displays formatted text correctly.
+"""
+
 import os
+import mdtex2html
 from transformers import AutoModel, AutoTokenizer
 import gradio as gr
-import mdtex2html
-from utils import load_model_on_gpus
-import torch
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
-if 'cuda' in DEVICE: # AMD, NVIDIA GPU can use Half Precision
-    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).to(DEVICE).eval()
-else: # CPU, Intel GPU and other GPU can use Float16 Precision Only
-    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).float().to(DEVICE).eval()
-
-# 多显卡支持，使用下面两行代替上面一行，将num_gpus改为你实际的显卡数量
-# from utils import load_model_on_gpus
-# model = load_model_on_gpus("THUDM/chatglm3-6b", num_gpus=2)
-
-"""Override Chatbot.postprocess"""
+model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
 
 def postprocess(self, y):
     if y is None:
