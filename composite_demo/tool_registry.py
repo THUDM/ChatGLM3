@@ -1,3 +1,9 @@
+"""
+This code is the tool registration part. By registering the tool, the model can call the tool.
+This code provides extended functionality to the model, enabling it to call and interact with a variety of utilities
+through defined interfaces.
+"""
+
 import copy
 import inspect
 from pprint import pformat

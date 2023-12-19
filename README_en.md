@@ -217,16 +217,7 @@ Loading the half-precision ChatGLM3-6B model requires about 13GB of memory. Mach
 
 ### Multi-GPU Deployment
 
-If you have multiple GPUs, but each GPU's VRAM size is not enough to accommodate the complete model, then the model can be split across multiple GPUs. First, install accelerate: `pip install accelerate`, and then load the model through the following methods:
-
-```python
-from utils import load_model_on_gpus
-
-model = load_model_on_gpus("THUDM/chatglm3-6b", num_gpus=2)
-```
-
-This allows the model to be deployed on two GPUs for inference. You can change `num_gpus` to the number of GPUs you want to use. It is evenly split by default, but you can also pass the `device_map` parameter to specify it yourself.
-
+If you have multiple GPUs, but each GPU's VRAM size is not enough to accommodate the complete model, then the model can be split across multiple GPUs. First, install accelerate: `pip install accelerate`, and then load the model as usual.
 ## Citation
 
 If you find our work helpful, please consider citing the following papers.

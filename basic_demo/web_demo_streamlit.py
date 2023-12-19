@@ -15,11 +15,8 @@ import streamlit as st
 import torch
 from transformers import AutoModel, AutoTokenizer
 
-from utils import load_model_on_gpus
-
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 st.set_page_config(
     page_title="ChatGLM3-6B Streamlit Simple Demo",
@@ -30,16 +27,9 @@ st.set_page_config(
 
 @st.cache_resource
 def get_model():
+
     tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
-
-    # if you use single GPU, you can use like this
-    if 'cuda' in DEVICE:  # AMD, NVIDIA GPU can use Half Precision
-        model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).to(DEVICE).eval()
-    else:  # CPU, Intel GPU and other GPU can use Float16 Precision Only
-        model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).float().to(DEVICE).eval()
-    # if you use multi GPU, you can use like this
-    # model = load_model_on_gpus(MODEL_PATH, num_gpus=2)
-
+    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
     return tokenizer, model
 
 

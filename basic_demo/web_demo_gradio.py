@@ -13,33 +13,15 @@ Note: The script includes a modification to the Chatbot's postprocess method to 
 """
 
 import os
-import torch
-
 import mdtex2html
 from transformers import AutoModel, AutoTokenizer
 import gradio as gr
 
-from utils import load_model_on_gpus
-
-# set path
-
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-# if you use single GPU, you can use like this
 
 tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
-if 'cuda' in DEVICE:  # AMD, NVIDIA GPU can use Half Precision
-    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).to(DEVICE).eval()
-else:  # CPU, Intel GPU and other GPU can use Float16 Precision Only
-    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).float().to(DEVICE).eval()
-
-# if you use multi GPU, you can use like this
-
-# model = load_model_on_gpus(MODEL_PATH, num_gpus=2)
-
-"""Override Chatbot.postprocess"""
+model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
 
 def postprocess(self, y):
     if y is None:

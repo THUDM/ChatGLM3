@@ -13,29 +13,14 @@ Note: The `bad_words_ids` feature is an essential tool for controlling the outpu
 """
 import os
 import platform
-import torch
 
 from transformers import AutoTokenizer, AutoModel
 
-from utils import load_model_on_gpus
-
-# set path
-
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-# if you use single GPU, you can use like this
 
 tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
-if 'cuda' in DEVICE:  # AMD, NVIDIA GPU can use Half Precision
-    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).to(DEVICE).eval()
-else:  # CPU, Intel GPU and other GPU can use Float16 Precision Only
-    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).float().to(DEVICE).eval()
-
-# if you use multi GPU, you can use like this
-
-# model = load_model_on_gpus(MODEL_PATH, num_gpus=2)
+model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
 
 os_name = platform.system()
 clear_command = 'cls' if os_name == 'Windows' else 'clear'

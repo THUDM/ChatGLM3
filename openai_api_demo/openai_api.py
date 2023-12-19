@@ -1,14 +1,28 @@
-# coding=utf-8
-# Implements API for ChatGLM3-6B in OpenAI's format. (https://platform.openai.com/docs/api-reference/chat)
-# Usage: python openai_api.py
-# Visit http://localhost:8000/docs for documents.
+"""
+This script implements an API for the ChatGLM3-6B model,
+formatted similarly to OpenAI's API (https://platform.openai.com/docs/api-reference/chat).
+It's designed to be run as a web server using FastAPI and uvicorn, making the ChatGLM3-6B model accessible through HTTP requests.
 
-# 在OpenAI的API中，max_tokens 等价于 HuggingFace 的 max_new_tokens 而不是 max_length，
-# 例如，对于6b模型，设置max_tokens = 8192，则会报错，因为扣除历史记录和提示词后，模型不能输出那么多的tokens。
+Key Components and Features:
+- Model and Tokenizer Setup: Configures the model and tokenizer paths and loads them, utilizing GPU acceleration if available.
+- FastAPI Configuration: Sets up a FastAPI application with CORS middleware for handling cross-origin requests.
+- API Endpoints:
+  - "/v1/models": Lists the available models, specifically ChatGLM3-6B.
+  - "/v1/chat/completions": Processes chat completion requests with options for streaming and regular responses.
+- Token Limit Caution: In the OpenAI API, 'max_tokens' is equivalent to HuggingFace's 'max_new_tokens', not 'max_length'.
+For instance, setting 'max_tokens' to 8192 for a 6b model would result in an error due to the model's inability to output
+that many tokens after accounting for the history and prompt tokens.
+- Stream Handling and Custom Functions: Manages streaming responses and custom function calls within chat responses.
+- Pydantic Models: Defines structured models for requests and responses, enhancing API documentation and type safety.
+- Main Execution: Initializes the model and tokenizer, and starts the FastAPI app on the designated host and port.
+
+Note: This script doesn't include the setup for special tokens or multi-GPU support by default.
+Users need to configure their special tokens and can enable multi-GPU support as per the provided instructions.
+
+"""
 
 import os
 import time
-import json
 from contextlib import asynccontextmanager
 from typing import List, Literal, Optional, Union
 
@@ -24,7 +38,6 @@ from utils import process_response, generate_chatglm3, generate_stream_chatglm3
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 @asynccontextmanager
@@ -164,7 +177,6 @@ async def create_chat_completion(request: ChatCompletionRequest):
         # CallFunction
         if isinstance(function_call, dict):
             function_call = FunctionCallResponse(**function_call)
-
 
             """
             In this demo, we did not register any tools.
@@ -400,15 +412,7 @@ def contains_custom_function(value: str) -> bool:
 
 
 if __name__ == "__main__":
-
     tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
-    if 'cuda' in DEVICE:  # AMD, NVIDIA GPU can use Half Precision
-        model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).to(DEVICE).eval()
+    model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
 
-        # Multi-GPU support, use the following two lines instead of the above line, num gpus to your actual number of graphics cards
-        # from utils import load_model_on_gpus
-        # model = load_model_on_gpus(MODEL_PATH, num_gpus=2)
-
-    else:  # CPU, Intel GPU and other GPU can use Float16 Precision Only
-        model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True).float().to(DEVICE).eval()
     uvicorn.run(app, host='0.0.0.0', port=8000, workers=1)

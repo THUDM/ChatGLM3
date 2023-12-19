@@ -13,39 +13,16 @@ from transformers.generation.utils import LogitsProcessorList
 
 from conversation import Conversation
 
-from basic_demo.utils import load_model_on_gpus
-
 TOOL_PROMPT = 'Answer the following questions as best as you can. You have access to the following tools:'
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 PT_PATH = os.environ.get('PT_PATH', None)
-PRE_SEQ_LEN = int(os.environ.get("PRE_SEQ_LEN", 128))  # mark sure your have pt_path with finetune model
-
+PRE_SEQ_LEN = int(os.environ.get("PRE_SEQ_LEN", 128))
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-
-# for Mac Computer like M1
-# You Need Use Pytorch compiled with Metal
-# DEVICE = 'mps'
-
-# for AMD gpu likes MI100 (Not Official Steady Support yet)
-# You Need Use Pytorch compiled with ROCm
-# DEVICE = 'cuda'
-
-# for Intel gpu likes A770 (Not Official Steady Support yet)
-# You Need Use Pytorch compiled with oneDNN and install intel-extension-for-pytorch
-# import intel_extension_for_pytorch as ipex
-# DEVICE = 'xpu'
-
-# for Moore Threads gpu like MTT S80 (Not Official Steady Support yet)
-# You Need Use Pytorch compiled with Musa
-# DEVICE = 'musa'
-
 
 @st.cache_resource
 def get_client() -> Client:
-    client = HFClient(MODEL_PATH, TOKENIZER_PATH, PT_PATH, DEVICE)
+    client = HFClient(MODEL_PATH, TOKENIZER_PATH, PT_PATH)
     return client
 
 
@@ -145,7 +122,7 @@ def stream_chat(
 
 
 class HFClient(Client):
-    def __init__(self, model_path: str, tokenizer_path: str, pt_checkpoint: str = None, DEVICE='cpu'):
+    def __init__(self, model_path: str, tokenizer_path: str, pt_checkpoint: str = None):
         self.model_path = model_path
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, trust_remote_code=True)
 
@@ -160,17 +137,8 @@ class HFClient(Client):
             print("Loaded from pt checkpoints", new_prefix_state_dict.keys())
             self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
         else:
-
-            # If you need 4bit quantization, run:
-            # self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True).quantize(4).cuda()
-
-            # if you use single GPU, you can use like this
-            self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
-
-            # if you use multi GPU, you can use like this
-            # self.model = load_model_on_gpus(MODEL_PATH, num_gpus=2)
-
-        self.model = self.model.to(DEVICE).eval() if 'cuda' in DEVICE else self.model.float().to(DEVICE).eval()
+            self.model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
+            # plus .quantized() if you want to use quantized model
 
     def generate_stream(
             self,
