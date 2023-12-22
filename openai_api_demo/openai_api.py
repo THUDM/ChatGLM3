@@ -32,9 +32,13 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from pydantic import BaseModel, Field
-from sse_starlette.sse import EventSourceResponse
 from transformers import AutoTokenizer, AutoModel
 from utils import process_response, generate_chatglm3, generate_stream_chatglm3
+
+from sse_starlette.sse import EventSourceResponse
+
+# Set up limit request time
+EventSourceResponse.DEFAULT_PING_INTERVAL = 1000
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
