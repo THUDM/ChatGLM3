@@ -128,7 +128,7 @@ class HFClient(Client):
 
         if pt_checkpoint is not None and os.path.exists(pt_checkpoint):
             config = AutoConfig.from_pretrained(model_path, trust_remote_code=True, pre_seq_len=PRE_SEQ_LEN)
-            self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True, config=config)
+            self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True, config=config, device_map="auto")
             prefix_state_dict = torch.load(os.path.join(pt_checkpoint, "pytorch_model.bin"))
             new_prefix_state_dict = {}
             for k, v in prefix_state_dict.items():
