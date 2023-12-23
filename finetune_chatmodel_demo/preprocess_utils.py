@@ -7,21 +7,23 @@ from copy import deepcopy
 from typing import Dict, List
 
 # text constants
-FUNCTION_CALL_NAME     = 'tool_call'
-FUNCTION_CALL_PREFIX   = '```python\n'
-FUNCTION_CALL_POSTFIX  = '\n```'
+FUNCTION_CALL_NAME = 'tool_call'
+FUNCTION_CALL_PREFIX = '```python\n'
+FUNCTION_CALL_POSTFIX = '\n```'
 TOOL_DEFINITION_PREFIX = 'Answer the following questions as best as you can. You have access to the following tools:\n'
-CONVERSATOIN_KEY       = 'conversations'
-TOOL_DESC_KEY          = 'tools'
+CONVERSATOIN_KEY = 'conversations'
+TOOL_DESC_KEY = 'tools'
+
 
 def format_function_call(function_name: str, parameters: Dict[str, str]):
     function_name = ast.Name(id=function_name)
     keywords = [
-        ast.keyword(arg=arg_name, value=ast.Constant(arg_value)) 
+        ast.keyword(arg=arg_name, value=ast.Constant(arg_value))
         for arg_name, arg_value in parameters.items()
     ]
     func_call = ast.Call(func=function_name, args=[], keywords=keywords)
     return astunparse.unparse(func_call).strip()
+
 
 def format_conversation(item, tokenizer, conversation_key: str, tool_key: str):
     conversations = deepcopy(item[conversation_key])
@@ -36,20 +38,22 @@ def format_conversation(item, tokenizer, conversation_key: str, tool_key: str):
 
     # insert system prompt for tools
     if tool_key in item:
-        conversations.insert(0, 
-            {
-                "role": "system", 
-                "content": TOOL_DEFINITION_PREFIX + json.dumps(item[tool_key], indent=4, ensure_ascii=False)
-            }
-        )
-    
+        conversations.insert(0,
+                             {
+                                 "role": "system",
+                                 "content": TOOL_DEFINITION_PREFIX + json.dumps(item[tool_key], indent=4,
+                                                                                ensure_ascii=False)
+                             }
+                             )
+
     for idx, conv in enumerate(conversations):
         loss = conv.get("loss", True)
         if conv['role'] in {'system', 'user'}:
             loss = False
         if conv['role'] == 'tool':
             # function call python code
-            value = FUNCTION_CALL_PREFIX + format_function_call(FUNCTION_CALL_NAME, conv["parameters"]) + FUNCTION_CALL_POSTFIX
+            value = FUNCTION_CALL_PREFIX + format_function_call(FUNCTION_CALL_NAME,
+                                                                conv["parameters"]) + FUNCTION_CALL_POSTFIX
             text = tokenizer.build_single_message("assistant", conv["name"], value)
             _update(text, loss)
 
@@ -68,16 +72,19 @@ def format_conversation(item, tokenizer, conversation_key: str, tool_key: str):
     assert len(tokens) == len(loss_masks), f"length mismatch: {len(tokens)} vs {len(loss_masks)}"
     return tokens, loss_masks
 
+
 def sanity_check(tokens: List[int], target: List[int], tokenizer: PreTrainedTokenizer):
     print("Sanity Check >>>>>>>>>>>>>")
     for t, m in zip(tokens, target):
-        decoded =  tokenizer.tokenizer.index_special_tokens[t] \
+        decoded = tokenizer.tokenizer.index_special_tokens[t] \
             if t in tokenizer.tokenizer.index_special_tokens \
             else tokenizer.decode([t])
-        print("%20s: %6d -> %6d" % (repr(decoded), t, m))
+        if t != 0:
+            print("%20s: %6d -> %6d" % (repr(decoded), t, m))
     print("<<<<<<<<<<<<< Sanity Check")
 
     assert len(tokens) == len(target), f"length mismatch: {len(tokens)} vs {len(target)}"
+
 
 class MultiTurnDataset(Dataset):
     def __init__(self, data: List[dict], tokenizer: PreTrainedTokenizer, max_seq_length: int):
@@ -108,9 +115,11 @@ class MultiTurnDataset(Dataset):
             "input_ids": tokens,
             "labels": labels
         }
-    
+
+
 class InputOutputDataset(Dataset):
-    def __init__(self, data: List[dict], tokenizer: PreTrainedTokenizer, max_source_length: int, max_target_length: int):
+    def __init__(self, data: List[dict], tokenizer: PreTrainedTokenizer, max_source_length: int,
+                 max_target_length: int):
         super(InputOutputDataset, self).__init__()
         self.tokenizer = tokenizer
         self.max_source_length = max_source_length
@@ -120,19 +129,19 @@ class InputOutputDataset(Dataset):
 
     def __len__(self):
         return len(self.data)
-    
+
     def __getitem__(self, i) -> dict:
         data_item = self.data[i]
 
         a_ids = self.tokenizer.encode(text=data_item['prompt'], add_special_tokens=True, truncation=True,
-                                         max_length=self.max_source_length)
+                                      max_length=self.max_source_length)
         b_ids = self.tokenizer.encode(text=data_item['response'], add_special_tokens=False, truncation=True,
-                                    max_length=self.max_target_length)
+                                      max_length=self.max_target_length)
 
         context_length = len(a_ids)
         input_ids = a_ids + b_ids + [self.tokenizer.eos_token_id]
         labels = [self.tokenizer.pad_token_id] * context_length + b_ids + [self.tokenizer.eos_token_id]
-        
+
         pad_len = self.max_seq_length - len(input_ids)
         input_ids = input_ids + [self.tokenizer.pad_token_id] * pad_len
         labels = labels + [self.tokenizer.pad_token_id] * pad_len
