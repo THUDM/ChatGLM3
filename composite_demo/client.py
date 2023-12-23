@@ -20,6 +20,7 @@ PT_PATH = os.environ.get('PT_PATH', None)
 PRE_SEQ_LEN = int(os.environ.get("PRE_SEQ_LEN", 128))
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
 
+
 @st.cache_resource
 def get_client() -> Client:
     client = HFClient(MODEL_PATH, TOKENIZER_PATH, PT_PATH)
@@ -127,8 +128,17 @@ class HFClient(Client):
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, trust_remote_code=True)
 
         if pt_checkpoint is not None and os.path.exists(pt_checkpoint):
-            config = AutoConfig.from_pretrained(model_path, trust_remote_code=True, pre_seq_len=PRE_SEQ_LEN)
-            self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True, config=config)
+            config = AutoConfig.from_pretrained(
+                model_path,
+                trust_remote_code=True,
+                pre_seq_len=PRE_SEQ_LEN
+            )
+            self.model = AutoModel.from_pretrained(
+                model_path,
+                trust_remote_code=True,
+                config=config,
+                device_map="auto"
+            ).eval()
             prefix_state_dict = torch.load(os.path.join(pt_checkpoint, "pytorch_model.bin"))
             new_prefix_state_dict = {}
             for k, v in prefix_state_dict.items():
@@ -137,7 +147,12 @@ class HFClient(Client):
             print("Loaded from pt checkpoints", new_prefix_state_dict.keys())
             self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
         else:
-            self.model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
+            self.model = (
+                AutoModel.from_pretrained(
+                    MODEL_PATH,
+                    trust_remote_code=True,
+                    device_map="auto"
+                ).eval())
             # plus .quantized() if you want to use quantized model
 
     def generate_stream(
