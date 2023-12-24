@@ -228,7 +228,7 @@ model = AutoModel.from_pretrained("your local path", trust_remote_code=True).to(
 
 ### TensorRT-LLM Demo
 
-ChatGLM3-6B已经支持使用 TensorRT-LLM 工具包进行加速推理，模型推理速度得到多倍的提升。具体使用方法请参考 [TensorRT-LLM Demo](tensort_llm_demo/tensorrt_llm_cli_demo.py) 和 官方技术文档。
+ChatGLM3-6B已经支持使用 TensorRT-LLM 工具包进行加速推理，模型推理速度得到多倍的提升。具体使用方法请参考 [TensorRT-LLM Demo](tensorrt_llm_demo/tensorrt_llm_cli_demo.py) 和 官方技术文档。
 
 
 ## 引用

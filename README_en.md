@@ -221,7 +221,7 @@ If you have multiple GPUs, but each GPU's VRAM size is not enough to accommodate
 
 ### TensorRT-LLM Demo
 
-ChatGLM3-6B now supports accelerated inference using the TensorRT-LLM toolkit, significantly improving model inference speed. For specific usage, please refer to the [TensorRT-LLM Demo](tensort_llm_demo/tensorrt_llm_cli_demo.py) and the official technical documentation.
+ChatGLM3-6B now supports accelerated inference using the TensorRT-LLM toolkit, significantly improving model inference speed. For specific usage, please refer to the [TensorRT-LLM Demo](tensorrt_llm_demo/tensorrt_llm_cli_demo.py) and the official technical documentation.
 
 ## Citation
 
