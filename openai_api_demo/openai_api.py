@@ -184,7 +184,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
 
             """
             In this demo, we did not register any tools.
-            You can use the tools that have been implemented in our `tool_using` and implement your own streaming tool implementation here.
+            You can use the tools that have been implemented in our `tools_using_demo` and implement your own streaming tool implementation here.
             Similar to the following method:
                 function_args = json.loads(function_call.arguments)
                 tool_response = dispatch_tool(tool_name: str, tool_params: dict)
@@ -405,7 +405,7 @@ def contains_custom_function(value: str) -> bool:
     """
     Determine whether 'function_call' according to a special function prefix.
 
-    For example, the functions defined in "tool_using/tool_register.py" are all "get_xxx" and start with "get_"
+    For example, the functions defined in "tools_using_demo/tool_register.py" are all "get_xxx" and start with "get_"
 
     [Note] This is not a rigorous judgment method, only for reference.
 
