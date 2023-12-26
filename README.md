@@ -19,7 +19,7 @@
 ChatGLM3 是智谱AI和清华大学 KEG 实验室联合发布的新一代对话预训练模型。ChatGLM3-6B 是 ChatGLM3 系列中的开源模型，在保留了前两代模型对话流畅、部署门槛低等众多优秀特性的基础上，ChatGLM3-6B 引入了如下特性：
 
 1. **更强大的基础模型：** ChatGLM3-6B 的基础模型 ChatGLM3-6B-Base 采用了更多样的训练数据、更充分的训练步数和更合理的训练策略。在语义、数学、推理、代码、知识等不同角度的数据集上测评显示，**ChatGLM3-6B-Base 具有在 10B 以下的基础模型中最强的性能**。
-2. **更完整的功能支持：** ChatGLM3-6B 采用了全新设计的 [Prompt 格式](PROMPT.md)，除正常的多轮对话外。同时原生支持[工具调用](tool_using/README.md)（Function Call）、代码执行（Code Interpreter）和 Agent 任务等复杂场景。
+2. **更完整的功能支持：** ChatGLM3-6B 采用了全新设计的 [Prompt 格式](PROMPT.md)，除正常的多轮对话外。同时原生支持[工具调用](tools_using_demo/README.md)（Function Call）、代码执行（Code Interpreter）和 Agent 任务等复杂场景。
 3. **更全面的开源序列：** 除了对话模型 [ChatGLM3-6B](https://huggingface.co/THUDM/chatglm3-6b) 外，还开源了基础模型 [ChatGLM3-6B-Base](https://huggingface.co/THUDM/chatglm3-6b-base)、长文本对话模型 [ChatGLM3-6B-32K](https://huggingface.co/THUDM/chatglm3-6b-32k)。以上所有权重对学术研究**完全开放**，在填写[问卷](https://open.bigmodel.cn/mla/form)进行登记后**亦允许免费商业使用**。
 
 -----
@@ -135,6 +135,7 @@ git clone https://huggingface.co/THUDM/chatglm3-6b
 请注意，不同的微调脚本对应的模型并不相同，请根据需要选择对应的模型。
 
 ### 网页版对话 Demo
+
 ![web-demo](resources/web-demo.gif)
 可以通过以下命令启动基于 Gradio 的网页版 demo：
 ```shell
@@ -163,12 +164,15 @@ python cli_demo.py
 程序会在命令行中进行交互式的对话，在命令行中输入指示并回车即可生成回复，输入 `clear` 可以清空对话历史，输入 `stop` 终止程序。
 
 ### LangChain Demo
-请参考 [基于 LangChain 的工具调用 Demo](langchain_demo/README.md)。
 
-### 工具调用
-关于工具调用的方法请参考 [工具调用](tool_using/README.md)。 
+代码实现请参考 [LangChain Demo](langchain_demo/README.md)。
 
-### API 部署
+#### 工具调用
+
+关于工具调用的方法请参考 [工具调用](tools_using_demo/README.md)。 
+
+#### OpenAI API Demo
+
 感谢 [@xusenlinzy](https://github.com/xusenlinzy) 实现了 OpenAI 格式的流式 API 部署，可以作为任意基于 ChatGPT 的应用的后端，比如 [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web)。可以通过运行仓库中的[openai_api.py](openai_api_demo/openai_api.py) 进行部署：
 ```shell
 cd openai_api_demo
@@ -219,7 +223,13 @@ model = AutoModel.from_pretrained("your local path", trust_remote_code=True).to(
 加载半精度的 ChatGLM3-6B 模型需要大概 13GB 内存。内存较小的机器（比如 16GB 内存的 MacBook Pro），在空余内存不足的情况下会使用硬盘上的虚拟内存，导致推理速度严重变慢。
 
 ### 多卡部署
+
 如果你有多张 GPU，但是每张 GPU 的显存大小都不足以容纳完整的模型，那么可以将模型切分在多张GPU上。首先安装 accelerate: `pip install accelerate`，然后即可正常加载模型。
+
+### TensorRT-LLM Demo
+
+ChatGLM3-6B已经支持使用 TensorRT-LLM 工具包进行加速推理，模型推理速度得到多倍的提升。具体使用方法请参考 [TensorRT-LLM Demo](tensorrt_llm_demo/tensorrt_llm_cli_demo.py) 和 官方技术文档。
+
 
 ## 引用
 
