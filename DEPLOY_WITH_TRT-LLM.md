@@ -6,11 +6,14 @@
 #### 获取TensorRT-LLM代码：
 
 ```bash
-# TensorRT-LLM代码需要使用git-lfs拉取
+# TensorRT-LLM 代码需要使用 git-lfs 拉取
 apt-get update && apt-get -y install git git-lfs
 
 git clone https://github.com/NVIDIA/TensorRT-LLM.git
 cd TensorRT-LLM
+
+# 本流程将使用 v0.7.0 Release 版本
+git checkout tags/v0.7.0 -b release/0.7.0
 git submodule update --init --recursive
 git lfs install
 git lfs pull
@@ -62,7 +65,7 @@ python3 build.py -m chatglm3_6b --world_size 2 --output_dir trt_engines/chatglm3
 python3 build.py -m chatglm3_6b_base --output_dir trt_engines/chatglm3_6b_base/fp16/1-gpu
 
 # 使用chatglm3_6b-32k模型
-python3 build.py -m chatglm3_6b-32k --output_dir trt_engines/chatglm3_6b-32k/fp16/1-gpu
+python3 build.py -m chatglm3_6b_32k --output_dir trt_engines/chatglm3_6b-32k/fp16/1-gpu
 ```
 
 #### 可配置的plugin参数
@@ -91,6 +94,8 @@ python3 build.py -m chatglm3_6b-32k --output_dir trt_engines/chatglm3_6b-32k/fp1
 
 * Paged KV cache中block的数量可以用`--tokens_per_block` 来配置。
 
+更多详细的功能和配置请参考：[TensorRT-LLM ChatGLM实现](https://github.com/NVIDIA/TensorRT-LLM/tree/main/examples/chatglm)。
+
 ## 3. 使用TensorRT-LLM Python Runtime进行推理
 
 #### 单机单卡的推理示例：
@@ -105,11 +110,11 @@ python3 ../run.py --input_text "What's new between ChatGLM3-6B and ChatGLM2-6B?"
 #### 单机多卡的推理示例：
 
 ```bash
-mpirun -n 2
+mpirun -n 2 \
     python ../run.py --input_text "What's new between ChatGLM3-6B and ChatGLM2-6B?" \
                      --max_output_len 50 \
                      --tokenizer_dir chatglm3_6b \
-                     --engine_dir trt_engines/chatglm3_6b/fp16/2-gpu
+                     --engine_dir trt_engines/chatglm3_6b/fp16/1-gpu
 ```
 
 * 如果您以root权限运行 `mpirun`，则可能需要添加 `--allow-run-as-root` 参数。
