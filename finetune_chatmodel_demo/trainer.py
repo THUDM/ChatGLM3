@@ -39,13 +39,14 @@ class PrefixTrainer(Trainer):
         output_dir = output_dir if output_dir is not None else self.args.output_dir
         os.makedirs(output_dir, exist_ok=True)
         logger.info(f"Saving model checkpoint to {output_dir}")
-        # Save a trained model and configuration using `save_pretrained()`.
-        # They can then be reloaded using `from_pretrained()`
         if not isinstance(self.model, PreTrainedModel):
             if isinstance(unwrap_model(self.model), PreTrainedModel):
                 if state_dict is None:
                     state_dict = self.model.state_dict()
-                unwrap_model(self.model).save_pretrained(output_dir, state_dict=state_dict)
+
+                # Since transformers 4.35.2,safe_serialization are set `True`,
+                # which will save model as `safetensors` format.
+                unwrap_model(self.model).save_pretrained(output_dir, state_dict=state_dict, safe_serialization=False)
             else:
                 logger.info("Trainer.model is not a `PreTrainedModel`, only saving its state dict.")
                 if state_dict is None:
@@ -59,14 +60,14 @@ class PrefixTrainer(Trainer):
                 for k, v in self.model.named_parameters():
                     if v.requires_grad:
                         filtered_state_dict[k] = state_dict[k]
-                self.model.save_pretrained(output_dir, state_dict=filtered_state_dict)
+                self.model.save_pretrained(output_dir, state_dict=filtered_state_dict, safe_serialization=False)
             else:
                 print("Saving the whole model")
-                self.model.save_pretrained(output_dir, state_dict=state_dict)
+                self.model.save_pretrained(output_dir, state_dict=state_dict, safe_serialization=False)
         if self.tokenizer is not None:
             self.tokenizer.save_pretrained(output_dir)
 
         # Good practice: save your training arguments together with the trained model
         torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
 
-#TODO: add LoRATrainer Support Later
+# TODO: add LoRATrainer Support Later

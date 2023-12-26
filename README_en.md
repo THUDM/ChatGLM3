@@ -16,7 +16,7 @@ ChatGLM3 is a new generation of pre-trained dialogue models jointly released by 
 
 1. **Stronger Base Model:** The base model of ChatGLM3-6B, ChatGLM3-6B-Base, adopts a more diverse training dataset, more sufficient training steps, and a more reasonable training strategy. Evaluations on datasets from various perspectives such as semantics, mathematics, reasoning, code, and knowledge show that **ChatGLM3-6B-Base has the strongest performance among base models below 10B**.
 
-2. **More Complete Function Support:** ChatGLM3-6B adopts a newly designed [Prompt format](PROMPT_en.md), supporting multi-turn dialogues as usual. It also natively supports [tool invocation](tool_using/README_en.md) (Function Call), code execution (Code Interpreter), and Agent tasks in complex scenarios.
+2. **More Complete Function Support:** ChatGLM3-6B adopts a newly designed [Prompt format](PROMPT_en.md), supporting multi-turn dialogues as usual. It also natively supports [tool invocation](tools_using_demo/README_en.md) (Function Call), code execution (Code Interpreter), and Agent tasks in complex scenarios.
 
 3. **More Comprehensive Open-source Series:** In addition to the dialogue model [ChatGLM3-6B](https://huggingface.co/THUDM/chatglm3-6b), the basic model [ChatGLM3-6B-Base](https://huggingface.co/THUDM/chatglm3-6b-base), and the long-text dialogue model [ChatGLM3-6B-32K](https://huggingface.co/THUDM/chatglm3-6b-32k) have also been open-sourced. All these weights are **fully open** for academic research, and **free commercial use is also allowed** after registration via a [questionnaire](https://open.bigmodel.cn/mla/form).
 
@@ -135,14 +135,14 @@ Please note that different fine-tuning scripts correspond to different models. P
 ![web-demo](resources/web-demo.gif)
 You can launch a web-based demo using Gradio with the following command:
 ```shell
-python web_demo.py
+python web_demo_gradio.py
 ```
 
 ![web-demo](resources/web-demo2.png)
 
 You can launch a web-based demo using Streamlit with the following command:
 ```shell
-streamlit run web_demo2.py
+streamlit run web_demo_streamlit.py
 ```
 
 The web-based demo will run a Web Server and output an address. You can use it by opening the output address in a browser. Based on tests, the web-based demo using Streamlit runs more smoothly.
@@ -159,7 +159,7 @@ python cli_demo.py
 
 The program will interact in the command line, enter instructions in the command line and hit enter to generate a response. Enter `clear` to clear the dialogue history, enter `stop` to terminate the program.
 
-### API Deployment
+### OpenAI API Demo
 Thanks to [@xusenlinzy](https://github.com/xusenlinzy) for implementing the OpenAI format streaming API deployment, which can serve as the backend for any ChatGPT-based application, such as [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web). You can deploy it by running [openai_api.py](openai_api_demo/openai_api.py) in the repository:
 ```shell
 cd openai_api_demo
@@ -181,7 +181,7 @@ If the test is successful, the model should return a story.
 
 ### Tool Invocation
 
-For methods of tool invocation, please refer to [Tool Invocation](tool_using/README_en.md).
+For methods of tool invocation, please refer to [Tool Invocation](tools_using_demo/README_en.md).
 
 ## Low-Cost Deployment
 
@@ -217,15 +217,11 @@ Loading the half-precision ChatGLM3-6B model requires about 13GB of memory. Mach
 
 ### Multi-GPU Deployment
 
-If you have multiple GPUs, but each GPU's VRAM size is not enough to accommodate the complete model, then the model can be split across multiple GPUs. First, install accelerate: `pip install accelerate`, and then load the model through the following methods:
+If you have multiple GPUs, but each GPU's VRAM size is not enough to accommodate the complete model, then the model can be split across multiple GPUs. First, install accelerate: `pip install accelerate`, and then load the model as usual.
 
-```python
-from utils import load_model_on_gpus
+### TensorRT-LLM Demo
 
-model = load_model_on_gpus("THUDM/chatglm3-6b", num_gpus=2)
-```
-
-This allows the model to be deployed on two GPUs for inference. You can change `num_gpus` to the number of GPUs you want to use. It is evenly split by default, but you can also pass the `device_map` parameter to specify it yourself.
+ChatGLM3-6B now supports accelerated inference using the TensorRT-LLM toolkit, significantly improving model inference speed. For specific usage, please refer to the [TensorRT-LLM Demo](tensorrt_llm_demo/tensorrt_llm_cli_demo.py) and the official technical documentation.
 
 ## Citation
 

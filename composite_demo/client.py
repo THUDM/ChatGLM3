@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
 import os
-from typing import Any, Protocol
-
-from huggingface_hub.inference._text_generation import TextGenerationStreamResponse, Token
 import streamlit as st
 import torch
+
+from collections.abc import Iterable
+from typing import Any, Protocol
+from huggingface_hub.inference._text_generation import TextGenerationStreamResponse, Token
 from transformers import AutoModel, AutoTokenizer, AutoConfig
+from transformers.generation.logits_process import LogitsProcessor
+from transformers.generation.utils import LogitsProcessorList
 
 from conversation import Conversation
 
@@ -15,33 +17,13 @@ TOOL_PROMPT = 'Answer the following questions as best as you can. You have acces
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 PT_PATH = os.environ.get('PT_PATH', None)
-PRE_SEQ_LEN = int(os.environ.get("PRE_SEQ_LEN", 128))  # mark sure your have pt_path with finetune model
-
+PRE_SEQ_LEN = int(os.environ.get("PRE_SEQ_LEN", 128))
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-
-# for Mac Computer like M1
-# You Need Use Pytorch compiled with Metal
-# DEVICE = 'mps'
-
-# for AMD gpu likes MI100 (Not Official Steady Support yet)
-# You Need Use Pytorch compiled with ROCm
-# DEVICE = 'cuda'
-
-# for Intel gpu likes A770 (Not Official Steady Support yet)
-# You Need Use Pytorch compiled with oneDNN and install intel-extension-for-pytorch
-# import intel_extension_for_pytorch as ipex
-# DEVICE = 'xpu'
-
-# for Moore Threads gpu like MTT S80 (Not Official Steady Support yet)
-# You Need Use Pytorch compiled with Musa
-# DEVICE = 'musa'
 
 
 @st.cache_resource
 def get_client() -> Client:
-    client = HFClient(MODEL_PATH, TOKENIZER_PATH, PT_PATH, DEVICE)
+    client = HFClient(MODEL_PATH, TOKENIZER_PATH, PT_PATH)
     return client
 
 
@@ -55,21 +37,20 @@ class Client(Protocol):
         ...
 
 
-def stream_chat(self, tokenizer, query: str,
-                history: list[tuple[str, str]] = None,
-                role: str = "user",
-                past_key_values=None,
-                max_new_tokens: int = 256,
-                do_sample=True, top_p=0.8,
-                temperature=0.8,
-                repetition_penalty=1.0,
-                length_penalty=1.0, num_beams=1,
-                logits_processor=None,
-                return_past_key_values=False,
-                **kwargs):
-    from transformers.generation.logits_process import LogitsProcessor
-    from transformers.generation.utils import LogitsProcessorList
-
+def stream_chat(
+        self, tokenizer, query: str,
+        history: list[tuple[str, str]] = None,
+        role: str = "user",
+        past_key_values=None,
+        max_new_tokens: int = 256,
+        do_sample=True, top_p=0.8,
+        temperature=0.8,
+        repetition_penalty=1.0,
+        length_penalty=1.0, num_beams=1,
+        logits_processor=None,
+        return_past_key_values=False,
+        **kwargs
+):
     class InvalidScoreLogitsProcessor(LogitsProcessor):
         def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
             if torch.isnan(scores).any() or torch.isinf(scores).any():
@@ -79,6 +60,10 @@ def stream_chat(self, tokenizer, query: str,
 
     if history is None:
         history = []
+
+    print("\n== Input ==\n", query)
+    print("\n==History==\n", history)
+
     if logits_processor is None:
         logits_processor = LogitsProcessorList()
     logits_processor.append(InvalidScoreLogitsProcessor())
@@ -109,7 +94,6 @@ def stream_chat(self, tokenizer, query: str,
         attention_mask = torch.cat((attention_mask.new_ones(1, past_length), attention_mask), dim=1)
         inputs['attention_mask'] = attention_mask
     history.append({"role": role, "content": query})
-    # print("input_shape>", inputs['input_ids'].shape)
     input_sequence_length = inputs['input_ids'].shape[1]
     if input_sequence_length + max_new_tokens >= self.config.seq_length:
         yield "Current input sequence length {} plus max_new_tokens {} is too long. The maximum model sequence length is {}. You may adjust the generation parameter to enable longer chat history.".format(
@@ -139,13 +123,22 @@ def stream_chat(self, tokenizer, query: str,
 
 
 class HFClient(Client):
-    def __init__(self, model_path: str, tokenizer_path: str, pt_checkpoint: str = None, DEVICE='cpu'):
+    def __init__(self, model_path: str, tokenizer_path: str, pt_checkpoint: str = None):
         self.model_path = model_path
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, trust_remote_code=True)
 
         if pt_checkpoint is not None and os.path.exists(pt_checkpoint):
-            config = AutoConfig.from_pretrained(model_path, trust_remote_code=True, pre_seq_len=PRE_SEQ_LEN)
-            self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True, config=config)
+            config = AutoConfig.from_pretrained(
+                model_path,
+                trust_remote_code=True,
+                pre_seq_len=PRE_SEQ_LEN
+            )
+            self.model = AutoModel.from_pretrained(
+                model_path,
+                trust_remote_code=True,
+                config=config,
+                device_map="auto"
+            ).eval()
             prefix_state_dict = torch.load(os.path.join(pt_checkpoint, "pytorch_model.bin"))
             new_prefix_state_dict = {}
             for k, v in prefix_state_dict.items():
@@ -154,17 +147,21 @@ class HFClient(Client):
             print("Loaded from pt checkpoints", new_prefix_state_dict.keys())
             self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
         else:
-            # If you need 4bit quantization, run:
-            # self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True).quantize(4).cuda()
-            self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
-        self.model = self.model.to(DEVICE).eval() if 'cuda' in DEVICE else self.model.float().to(DEVICE).eval()
+            self.model = (
+                AutoModel.from_pretrained(
+                    MODEL_PATH,
+                    trust_remote_code=True,
+                    device_map="auto"
+                ).eval())
+            # plus .quantized() if you want to use quantized model
 
-    def generate_stream(self,
-                        system: str | None,
-                        tools: list[dict] | None,
-                        history: list[Conversation],
-                        **parameters: Any
-                        ) -> Iterable[TextGenerationStreamResponse]:
+    def generate_stream(
+            self,
+            system: str | None,
+            tools: list[dict] | None,
+            history: list[Conversation],
+            **parameters: Any
+    ) -> Iterable[TextGenerationStreamResponse]:
         chat_history = [{
             'role': 'system',
             'content': system if not tools else TOOL_PROMPT,
@@ -181,16 +178,15 @@ class HFClient(Client):
 
         query = history[-1].content
         role = str(history[-1].role).removeprefix('<|').removesuffix('|>')
-
         text = ''
-
-        for new_text, _ in stream_chat(self.model,
-                                       self.tokenizer,
-                                       query,
-                                       chat_history,
-                                       role,
-                                       **parameters,
-                                       ):
+        for new_text, _ in stream_chat(
+                self.model,
+                self.tokenizer,
+                query,
+                chat_history,
+                role,
+                **parameters,
+        ):
             word = new_text.removeprefix(text)
             word_stripped = word.strip()
             text = new_text

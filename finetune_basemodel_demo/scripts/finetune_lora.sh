@@ -12,9 +12,8 @@ MAX_SOURCE_LEN=512
 MAX_TARGET_LEN=128
 DEV_BATCH_SIZE=1
 GRAD_ACCUMULARION_STEPS=1
-MAX_STEP=500
-SAVE_INTERVAL=50
-MAX_SEQ_LEN=512
+MAX_STEP=1000
+SAVE_INTERVAL=500
 
 RUN_NAME=text
 BASE_MODEL_PATH=THUDM/chatglm3-6b-base
@@ -31,7 +30,8 @@ torchrun --standalone --nnodes=1 --nproc_per_node=$NUM_GPUS finetune.py \
     --lora_rank $LORA_RANK \
     --lora_alpha $LORA_ALPHA \
     --lora_dropout $LORA_DROUPOUT \
-    --max_seq_length $MAX_SEQ_LEN \
+    --max_source_length $MAX_SOURCE_LEN \
+    --max_target_length $MAX_TARGET_LEN \
     --preprocessing_num_workers 1 \
     --model_name_or_path $BASE_MODEL_PATH \
     --output_dir $OUTPUT_DIR \
@@ -41,3 +41,4 @@ torchrun --standalone --nnodes=1 --nproc_per_node=$NUM_GPUS finetune.py \
     --logging_steps 1 \
     --save_steps $SAVE_INTERVAL \
     --learning_rate $LR  2>&1 | tee ${OUTPUT_DIR}/train.log
+
