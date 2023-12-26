@@ -127,6 +127,12 @@ python3 ../summarize.py --test_trt_llm \
                         --engine_dir trt_engines/chatglm3_6b/fp16/1-gpu
 ```
 
+#### 运行我们提供的对话demo:[tensorrt_llm_cli_demo.py](tensorrt_llm_cli_demo.py):
+
+```bash
+python3 tensorrt_llm_cli_demo.py --tokenizer_dir chatglm3_6b --engine_dir trt_engines/chatglm3_6b/fp16/1-gpu
+```
+
 #### 性能测试：
 
 您可以在[这里](https://github.com/NVIDIA/TensorRT-LLM/tree/main/benchmarks/python)查阅到如何测试 TensorRT-LLM 上运行 ChatGLM3 的性能。
