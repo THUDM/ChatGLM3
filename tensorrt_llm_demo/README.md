@@ -133,6 +133,25 @@ python3 ../summarize.py --test_trt_llm \
 python3 tensorrt_llm_cli_demo.py --tokenizer_dir chatglm3_6b --engine_dir trt_engines/chatglm3_6b/fp16/1-gpu
 ```
 
+运行结果展示：
+```
+用户: what is your name?
+ChatGLM3-6B:Hello, I am an assistant named ChatGLM3-6B, and you can call me assistant. What can I help you with??
+
+用户: what is new in ChatGLM3-6B compared with ChatGLM2-6B?
+ChatGLM3-6B:ChatGLM3-6B is an improved version of ChatGLM2-6B. Compared with ChatGLM2-6B, ChatGLM3-6B has the following improvements:
+
+1. Enhanced language understanding capabilities: ChatGLM3-6B's language model is based on the GLM3-6B model, which has been pre-trained on more diverse and large-scale data, resulting in better language understanding and generation capabilities.
+
+2. Improved generation ability: ChatGLM3-6B has improved the generation ability compared to ChatGLM2-6B. With more training data and optimization algorithms, ChatGLM3-6B can generate more coherent and natural-looking text.
+
+3. Enhanced adaptability to different dialogue scenarios: ChatGLM3-6B has been trained on more diverse dialogue data, including dialogue scenarios with different languages, cultures, and styles, making it more adaptable to different dialogue scenarios.
+
+4. New features and functions: ChatGLM3-6B also has some new features and functions, such as support for multiple choice questions, sentiment analysis, and entity recognition.
+
+In short, ChatGLM3-6B is more advanced and capable than ChatGLM2-6B, and can better meet the needs of users in various scenarios..
+```
+
 #### 性能测试：
 
 您可以在[这里](https://github.com/NVIDIA/TensorRT-LLM/tree/main/benchmarks/python)查阅到如何测试 TensorRT-LLM 上运行 ChatGLM3 的性能。
