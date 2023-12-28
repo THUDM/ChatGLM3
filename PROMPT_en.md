@@ -29,7 +29,7 @@ Where `<|role|>` part is represented in a special token,  which can’t be encod
 
 ### Example Scenarios
 
-For better readablity, an extra `\n` is added before each role special token. This extra `\n` should not be added in actual use and tokenizer implementation.
+For better readability, an extra `\n` is added before each role special token. This extra `\n` should not be added in actual use and tokenizer implementation.
 
 #### Multi-turn Dialogue
 * There are only three roles: `<|user|>`, `<|assistant|>`, and `<|system|>`.
