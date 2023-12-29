@@ -43,14 +43,16 @@ from sse_starlette.sse import EventSourceResponse
 # Set up limit request time
 EventSourceResponse.DEFAULT_PING_INTERVAL = 1000
 
-MODEL_PATH = os.environ.get('MODEL_PATH', '/share/home/zyx/Models/chatglm3-6b')
+# set LLM path
+MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
 
-EMBEDDING_PATH = os.environ.get('M3E_MODEL_PATH', '/share/home/zyx/Models/bge-large-zh-v1.5')
+# set Embedding Model path
+EMBEDDING_PATH = os.environ.get('EMBEDDING_PATH', 'BAAI/bge-large-zh-v1.5')
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # collects GPU memory
+async def lifespan(app: FastAPI):
     yield
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
