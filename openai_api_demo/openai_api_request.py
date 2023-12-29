@@ -55,14 +55,14 @@ def simple_chat(use_stream=True):
         },
         {
             "role": "user",
-            "content": "你好，给我讲一个故事，大概100字"
+            "content": "你好，请你用生动的话语给我讲一个小故事吧"
         }
     ]
     response = client.chat.completions.create(
         model="chatglm3-6b",
         messages=messages,
         stream=use_stream,
-        max_tokens=100,
+        max_tokens=256,
         temperature=0.8,
         presence_penalty=1.1,
         top_p=0.8)
