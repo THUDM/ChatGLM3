@@ -1,113 +1,94 @@
-# 使用curl命令测试返回
-# curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
-# -H "Content-Type: application/json" \
-# -d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"system\", \"content\": \"You are ChatGLM3, a large language model trained by Zhipu.AI. Follow the user's instructions carefully. Respond using markdown.\"}, {\"role\": \"user\", \"content\": \"你好，给我讲一个故事，大概100字\"}], \"stream\": false, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
+"""
+This script is an example of using the OpenAI API to create various interactions with a ChatGLM3 model. It includes functions to:
+1. Conduct a basic chat session, asking about weather conditions in multiple cities.
+2. Initiate a simple chat in Chinese, asking the model to tell a short story.
+3. Retrieve and print embeddings for a given text input.
+Each function demonstrates a different aspect of the API's capabilities, showcasing how to make requests and handle responses.
+"""
 
-# 使用Python代码测返回
-import requests
-import json
+from openai import OpenAI
 
-base_url = "http://127.0.0.1:8000"
+base_url = "http://127.0.0.1:8000/v1/"
+client = OpenAI(api_key="EMPTY", base_url=base_url)
 
-
-def create_chat_completion(model, messages, functions, use_stream=False):
-    data = {
-        "functions": functions,  # 函数定义
-        "model": model,  # 模型名称
-        "messages": messages,  # 会话历史
-        "stream": use_stream,  # 是否流式响应
-        "max_tokens": 100,  # 最多生成字数
-        "temperature": 0.8,  # 温度
-        "top_p": 0.8,  # 采样概率
-    }
-
-    response = requests.post(f"{base_url}/v1/chat/completions", json=data, stream=use_stream)
-    if response.status_code == 200:
-        if use_stream:
-            # 处理流式响应
-            for line in response.iter_lines():
-                if line:
-                    decoded_line = line.decode('utf-8')[6:]
-                    try:
-                        response_json = json.loads(decoded_line)
-                        content = response_json.get("choices", [{}])[0].get("delta", {}).get("content", "")
-                        print(content)
-                    except:
-                        print("Special Token:", decoded_line)
-        else:
-            # 处理非流式响应
-            decoded_line = response.json()
-            content = decoded_line.get("choices", [{}])[0].get("message", "").get("content", "")
-            print(content)
-    else:
-        print("Error:", response.status_code)
-        return None
-
-
-def function_chat(use_stream=True):
-    functions = [
+def function_chat():
+    messages = [{"role": "user", "content": "What's the weather like in San Francisco, Tokyo, and Paris?"}]
+    tools = [
         {
-            "name": "get_current_weather",
-            "description": "Get the current weather in a given location.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "location": {
-                        "type": "string",
-                        "description": "The city and state, e.g. Beijing",
+            "type": "function",
+            "function": {
+                "name": "get_current_weather",
+                "description": "Get the current weather in a given location",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "location": {
+                            "type": "string",
+                            "description": "The city and state, e.g. San Francisco, CA",
+                        },
+                        "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
                     },
-                    "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
+                    "required": ["location"],
                 },
-                "required": ["location"],
             },
         }
     ]
-    chat_messages = [
-        {
-            "role": "user",
-            "content": "波士顿天气如何？",
-        },
-        {
-            "role": "assistant",
-            "content": "get_current_weather\n ```python\ntool_call(location='Beijing', unit='celsius')\n```",
-            "function_call": {
-                "name": "get_current_weather",
-                "arguments": '{"location": "Beijing", "unit": "celsius"}',
-            },
-        },
-        {
-            "role": "function",
-            "name": "get_current_weather",
-            "content": '{"temperature": "12", "unit": "celsius", "description": "Sunny"}',
-        },
-        # ... 接下来这段是 assistant 的回复和用户的回复。
-        # {
-        #     "role": "assistant",
-        #     "content": "根据最新的天气预报，目前北京的天气情况是晴朗的，温度为12摄氏度。",
-        # },
-        # {
-        #     "role": "user",
-        #     "content": "谢谢",
-        # }
-    ]
-    create_chat_completion("chatglm3-6b", messages=chat_messages, functions=functions, use_stream=use_stream)
+
+    response = client.chat.completions.create(
+        model="chatglm3-6b",
+        messages=messages,
+        tools=tools,
+        tool_choice="auto",
+    )
+    if response:
+        content = response.choices[0].message.content
+        print(content)
+    else:
+        print("Error:", response.status_code)
 
 
 def simple_chat(use_stream=True):
-    functions = None
-    chat_messages = [
+    messages = [
         {
             "role": "system",
             "content": "You are ChatGLM3, a large language model trained by Zhipu.AI. Follow the user's instructions carefully. Respond using markdown.",
         },
         {
             "role": "user",
-            "content": "你好，给我讲一个故事，大概100字"
+            "content": "你好，请你用生动的话语给我讲一个小故事吧"
         }
     ]
-    create_chat_completion("chatglm3-6b", messages=chat_messages, functions=functions, use_stream=use_stream)
+    response = client.chat.completions.create(
+        model="chatglm3-6b",
+        messages=messages,
+        stream=use_stream,
+        max_tokens=256,
+        temperature=0.8,
+        presence_penalty=1.1,
+        top_p=0.8)
+    if response:
+        if use_stream:
+            for chunk in response:
+                print(chunk.choices[0].delta.content)
+        else:
+            content = response.choices[0].message.content
+            print(content)
+    else:
+        print("Error:", response.status_code)
+
+
+def embedding():
+    response = client.embeddings.create(
+        model="bge-large-zh-1.5",
+        input=["你好，给我讲一个故事，大概100字"],
+    )
+    embeddings = response.data[0].embedding
+    print("嵌入完成，维度：", len(embeddings))
 
 
 if __name__ == "__main__":
-    function_chat(use_stream=True)
+
+    simple_chat(use_stream=False)
     # simple_chat(use_stream=True)
+    # embedding()
+    # function_chat()

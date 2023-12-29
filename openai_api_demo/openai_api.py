@@ -23,29 +23,36 @@ Users need to configure their special tokens and can enable multi-GPU support as
 
 import os
 import time
-from contextlib import asynccontextmanager
-from typing import List, Literal, Optional, Union
-
+import tiktoken
 import torch
 import uvicorn
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+
+from contextlib import asynccontextmanager
+from typing import List, Literal, Optional, Union
 from loguru import logger
 from pydantic import BaseModel, Field
 from transformers import AutoTokenizer, AutoModel
 from utils import process_response, generate_chatglm3, generate_stream_chatglm3
+from sentence_transformers import SentenceTransformer
 
 from sse_starlette.sse import EventSourceResponse
 
 # Set up limit request time
 EventSourceResponse.DEFAULT_PING_INTERVAL = 1000
 
+# set LLM path
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
 
+# set Embedding Model path
+EMBEDDING_PATH = os.environ.get('EMBEDDING_PATH', 'BAAI/bge-large-zh-v1.5')
+
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # collects GPU memory
+async def lifespan(app: FastAPI):
     yield
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
@@ -96,6 +103,27 @@ class DeltaMessage(BaseModel):
     function_call: Optional[FunctionCallResponse] = None
 
 
+## for Embedding
+class EmbeddingRequest(BaseModel):
+    input: List[str]
+    model: str
+
+
+class EmbeddingResponse(BaseModel):
+    data: list
+    model: str
+    object: str
+    usage: dict
+
+
+# for ChatCompletionRequest
+
+class UsageInfo(BaseModel):
+    prompt_tokens: int = 0
+    total_tokens: int = 0
+    completion_tokens: Optional[int] = 0
+
+
 class ChatCompletionRequest(BaseModel):
     model: str
     messages: List[ChatMessage]
@@ -103,7 +131,7 @@ class ChatCompletionRequest(BaseModel):
     top_p: Optional[float] = 0.8
     max_tokens: Optional[int] = None
     stream: Optional[bool] = False
-    functions: Optional[Union[dict, List[dict]]] = None
+    tools: Optional[Union[dict, List[dict]]] = None
     # Additional parameters
     repetition_penalty: Optional[float] = 1.1
 
@@ -112,6 +140,7 @@ class ChatCompletionResponseChoice(BaseModel):
     index: int
     message: ChatMessage
     finish_reason: Literal["stop", "length", "function_call"]
+    # no need for logprobs
 
 
 class ChatCompletionResponseStreamChoice(BaseModel):
@@ -120,24 +149,54 @@ class ChatCompletionResponseStreamChoice(BaseModel):
     finish_reason: Optional[Literal["stop", "length", "function_call"]]
 
 
-class UsageInfo(BaseModel):
-    prompt_tokens: int = 0
-    total_tokens: int = 0
-    completion_tokens: Optional[int] = 0
-
-
 class ChatCompletionResponse(BaseModel):
-    model: str
     object: Literal["chat.completion", "chat.completion.chunk"]
     choices: List[Union[ChatCompletionResponseChoice, ChatCompletionResponseStreamChoice]]
     created: Optional[int] = Field(default_factory=lambda: int(time.time()))
     usage: Optional[UsageInfo] = None
 
 
+@app.post("/v1/embeddings", response_model=EmbeddingResponse)
+async def get_embeddings(request: EmbeddingRequest):
+    embeddings = [embedding_model.encode(text) for text in request.input]
+    embeddings = [embedding.tolist() for embedding in embeddings]
+
+    def num_tokens_from_string(string: str) -> int:
+        """
+        Returns the number of tokens in a text string.
+        use cl100k_base tokenizer
+        """
+        encoding = tiktoken.get_encoding('cl100k_base')
+        num_tokens = len(encoding.encode(string))
+        return num_tokens
+
+    response = {
+        "data": [
+            {
+                "object": "embedding",
+                "embedding": embedding,
+                "index": index
+            }
+            for index, embedding in enumerate(embeddings)
+        ],
+        "model": request.model,
+        "object": "list",
+        "usage": {
+            "prompt_tokens": sum(len(text.split()) for text in request.input),  # how many characters in prompt
+            "total_tokens": sum(num_tokens_from_string(text) for text in request.input),  # how many tokens (encoding)
+        },
+    }
+    return response
+
+
 @app.get("/v1/models", response_model=ModelList)
 async def list_models():
-    model_card = ModelCard(id="chatglm3-6b")
-    return ModelList(data=[model_card])
+    model_card = ModelCard(
+        id="chatglm3-6b"
+    )
+    return ModelList(
+        data=[model_card]
+    )
 
 
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponse)
@@ -155,9 +214,8 @@ async def create_chat_completion(request: ChatCompletionRequest):
         echo=False,
         stream=request.stream,
         repetition_penalty=request.repetition_penalty,
-        functions=request.functions,
+        tools=request.tools,
     )
-
     logger.debug(f"==== request ====\n{gen_params}")
 
     if request.stream:
@@ -172,7 +230,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
         logger.debug(f"First result output：\n{output}")
 
         function_call = None
-        if output and request.functions:
+        if output and request.tools:
             try:
                 function_call = process_response(output, use_tool=True)
             except:
@@ -220,9 +278,10 @@ async def create_chat_completion(request: ChatCompletionRequest):
     if response["text"].startswith("\n"):
         response["text"] = response["text"][1:]
     response["text"] = response["text"].strip()
+
     usage = UsageInfo()
     function_call, finish_reason = None, "stop"
-    if request.functions:
+    if request.tools:
         try:
             function_call = process_response(response["text"], use_tool=True)
         except:
@@ -248,7 +307,12 @@ async def create_chat_completion(request: ChatCompletionRequest):
     task_usage = UsageInfo.model_validate(response["usage"])
     for usage_key, usage_value in task_usage.model_dump().items():
         setattr(usage, usage_key, getattr(usage, usage_key) + usage_value)
-    return ChatCompletionResponse(model=request.model, choices=[choice_data], object="chat.completion", usage=usage)
+
+    return ChatCompletionResponse(
+        choices=[choice_data],
+        object="chat.completion",
+        usage=usage
+    )
 
 
 async def predict(model_id: str, params: dict):
@@ -416,7 +480,10 @@ def contains_custom_function(value: str) -> bool:
 
 
 if __name__ == "__main__":
+    # Load LLM
     tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
     model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
 
+    # load Embedding
+    embedding_model = SentenceTransformer(EMBEDDING_PATH, device="cuda")
     uvicorn.run(app, host='0.0.0.0', port=8000, workers=1)

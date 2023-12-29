@@ -7,17 +7,14 @@ gradio~=3.39
 sentencepiece>=0.1.99
 accelerate>=0.25.0
 streamlit>=1.29.0
-fastapi>=0.105.0
-uvicorn~=0.24.0
+fastapi>=0.108.0
 loguru~=0.7.2
 mdtex2html>=1.2.0
 latex2mathml>=3.77.0
 
 # for openai demo
-openai>=1.4.0
-pydantic>=2.5.2
-httpx>=0.25.2
-fastapi>=0.105.0
+openai>=1.6.1
+pydantic>=2.5.3
 sse-starlette>=1.8.2
 uvicorn~=0.24.0
 timm>=0.9.12
