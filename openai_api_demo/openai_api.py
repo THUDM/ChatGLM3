@@ -23,8 +23,6 @@ Users need to configure their special tokens and can enable multi-GPU support as
 
 import os
 import time
-
-import numpy as np
 import tiktoken
 import torch
 import uvicorn
@@ -39,7 +37,6 @@ from pydantic import BaseModel, Field
 from transformers import AutoTokenizer, AutoModel
 from utils import process_response, generate_chatglm3, generate_stream_chatglm3
 from sentence_transformers import SentenceTransformer
-from sklearn.preprocessing import PolynomialFeatures
 
 from sse_starlette.sse import EventSourceResponse
 
@@ -157,31 +154,19 @@ class ChatCompletionResponse(BaseModel):
     usage: Optional[UsageInfo] = None
 
 
-def num_tokens_from_string(string: str) -> int:
-    """Returns the number of tokens in a text string."""
-    encoding = tiktoken.get_encoding('cl100k_base')
-    num_tokens = len(encoding.encode(string))
-    return num_tokens
-
-
-def expand_features(embedding, target_length):
-    poly = PolynomialFeatures(degree=2)
-    expanded_embedding = poly.fit_transform(embedding.reshape(1, -1))
-    expanded_embedding = expanded_embedding.flatten()
-    if len(expanded_embedding) > target_length:
-        expanded_embedding = expanded_embedding[:target_length]
-    elif len(expanded_embedding) < target_length:
-        expanded_embedding = np.pad(expanded_embedding, (0, target_length - len(expanded_embedding)))
-    return expanded_embedding
-
-
 @app.post("/v1/embeddings", response_model=EmbeddingResponse)
 async def get_embeddings(request: EmbeddingRequest):
     embeddings = [embedding_model.encode(text) for text in request.input]
     embeddings = [embedding.tolist() for embedding in embeddings]
 
-    prompt_tokens = sum(len(text.split()) for text in request.input)
-    total_tokens = sum(num_tokens_from_string(text) for text in request.input)
+    def num_tokens_from_string(string: str) -> int:
+        """
+        Returns the number of tokens in a text string.
+        use cl100k_base tokenizer
+        """
+        encoding = tiktoken.get_encoding('cl100k_base')
+        num_tokens = len(encoding.encode(string))
+        return num_tokens
 
     response = {
         "data": [
@@ -195,8 +180,8 @@ async def get_embeddings(request: EmbeddingRequest):
         "model": request.model,
         "object": "list",
         "usage": {
-            "prompt_tokens": prompt_tokens,
-            "total_tokens": total_tokens,
+            "prompt_tokens": sum(len(text.split()) for text in request.input),  # how many characters in prompt
+            "total_tokens": sum(num_tokens_from_string(text) for text in request.input),  # how many tokens (encoding)
         },
     }
     return response
@@ -204,9 +189,12 @@ async def get_embeddings(request: EmbeddingRequest):
 
 @app.get("/v1/models", response_model=ModelList)
 async def list_models():
-    model_card = ModelCard(id="chatglm3-6b")
-    return ModelList(data=[model_card])
-
+    model_card = ModelCard(
+        id="chatglm3-6b"
+    )
+    return ModelList(
+        data=[model_card]
+    )
 
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponse)
 async def create_chat_completion(request: ChatCompletionRequest):
