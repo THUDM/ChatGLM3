@@ -49,6 +49,7 @@ Efficient fine-tuning:
 Application framework:
 * [LangChain-Chatchat](https://github.com/chatchat-space/Langchain-Chatchat): Based on large language models such as ChatGLM and application frameworks such as Langchain, open source and offline deployable retrieval enhancement generation (RAG) large Model knowledge base project.
 
+* [BISHENG](https://github.com/dataelement/bisheng): open-source platform for developing LLM applications. It empowers and accelerates the development of LLM applications and helps users to enter the next generation of application development mode with the best experience.
 ## Evaluation Results
 
 ### Typical Tasks

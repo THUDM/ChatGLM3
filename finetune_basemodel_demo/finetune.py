@@ -129,7 +129,7 @@ def main():
         tokenizer=tokenizer,
         data_collator=data_collator,
     )
-    breakpoint()
+
     checkpoint = None
     if training_args.resume_from_checkpoint is not None:
         checkpoint = training_args.resume_from_checkpoint

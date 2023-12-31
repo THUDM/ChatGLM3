@@ -6,16 +6,18 @@ Usage:
 - Interact with the model by typing questions and receiving responses.
 
 Requirements:
-- Gradio (required with 3.39 version, not support for 4.x), Transformers, and other necessary Python libraries should be installed.
-- The model checkpoint should be accessible at the specified paths.
+- Gradio (required for 4.12.0 and later, 3.x is not support now) should be installed.
 
-Note: The script includes a modification to the Chatbot's postprocess method to handle markdown to HTML conversion, ensuring that the chat interface displays formatted text correctly.
+Note: The script includes a modification to the Chatbot's postprocess method to handle markdown to HTML conversion,
+ensuring that the chat interface displays formatted text correctly.
+
 """
 
 import os
-import mdtex2html
-from transformers import AutoModel, AutoTokenizer
 import gradio as gr
+import torch
+from transformers import AutoModel, AutoTokenizer, StoppingCriteria, StoppingCriteriaList, TextIteratorStreamer
+from threading import Thread
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
@@ -23,22 +25,17 @@ TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
 tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
 model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
 
-def postprocess(self, y):
-    if y is None:
-        return []
-    for i, (message, response) in enumerate(y):
-        y[i] = (
-            None if message is None else mdtex2html.convert((message)),
-            None if response is None else mdtex2html.convert(response),
-        )
-    return y
 
-
-gr.Chatbot.postprocess = postprocess
+class StopOnTokens(StoppingCriteria):
+    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs) -> bool:
+        stop_ids = [0, 2]
+        for stop_id in stop_ids:
+            if input_ids[0][-1] == stop_id:
+                return True
+        return False
 
 
 def parse_text(text):
-    """copy from https://github.com/GaiZhenbiao/ChuanhuChatGPT/"""
     lines = text.split("\n")
     lines = [line for line in lines if line != ""]
     count = 0
@@ -70,50 +67,67 @@ def parse_text(text):
     return text
 
 
-def predict(input, chatbot, max_length, top_p, temperature, history, past_key_values):
-    chatbot.append((parse_text(input), ""))
-    for response, history, past_key_values in model.stream_chat(tokenizer, input, history,
-                                                                past_key_values=past_key_values,
-                                                                return_past_key_values=True,
-                                                                max_length=max_length, top_p=top_p,
-                                                                temperature=temperature):
-        chatbot[-1] = (parse_text(input), parse_text(response))
+def predict(history, max_length, top_p, temperature):
+    stop = StopOnTokens()
+    messages = []
+    for idx, (user_msg, model_msg) in enumerate(history):
+        if idx == len(history) - 1 and not model_msg:
+            messages.append({"role": "user", "content": user_msg})
+            break
+        if user_msg:
+            messages.append({"role": "user", "content": user_msg})
+        if model_msg:
+            messages.append({"role": "assistant", "content": model_msg})
 
-        yield chatbot, history, past_key_values
+    print("\n\n====conversation====\n", messages)
+    model_inputs = tokenizer.apply_chat_template(messages,
+                                                 add_generation_prompt=True,
+                                                 tokenize=True,
+                                                 return_tensors="pt").to(next(model.parameters()).device)
+    streamer = TextIteratorStreamer(tokenizer, timeout=60, skip_prompt=True, skip_special_tokens=True)
+    generate_kwargs = {
+        "input_ids": model_inputs,
+        "streamer": streamer,
+        "max_new_tokens": max_length,
+        "do_sample": True,
+        "top_p": top_p,
+        "temperature": temperature,
+        "stopping_criteria": StoppingCriteriaList([stop]),
+        "repetition_penalty": 1.2,
+    }
+    t = Thread(target=model.generate, kwargs=generate_kwargs)
+    t.start()
 
-
-def reset_user_input():
-    return gr.update(value='')
-
-
-def reset_state():
-    return [], [], None
+    for new_token in streamer:
+        if new_token != '':
+            history[-1][1] += new_token
+            yield history
 
 
 with gr.Blocks() as demo:
-    gr.HTML("""<h1 align="center">ChatGLM3-6B</h1>""")
-
+    gr.HTML("""<h1 align="center">ChatGLM3-6B Gradio Simple Demo</h1>""")
     chatbot = gr.Chatbot()
+
     with gr.Row():
         with gr.Column(scale=4):
             with gr.Column(scale=12):
-                user_input = gr.Textbox(show_label=False, placeholder="Input...", lines=10).style(
-                    container=False)
+                user_input = gr.Textbox(show_label=False, placeholder="Input...", lines=10, container=False)
             with gr.Column(min_width=32, scale=1):
-                submitBtn = gr.Button("Submit", variant="primary")
+                submitBtn = gr.Button("Submit")
         with gr.Column(scale=1):
             emptyBtn = gr.Button("Clear History")
             max_length = gr.Slider(0, 32768, value=8192, step=1.0, label="Maximum length", interactive=True)
             top_p = gr.Slider(0, 1, value=0.8, step=0.01, label="Top P", interactive=True)
-            temperature = gr.Slider(0, 1, value=0.6, step=0.01, label="Temperature", interactive=True)
+            temperature = gr.Slider(0.01, 1, value=0.6, step=0.01, label="Temperature", interactive=True)
 
-    history = gr.State([])
-    past_key_values = gr.State(None)
 
-    submitBtn.click(predict, [user_input, chatbot, max_length, top_p, temperature, history, past_key_values],
-                    [chatbot, history, past_key_values], show_progress=True)
-    submitBtn.click(reset_user_input, [], [user_input])
+    def user(query, history):
+        return "", history + [[parse_text(query), ""]]
 
-    emptyBtn.click(reset_state, outputs=[chatbot, history, past_key_values], show_progress=True)
+    submitBtn.click(user, [user_input, chatbot], [user_input, chatbot], queue=False).then(
+        predict, [chatbot, max_length, top_p, temperature], chatbot
+    )
+    emptyBtn.click(lambda: None, None, chatbot, queue=False)
 
-demo.queue().launch(share=False, server_name="127.0.0.1", server_port=8501, inbrowser=True)
+demo.queue()
+demo.launch(server_name="127.0.0.1", server_port=8501, inbrowser=True, share=False)
