@@ -3,9 +3,15 @@ from transformers import AutoConfig, AutoModel, AutoTokenizer
 import torch
 import os
 
+merged_dir = "/root/autodl-tmp/ChatGLM3/finetune_chatmodel_demo/output/merged"
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--pt-checkpoint", type=str, default=None, help="The checkpoint path")
-parser.add_argument("--model", type=str, default=None, help="main model weights")
+#parser.add_argument("--pt-checkpoint", type=str, default="/root/autodl-tmp/ChatGLM3/finetune_chatmodel_demo/output/zts_pt-20231229-141644-128-2e-2", help="The checkpoint path")
+#parser.add_argument("--model", type=str, default="/root/autodl-tmp/model_files/chatglm3-6b-32k", help="main model weights")
+parser.add_argument("--model", type=str, default=merged_dir, help="main model weights")
+#parser.add_argument("--model", type=str, default=None, help="main model weights")
 parser.add_argument("--tokenizer", type=str, default=None, help="main model weights")
 parser.add_argument("--pt-pre-seq-len", type=int, default=128, help="The pre-seq-len used in p-tuning")
 parser.add_argument("--device", type=str, default="cuda")
@@ -15,6 +21,7 @@ args = parser.parse_args()
 
 if args.tokenizer is None:
     args.tokenizer = args.model
+print(">>> ", args.tokenizer)
 
 if args.pt_checkpoint:
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer, trust_remote_code=True)

@@ -45,3 +45,6 @@ while True:
                               max_length=inputs["input_ids"].shape[-1] + args.max_new_tokens)
     response = response[0, inputs["input_ids"].shape[-1]:]
     print("Response:", tokenizer.decode(response, skip_special_tokens=True))
+
+
+#  python inference.py --pt-checkpoint "/root/autodl-tmp/ChatGLM3/finetune_chatmodel_demo/output/zts_pt-20231218-141452-128-2e-2" --model "/root/autodl-tmp/model_files/chatglm3-6b-32k"
