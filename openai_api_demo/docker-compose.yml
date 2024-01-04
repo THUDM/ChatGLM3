@@ -6,6 +6,7 @@ services:
                 restart: unless-stopped
                 working_dir: /glm3
                 container_name: glm3_api
+                env_file: ./.env
                 networks:
                         - v_glm3
                 deploy:
@@ -26,8 +27,8 @@ services:
                         - 8100:8000
                 volumes:
                         - ./:/glm3
-                        - /home/ubuntu/llm_models/chatglm3-6b:/models/chatglm3-6b
-                        - /home/ubuntu/llm_models/bge-large-zh-v1.5:/models/bge-large-zh-v1.5
+                        - ${LOCAL_MODEL_PATH}:/models/chatglm3-6b
+                        - ${LOCAL_EMBEDDING_MODEL_PATH}:/models/bge-large-zh-v1.5
                 command:
                         - sh
                         - -c
@@ -40,4 +41,4 @@ services:
                           python openai_api.py
 networks:
         v_glm3:
-                external: true
+                driver: bridge
