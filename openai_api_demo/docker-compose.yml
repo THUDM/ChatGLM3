@@ -7,7 +7,7 @@ services:
                 working_dir: /glm3
                 container_name: glm3_api
                 networks:
-                        - glm3
+                        - v_glm3
                 deploy:
                         resources:
                                 reservations:
@@ -26,8 +26,8 @@ services:
                         - 8100:8000
                 volumes:
                         - ./:/glm3
-                        - /home/ubuntu/mydev/llm_models/chatglm3-6b:/models/chatglm3-6b
-                        - /home/ubuntu/mydev/llm_models/bge-large-zh-v1.5:/models/bge-large-zh-v1.5
+                        - /home/ubuntu/llm_models/chatglm3-6b:/models/chatglm3-6b
+                        - /home/ubuntu/llm_models/bge-large-zh-v1.5:/models/bge-large-zh-v1.5
                 command:
                         - sh
                         - -c
@@ -39,5 +39,5 @@ services:
                           pip install -r requirements.txt -i  https://pypi.tuna.tsinghua.edu.cn/simple
                           python openai_api.py
 networks:
-        glm3:
-                driver: bridge
+        v_glm3:
+                external: true
