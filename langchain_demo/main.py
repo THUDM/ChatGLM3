@@ -54,7 +54,7 @@ from tools.DistanceConversion import DistanceConverter
 
 HUMAN_MESSAGE_TEMPLATE = "{input}\n\nhistory:{chat_history}\n\n{agent_scratchpad}"
 
-MODEL_PATH = os.environ.get('MODEL_PATH', '/share/home/zyx/Models/chatglm3-6b')
+MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 
 if __name__ == "__main__":
     llm = ChatGLM3()
