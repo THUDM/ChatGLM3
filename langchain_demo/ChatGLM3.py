@@ -1,19 +1,18 @@
+import ast
 import json
 from langchain.llms.base import LLM
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 from typing import List, Optional
-from utils import tool_config_from_file
 
 
 class ChatGLM3(LLM):
     max_token: int = 8192
-    do_sample: bool = False
+    do_sample: bool = True
     temperature: float = 0.8
     top_p = 0.8
     tokenizer: object = None
     model: object = None
     history: List = []
-    tool_names: List = []
     has_search: bool = False
 
     def __init__(self):
@@ -37,21 +36,27 @@ class ChatGLM3(LLM):
 
     def _tool_history(self, prompt: str):
         ans = []
+
         tool_prompts = prompt.split(
             "You have access to the following tools:\n\n")[1].split("\n\nUse a json blob")[0].split("\n")
-
-        tool_names = [tool.split(":")[0] for tool in tool_prompts]
-        self.tool_names = tool_names
         tools_json = []
-        for i, tool in enumerate(tool_names):
-            tool_config = tool_config_from_file(tool)
-            if tool_config:
-                tools_json.append(tool_config)
-            else:
-                ValueError(
-                    f"Tool {tool} config not found! It's description is {tool_prompts[i]}"
-                )
 
+        for tool_desc in tool_prompts:
+            name = tool_desc.split(":")[0]
+            description = tool_desc.split(":")[1].split(", args:")[0].strip()
+            parameters_str = tool_desc.split("args:")[1].strip()
+            parameters_dict = ast.literal_eval(parameters_str)
+
+            # Extracting only the 'description' and 'type' for each parameter
+            params_cleaned = {}
+            for param, details in parameters_dict.items():
+                params_cleaned[param] = {'description': details['description'], 'type': details['type']}
+
+            tools_json.append({
+                "name": name,
+                "description": description,
+                "parameters": params_cleaned
+            })
         ans.append({
             "role": "system",
             "content": "Answer the following questions as best as you can. You have access to the following tools:",
@@ -72,16 +77,25 @@ class ChatGLM3(LLM):
         if len(self.history[-1]["metadata"]) > 0:
             metadata = self.history[-1]["metadata"]
             content = self.history[-1]["content"]
-            if "tool_call" in content:
-                for tool in self.tool_names:
-                    if tool in metadata:
-                        input_para = content.split("='")[-1].split("'")[0]
-                        action_json = {
-                            "action": tool,
-                            "action_input": input_para
-                        }
-                        self.has_search = True
-                        return f"""
+
+            lines = content.split('\n')
+            for line in lines:
+                if 'tool_call(' in line and ')' in line and self.has_search is False:
+                    # 获取括号内的字符串
+                    params_str = line.split('tool_call(')[-1].split(')')[0]
+
+                    # 解析参数对
+                    params_pairs = [param.split("=") for param in params_str.split(",") if "=" in param]
+                    params = {pair[0].strip(): pair[1].strip().strip("'\"") for pair in params_pairs}
+                    action_json = {
+                        "action": metadata,
+                        "action_input": params
+                    }
+                    self.has_search = True
+                    print("*****Action****")
+                    print(action_json)
+                    print("***************")
+                    return f"""
 Action: 
 ```
 {json.dumps(action_json, ensure_ascii=False)}
