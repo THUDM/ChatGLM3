@@ -1,0 +1,44 @@
+version: "3.6"
+
+services:
+        glm3_api:
+                image: python:3.10.13-slim
+                restart: unless-stopped
+                working_dir: /glm3
+                container_name: glm3_api
+                env_file: ./.env
+                networks:
+                        - v_glm3
+                deploy:
+                        resources:
+                                reservations:
+                                        devices:
+                                                - driver: nvidia
+                                                  count: 1
+                                                  capabilities: [gpu]
+                environment:
+                        - MODEL_PATH=/models/chatglm3-6b
+                        - EMBEDDING_PATH=/models/bge-large-zh-v1.5
+                        - TZ=Asia/Shanghai
+                        - PYTHONDONTWRITEBYTECODE=1
+                        - PYTHONUNBUFFERED=1
+                        - DOCKER=True
+                ports:
+                        - 8100:8000
+                volumes:
+                        - ./:/glm3
+                        - ${LOCAL_MODEL_PATH}:/models/chatglm3-6b
+                        - ${LOCAL_EMBEDDING_MODEL_PATH}:/models/bge-large-zh-v1.5
+                command:
+                        - sh
+                        - -c
+                        - |
+                          sed -i s/deb.debian.org/mirrors.tencentyun.com/g /etc/apt/sources.list
+                          sed -i s/security.debian.org/mirrors.tencentyun.com/g /etc/apt/sources.list
+                          apt-get update
+                          python -m pip install -i  https://mirror.sjtu.edu.cn/pypi/web/simple --upgrade pip
+                          pip install -r requirements.txt -i  https://pypi.tuna.tsinghua.edu.cn/simple
+                          python openai_api.py
+networks:
+        v_glm3:
+                driver: bridge

@@ -31,7 +31,7 @@ import tiktoken
 import torch
 import uvicorn
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from contextlib import asynccontextmanager
@@ -158,6 +158,12 @@ class ChatCompletionResponse(BaseModel):
     choices: List[Union[ChatCompletionResponseChoice, ChatCompletionResponseStreamChoice]]
     created: Optional[int] = Field(default_factory=lambda: int(time.time()))
     usage: Optional[UsageInfo] = None
+
+
+@app.get("/health")
+async def health() -> Response:
+    """Health check."""
+    return Response(status_code=200)
 
 
 @app.post("/v1/embeddings", response_model=EmbeddingResponse)
