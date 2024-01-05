@@ -31,7 +31,7 @@ import tiktoken
 import torch
 import uvicorn
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from contextlib import asynccontextmanager
