@@ -65,7 +65,7 @@ def get_tools() -> dict:
     return deepcopy(_TOOL_DESCRIPTIONS)
 
 
-# Tool Definitions
+# tools Definitions
 
 @register_tool
 def random_number_generator(

@@ -1,22 +1,23 @@
 import os
-from typing import Any
-
 import requests
+
+from typing import Type, Any
 from langchain.tools import BaseTool
+from pydantic import BaseModel, Field
+
+class WeatherInput(BaseModel):
+    location: str = Field(description="the location need to check the weather")
 
 
 class Weather(BaseTool):
     name = "weather"
     description = "Use for searching weather at a specific location"
+    args_schema: Type[BaseModel] = WeatherInput
 
     def __init__(self):
         super().__init__()
 
-    async def _arun(self, *args: Any, **kwargs: Any) -> Any:
-        # 用例中没有用到 arun 不予具体实现
-        pass
-
-    def get_weather(self, location):
+    def _run(self, location: str) -> dict[str, Any]:
         api_key = os.environ["SENIVERSE_KEY"]
         url = f"https://api.seniverse.com/v3/weather/now.json?key={api_key}&location={location}&language=zh-Hans&unit=c"
         response = requests.get(url)
@@ -30,12 +31,3 @@ class Weather(BaseTool):
         else:
             raise Exception(
                 f"Failed to retrieve weather: {response.status_code}")
-
-    def _run(self, para: str) -> str:
-        return self.get_weather(para)
-
-
-if __name__ == "__main__":
-    weather_tool = Weather()
-    weather_info = weather_tool.run("成都")
-    print(weather_info)
