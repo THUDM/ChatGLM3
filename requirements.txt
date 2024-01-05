@@ -3,8 +3,9 @@ transformers>=4.36.2
 tokenizers>=0.15.0
 cpm_kernels>=1.0.11
 torch>=2.1.0
-gradio~=3.39
+gradio>=4.13.0
 sentencepiece>=0.1.99
+sentence_transformers>=2.2.2
 accelerate>=0.25.0
 streamlit>=1.29.0
 fastapi>=0.108.0
@@ -16,7 +17,6 @@ latex2mathml>=3.77.0
 openai>=1.6.1
 pydantic>=2.5.3
 sse-starlette>=1.8.2
-uvicorn~=0.24.0
+uvicorn>=0.25.0
 timm>=0.9.12
-tiktoken
-sentence_transformers
+tiktoken>=0.5.2
