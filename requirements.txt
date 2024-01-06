@@ -26,5 +26,6 @@ tiktoken>=0.5.2
 
 # for langchain demo
 
-langchain>=0.0.354
+langchain>=0.1.0
+langchainhub>=0.1.14
 arxiv>=2.1.0

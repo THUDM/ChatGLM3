@@ -11,7 +11,8 @@ Tools:
 
 The agent operates in three modes:
 1. Single Parameter without History: Uses Calculator to perform simple arithmetic.
-2. Single Parameter with History: Uses Weather tool to answer queries about temperature, considering the conversation history.
+2. Single Parameter with History: Uses Weather tool to answer queries about temperature, considering the
+conversation history.
 3. Multiple Parameters without History: Uses DistanceConverter to convert distances between specified units.
 4. Single use Langchain Tool: Uses Arxiv tool to search for scientific articles.
 
@@ -27,43 +28,49 @@ The top_p and temperature parameters of the model should be adjusted to better s
 
 Success example:
 
-*****Action****
-{'action': 'Calculator', 'action_input': {'calculation': '34*34'}}
-***************
-{'input': '34 * 34', 'output': '34 * 34 = 1156'}
-{'input': '厦门比北京热吗?', 'chat_history': ['北京的温度是多少度?', '北京的温度是4度。'], 'output': '经过查询，厦门的温度是21度，比北京更加温暖'}
-*****Action****
-{'action': 'DistanceConverter', 'action_input': {'distance': '30', 'unit': 'km', 'to_unit': 'm'}}
-***************
-{'input': 'how many meters in 30 km?', 'output': 'The answer is: 30000'}
-*****Action****
-{'action': 'arxiv', 'action_input': {'query': 'GLM 130B'}}
-***************
-{'input': 'Descirbe the paper about GLM 130B', 'output': 'The GLM-130B paper is about a bilingual pre-trained language model with 130 billion parameters, trained on both English and Chinese data. The authors propose a unique scaling property of GLM-130B that allows them to reach INT4 quantization without post-training, which makes it the first 100B-scale model to achieve this. The model shows significant outperformance on popular English benchmarks and consistently outperforms the largest Chinese language model. The authors also show that masked language models, which are trained to predict masked tokens in a sequence, often demonstrate inconsistencies, and they propose a self-ensemble algorithm to address this issue during the inference phase.'}
+*****Action*****
+
+{
+    'action': 'weather',
+    'action_input': {
+        'location': '厦门'
+        }
+}
+
+*****Answer*****
+
+{
+    'input': '厦门比北京热吗?',
+    'chat_history': [HumanMessage(content='北京温度多少度'), AIMessage(content='北京现在12度')],
+    'output': '根据最新的天气数据，厦门今天的气温为18℃，天气晴朗。而北京今天的气温为20℃，稍微有些热。所以，厦门比北京热。'
+}
+
+****************
 
 """
 
 import os
 
-from langchain.agents import StructuredChatAgent, AgentExecutor, load_tools
-from ChatGLM3 import ChatGLM3
+from langchain import hub
+from langchain.agents import AgentExecutor, create_structured_chat_agent, load_tools
+from langchain_core.messages import AIMessage, HumanMessage
 
+from ChatGLM3 import ChatGLM3
 from tools.Calculator import Calculator
 from tools.Weather import Weather
 from tools.DistanceConversion import DistanceConverter
-
-HUMAN_MESSAGE_TEMPLATE = "{input}\n\nhistory:{chat_history}\n\n{agent_scratchpad}"
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 
 if __name__ == "__main__":
     llm = ChatGLM3()
     llm.load_model(MODEL_PATH)
+    prompt = hub.pull("hwchase17/structured-chat-agent")
 
     # for single parameter without history
 
     tools = [Calculator()]
-    agent = StructuredChatAgent.from_llm_and_tools(llm=llm, tools=tools)
+    agent = create_structured_chat_agent(llm=llm, tools=tools, prompt=prompt)
     agent_executor = AgentExecutor(agent=agent, tools=tools)
     ans = agent_executor.invoke({"input": "34 * 34"})
     print(ans)
@@ -71,14 +78,14 @@ if __name__ == "__main__":
     # for singe parameter with history
 
     tools = [Weather()]
-    agent = StructuredChatAgent.from_llm_and_tools(llm=llm, tools=tools, human_message_template=HUMAN_MESSAGE_TEMPLATE)
+    agent = create_structured_chat_agent(llm=llm, tools=tools, prompt=prompt)
     agent_executor = AgentExecutor(agent=agent, tools=tools)
     ans = agent_executor.invoke(
         {
             "input": "厦门比北京热吗?",
             "chat_history": [
-                "北京的温度是多少度?",
-                "北京的温度是4度。",
+                HumanMessage(content="北京温度多少度"),
+                AIMessage(content="北京现在12度"),
             ],
         }
     )
@@ -87,7 +94,7 @@ if __name__ == "__main__":
     # for multiple parameters without history
 
     tools = [DistanceConverter()]
-    agent = StructuredChatAgent.from_llm_and_tools(llm=llm, tools=tools)
+    agent = create_structured_chat_agent(llm=llm, tools=tools, prompt=prompt)
     agent_executor = AgentExecutor(agent=agent, tools=tools)
     ans = agent_executor.invoke({"input": "how many meters in 30 km?"})
 
@@ -96,7 +103,7 @@ if __name__ == "__main__":
     # for using langchain tools
 
     tools = load_tools(["arxiv"], llm=llm)
-    agent = StructuredChatAgent.from_llm_and_tools(llm=llm, tools=tools)
+    agent = create_structured_chat_agent(llm=llm, tools=tools, prompt=prompt)
     agent_executor = AgentExecutor(agent=agent, tools=tools)
     ans = agent_executor.invoke({"input": "Descirbe the paper about GLM 130B"})
 

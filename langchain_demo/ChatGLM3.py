@@ -92,9 +92,9 @@ class ChatGLM3(LLM):
                         "action_input": params
                     }
                     self.has_search = True
-                    print("*****Action****")
+                    print("*****Action*****")
                     print(action_json)
-                    print("***************")
+                    print("*****Answer*****")
                     return f"""
 Action: 
 ```
