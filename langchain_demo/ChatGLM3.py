@@ -43,11 +43,9 @@ class ChatGLM3(LLM):
 
         for tool_desc in tool_prompts:
             name = tool_desc.split(":")[0]
-            description = tool_desc.split(":")[1].split(", args:")[0].strip()
+            description = tool_desc.split(", args:")[0].split(":")[1].strip()
             parameters_str = tool_desc.split("args:")[1].strip()
             parameters_dict = ast.literal_eval(parameters_str)
-
-            # Extracting only the 'description' and 'type' for each parameter
             params_cleaned = {}
             for param, details in parameters_dict.items():
                 params_cleaned[param] = {'description': details['description'], 'type': details['type']}
@@ -57,6 +55,7 @@ class ChatGLM3(LLM):
                 "description": description,
                 "parameters": params_cleaned
             })
+
         ans.append({
             "role": "system",
             "content": "Answer the following questions as best as you can. You have access to the following tools:",
