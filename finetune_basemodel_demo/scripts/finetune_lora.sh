@@ -15,6 +15,7 @@ GRAD_ACCUMULARION_STEPS=1
 MAX_STEP=1000
 SAVE_INTERVAL=500
 
+AUTORESUME_FROM_CHECKPOINT=True
 RUN_NAME=text
 BASE_MODEL_PATH=THUDM/chatglm3-6b-base
 DATASET_PATH=data/alpaca_data.jsonl
@@ -40,5 +41,6 @@ torchrun --standalone --nnodes=1 --nproc_per_node=$NUM_GPUS finetune.py \
     --max_steps $MAX_STEP \
     --logging_steps 1 \
     --save_steps $SAVE_INTERVAL \
-    --learning_rate $LR  2>&1 | tee ${OUTPUT_DIR}/train.log
+    --learning_rate $LR \
+    --resume_from_checkpoint $AUTORESUME_FROM_CHECKPOINT  2>&1 | tee ${OUTPUT_DIR}/train.log
 

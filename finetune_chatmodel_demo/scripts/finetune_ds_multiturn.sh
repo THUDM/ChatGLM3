@@ -10,6 +10,7 @@ GRAD_ACCUMULARION_STEPS=1
 MAX_STEP=200
 SAVE_INTERVAL=50
 
+AUTORESUME_FROM_CHECKPOINT=True
 DATESTR=`date +%Y%m%d-%H%M%S`
 RUN_NAME=tool_alpaca_ft
 DATASET_PATH=formatted_data/tool_alpaca.jsonl
@@ -32,4 +33,5 @@ torchrun --standalone --nnodes=1 --nproc_per_node=$NUM_GPUS finetune.py \
     --logging_steps 1 \
     --save_steps $SAVE_INTERVAL \
     --fp16 \
-    --deepspeed configs/deepspeed.json 2>&1 | tee ${OUTPUT_DIR}/train.log
+    --deepspeed configs/deepspeed.json \
+    --resume_from_checkpoint $AUTORESUME_FROM_CHECKPOINT 2>&1 | tee ${OUTPUT_DIR}/train.log
