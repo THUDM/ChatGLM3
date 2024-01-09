@@ -173,10 +173,7 @@ def main():
         model.gradient_checkpointing_enable()
         model.enable_input_require_grads()
         checkpointdir = output_dir + "\\checkpoint-" + str(checkpointsn)
-        print("-----------------------------")
-        print("\n\n\n\n")
         print(checkpointdir)
-        print("-----------------------------")
         trainer.train(resume_from_checkpoint=checkpointdir)
         trainer.save_model()  # Saves the tokenizer too for easy upload
         trainer.save_state()
