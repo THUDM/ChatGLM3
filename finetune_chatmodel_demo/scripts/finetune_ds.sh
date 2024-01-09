@@ -11,6 +11,7 @@ GRAD_ACCUMULARION_STEPS=1
 MAX_STEP=500
 SAVE_INTERVAL=500
 
+AUTORESUME_FROM_CHECKPOINT=True
 RUN_NAME=advertise_gen_ft
 BASE_MODEL_PATH=THUDM/chatglm3-6b
 DATASET_PATH=formatted_data/advertise_gen.jsonl
@@ -36,4 +37,5 @@ torchrun --standalone --nnodes=1 --nproc_per_node=$NUM_GPUS finetune.py \
     --save_steps $SAVE_INTERVAL \
     --learning_rate $LR \
     --fp16 \
-    --deepspeed configs/deepspeed.json 2>&1 | tee ${OUTPUT_DIR}/train.log
+    --deepspeed configs/deepspeed.json \
+    --resume_from_checkpoint $AUTORESUME_FROM_CHECKPOINT  2>&1 | tee ${OUTPUT_DIR}/train.log

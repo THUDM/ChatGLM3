@@ -153,14 +153,41 @@ def main():
         save_changed=model_args.pre_seq_len is not None
     )
 
-    checkpoint = None
+    # Determine if there are any breakpoints in this task
+    output_dir = training_args.output_dir
+    dirlist = os.listdir(output_dir)
+    checkpointsn = 0
+    for checkpointstr in dirlist:
+        if checkpointstr.find("eckpoint") > 0:
+            checkpoint = int(checkpointstr.replace("checkpoint-", ""))
+            if checkpoint > checkpointsn:
+                checkpointsn = checkpoint
+
+    # Determine whether to perform automatic recovery
     if training_args.resume_from_checkpoint is not None:
-        checkpoint = training_args.resume_from_checkpoint
-    model.gradient_checkpointing_enable()
-    model.enable_input_require_grads()
-    trainer.train(resume_from_checkpoint=checkpoint)
-    trainer.save_model()  # Saves the tokenizer too for easy upload
-    trainer.save_state()
+        is_auto_resume_from_checkpoint = True
+    else:
+        is_auto_resume_from_checkpoint = False
+    if is_auto_resume_from_checkpoint and checkpointsn > 0:
+        # If there is a breakpoint, continue training at the breakpoint
+        model.gradient_checkpointing_enable()
+        model.enable_input_require_grads()
+        checkpointdir = output_dir + "\\checkpoint-" + str(checkpointsn)
+        print("-----------------------------")
+        print("\n\n\n\n")
+        print(checkpointdir)
+        print("-----------------------------")
+        trainer.train(resume_from_checkpoint=checkpointdir)
+        trainer.save_model()  # Saves the tokenizer too for easy upload
+        trainer.save_state()
+    else:
+        # Train normally without breakpoints
+        model.gradient_checkpointing_enable()
+        model.enable_input_require_grads()
+        trainer.train()
+        trainer.save_model()  # Saves the tokenizer too for easy upload
+        trainer.save_state()
+
 
 
 if __name__ == "__main__":
