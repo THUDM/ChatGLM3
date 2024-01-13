@@ -105,6 +105,6 @@ if __name__ == "__main__":
     tools = load_tools(["arxiv"], llm=llm)
     agent = create_structured_chat_agent(llm=llm, tools=tools, prompt=prompt)
     agent_executor = AgentExecutor(agent=agent, tools=tools)
-    ans = agent_executor.invoke({"input": "Descirbe the paper about GLM 130B"})
+    ans = agent_executor.invoke({"input": "Describe the paper about GLM 130B"})
 
     print(ans)
