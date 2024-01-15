@@ -12,13 +12,13 @@ client = OpenAI(
   api_key = "xxx"
 )
 
-functions = get_tools()
+tools = get_tools()
 
 
-def run_conversation(query: str, stream=False, functions=None, max_retry=5):
+def run_conversation(query: str, stream=False, tools=None, max_retry=5):
     params = dict(model="chatglm3", messages=[{"role": "user", "content": query}], stream=stream)
-    if functions:
-        params["functions"] = functions
+    if tools:
+        params["tools"] = tools
     response = client.chat.completions.create(**params)
 
     for _ in range(max_retry):
@@ -90,4 +90,4 @@ if __name__ == "__main__":
     logger.info("\n=========== next conversation ===========")
 
     query = "帮我查询北京的天气怎么样"
-    run_conversation(query, functions=functions, stream=True)
+    run_conversation(query, tools=tools, stream=True)
