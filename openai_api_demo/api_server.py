@@ -113,11 +113,17 @@ class EmbeddingRequest(BaseModel):
     model: str
 
 
+class CompletionUsage(BaseModel):
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
+
 class EmbeddingResponse(BaseModel):
     data: list
     model: str
     object: str
-    usage: dict
+    usage: CompletionUsage
 
 
 # for ChatCompletionRequest
@@ -136,7 +142,6 @@ class ChatCompletionRequest(BaseModel):
     max_tokens: Optional[int] = None
     stream: Optional[bool] = False
     tools: Optional[Union[dict, List[dict]]] = None
-    # Additional parameters
     repetition_penalty: Optional[float] = 1.1
 
 
@@ -144,16 +149,17 @@ class ChatCompletionResponseChoice(BaseModel):
     index: int
     message: ChatMessage
     finish_reason: Literal["stop", "length", "function_call"]
-    # no need for logprobs
 
 
 class ChatCompletionResponseStreamChoice(BaseModel):
-    index: int
     delta: DeltaMessage
     finish_reason: Optional[Literal["stop", "length", "function_call"]]
+    index: int
 
 
 class ChatCompletionResponse(BaseModel):
+    model: str
+    id: str
     object: Literal["chat.completion", "chat.completion.chunk"]
     choices: List[Union[ChatCompletionResponseChoice, ChatCompletionResponseStreamChoice]]
     created: Optional[int] = Field(default_factory=lambda: int(time.time()))
@@ -191,10 +197,11 @@ async def get_embeddings(request: EmbeddingRequest):
         ],
         "model": request.model,
         "object": "list",
-        "usage": {
-            "prompt_tokens": sum(len(text.split()) for text in request.input),  # how many characters in prompt
-            "total_tokens": sum(num_tokens_from_string(text) for text in request.input),  # how many tokens (encoding)
-        },
+        "usage": CompletionUsage(
+            prompt_tokens=sum(len(text.split()) for text in request.input),
+            completion_tokens=0,
+            total_tokens=sum(num_tokens_from_string(text) for text in request.input),
+        )
     }
     return response
 
@@ -319,6 +326,8 @@ async def create_chat_completion(request: ChatCompletionRequest):
         setattr(usage, usage_key, getattr(usage, usage_key) + usage_value)
 
     return ChatCompletionResponse(
+        model=request.model,
+        id="",  # for open_source model, id is empty
         choices=[choice_data],
         object="chat.completion",
         usage=usage
@@ -333,7 +342,7 @@ async def predict(model_id: str, params: dict):
         delta=DeltaMessage(role="assistant"),
         finish_reason=None
     )
-    chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
+    chunk = ChatCompletionResponse(model=model_id, id="", choices=[choice_data], object="chat.completion.chunk")
     yield "{}".format(chunk.model_dump_json(exclude_unset=True))
 
     previous_text = ""
@@ -368,7 +377,12 @@ async def predict(model_id: str, params: dict):
             delta=delta,
             finish_reason=finish_reason
         )
-        chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
+        chunk = ChatCompletionResponse(
+            model=model_id,
+            id="",
+            choices=[choice_data],
+            object="chat.completion.chunk"
+        )
         yield "{}".format(chunk.model_dump_json(exclude_unset=True))
 
     choice_data = ChatCompletionResponseStreamChoice(
@@ -376,7 +390,12 @@ async def predict(model_id: str, params: dict):
         delta=DeltaMessage(),
         finish_reason="stop"
     )
-    chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
+    chunk = ChatCompletionResponse(
+        model=model_id,
+        id="",
+        choices=[choice_data],
+        object="chat.completion.chunk"
+    )
     yield "{}".format(chunk.model_dump_json(exclude_unset=True))
     yield '[DONE]'
 
@@ -425,7 +444,13 @@ def predict_stream(model_id, gen_params):
                     delta=message,
                     finish_reason=finish_reason
                 )
-                chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
+                chunk = ChatCompletionResponse(
+                    model=model_id,
+                    id="",
+                    choices=[choice_data],
+                    created=int(time.time()),
+                    object="chat.completion.chunk"
+                )
                 yield "{}".format(chunk.model_dump_json(exclude_unset=True))
 
             send_msg = delta_text if has_send_first_chunk else output
@@ -440,7 +465,13 @@ def predict_stream(model_id, gen_params):
                 delta=message,
                 finish_reason=finish_reason
             )
-            chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
+            chunk = ChatCompletionResponse(
+                model=model_id,
+                id="",
+                choices=[choice_data],
+                created=int(time.time()),
+                object="chat.completion.chunk"
+            )
             yield "{}".format(chunk.model_dump_json(exclude_unset=True))
 
     if is_function_call:
@@ -462,7 +493,7 @@ async def parse_output_text(model_id: str, value: str):
         delta=DeltaMessage(role="assistant", content=value),
         finish_reason=None
     )
-    chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
+    chunk = ChatCompletionResponse(model=model_id, id="", choices=[choice_data], object="chat.completion.chunk")
     yield "{}".format(chunk.model_dump_json(exclude_unset=True))
 
     choice_data = ChatCompletionResponseStreamChoice(
@@ -470,7 +501,7 @@ async def parse_output_text(model_id: str, value: str):
         delta=DeltaMessage(),
         finish_reason="stop"
     )
-    chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
+    chunk = ChatCompletionResponse(model=model_id, id="", choices=[choice_data], object="chat.completion.chunk")
     yield "{}".format(chunk.model_dump_json(exclude_unset=True))
     yield '[DONE]'
 

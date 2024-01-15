@@ -38,7 +38,7 @@ services:
                           apt-get update
                           python -m pip install -i  https://mirror.sjtu.edu.cn/pypi/web/simple --upgrade pip
                           pip install -r requirements.txt -i  https://pypi.tuna.tsinghua.edu.cn/simple
-                          python openai_api.py
+                          python api_server.py
 networks:
         v_glm3:
                 driver: bridge

@@ -120,17 +120,15 @@ pip install -r requirements.txt
 
 + 为了保证 `torch` 的版本正确，请严格按照 [官方文档](https://pytorch.org/get-started/locally/) 的说明安装。
 
-
 ### 综合 Demo
 
 我们提供了一个集成以下三种功能的综合 Demo，运行方法请参考[综合 Demo](composite_demo/README.md)
-
 
 - Chat: 对话模式，在此模式下可以与模型进行对话。
 - Tool: 工具模式，模型除了对话外，还可以通过工具进行其他操作。
 
 <img src="resources/tool.png" width="400">
-  
+
 - Code Interpreter: 代码解释器模式，模型可以在一个 Jupyter 环境中执行代码并获取结果，以完成复杂任务。
 
 <img src="resources/heart.png" width="400">
@@ -153,12 +151,18 @@ B, 很高兴见到你, 欢迎问我任何问题。
 >> > print(response)
 晚上睡不着可能会让你感到焦虑或不舒服, 但以下是一些可以帮助你入睡的方法:
 
-1.制定规律的睡眠时间表: 保持规律的睡眠时间表可以帮助你建立健康的睡眠习惯, 使你更容易入睡。尽量在每天的相同时间上床, 并在同一时间起床。
-2.创造一个舒适的睡眠环境: 确保睡眠环境舒适, 安静, 黑暗且温度适宜。可以使用舒适的床上用品, 并保持房间通风。
-3.放松身心: 在睡前做些放松的活动, 例如泡个热水澡, 听些轻柔的音乐, 阅读一些有趣的书籍等, 有助于缓解紧张和焦虑, 使你更容易入睡。
-4.避免饮用含有咖啡因的饮料: 咖啡因是一种刺激性物质, 会影响你的睡眠质量。尽量避免在睡前饮用含有咖啡因的饮料, 例如咖啡, 茶和可乐。
-5.避免在床上做与睡眠无关的事情: 在床上做些与睡眠无关的事情, 例如看电影, 玩游戏或工作等, 可能会干扰你的睡眠。
-6.尝试呼吸技巧: 深呼吸是一种放松技巧, 可以帮助你缓解紧张和焦虑, 使你更容易入睡。试着慢慢吸气, 保持几秒钟, 然后缓慢呼气。
+1.
+制定规律的睡眠时间表: 保持规律的睡眠时间表可以帮助你建立健康的睡眠习惯, 使你更容易入睡。尽量在每天的相同时间上床, 并在同一时间起床。
+2.
+创造一个舒适的睡眠环境: 确保睡眠环境舒适, 安静, 黑暗且温度适宜。可以使用舒适的床上用品, 并保持房间通风。
+3.
+放松身心: 在睡前做些放松的活动, 例如泡个热水澡, 听些轻柔的音乐, 阅读一些有趣的书籍等, 有助于缓解紧张和焦虑, 使你更容易入睡。
+4.
+避免饮用含有咖啡因的饮料: 咖啡因是一种刺激性物质, 会影响你的睡眠质量。尽量避免在睡前饮用含有咖啡因的饮料, 例如咖啡, 茶和可乐。
+5.
+避免在床上做与睡眠无关的事情: 在床上做些与睡眠无关的事情, 例如看电影, 玩游戏或工作等, 可能会干扰你的睡眠。
+6.
+尝试呼吸技巧: 深呼吸是一种放松技巧, 可以帮助你缓解紧张和焦虑, 使你更容易入睡。试着慢慢吸气, 保持几秒钟, 然后缓慢呼气。
 
 如果这些方法无法帮助你入睡, 你可以考虑咨询医生或睡眠专家, 寻求进一步的建议。
 ```
@@ -225,22 +229,21 @@ python cli_demo.py
 
 关于工具调用的方法请参考 [工具调用](tools_using_demo/README.md)。
 
-#### OpenAI API Demo
+#### OpenAI API / Zhipu API Demo
 
-感谢 [@xusenlinzy](https://github.com/xusenlinzy) 实现了 OpenAI 格式的流式 API 部署，可以作为任意基于 ChatGPT
-的应用的后端，比如 [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web)
-。可以通过运行仓库中的[openai_api.py](openai_api_demo/openai_api.py) 进行部署：
+我们已经推出了 OpenAI / ZhipuAI 格式的 开源模型 API 部署代码，可以作为任意基于 ChatGPT 的应用的后端。
+目前，可以通过运行仓库中的 [api_server.py](openai_api_demo/api_server.py) 进行部署
 
 ```shell
 cd openai_api_demo
-python openai_api.py
+python api_server.py
 ```
 
-同时，我们也书写了一个示例代码，用来测试API调用的性能。可以通过运行仓库中的[openai_api_request.py](openai_api_demo/openai_api_request.py)
-进行测试
+同时，我们也书写了一个示例代码，用来测试API调用的性能。
 
++ OpenAI 测试脚本：[openai_api_request.py](openai_api_demo/openai_api_request.py)
++ ZhipuAI 测试脚本：[zhipu_api_request.py](openai_api_demo/zhipu_api_request.py)
 + 使用Curl进行测试
-
 ```shell
 curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
 -H "Content-Type: application/json" \

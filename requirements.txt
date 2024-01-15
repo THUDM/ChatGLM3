@@ -1,23 +1,25 @@
 # basic requirements
 
-protobuf>=4.25.1
+protobuf>=4.25.2
 transformers>=4.36.2
 tokenizers>=0.15.0
 cpm_kernels>=1.0.11
 torch>=2.1.0
-gradio>=4.13.0
+gradio>=4.14.0
 sentencepiece>=0.1.99
 sentence_transformers>=2.2.2
-accelerate>=0.25.0
-streamlit>=1.29.0
-fastapi>=0.108.0
+accelerate>=0.26.1
+streamlit>=1.30.0
+fastapi>=0.109.0
 loguru~=0.7.2
 mdtex2html>=1.2.0
 latex2mathml>=3.77.0
 
 # for openai demo
 
-openai>=1.6.1
+openai>=1.7.2
+zhipuai>=2.0.0b0
+
 pydantic>=2.5.3
 sse-starlette>=1.8.2
 uvicorn>=0.25.0
