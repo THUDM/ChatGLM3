@@ -1,12 +1,15 @@
 """
-This script creates an interactive web demo for the ChatGLM3-6B model using Gradio, a Python library for building quick and easy UI components for machine learning models. It's designed to showcase the capabilities of the ChatGLM3-6B model in a user-friendly interface, allowing users to interact with the model through a chat-like interface.
+This script creates an interactive web demo for the ChatGLM3-6B model using Gradio,
+a Python library for building quick and easy UI components for machine learning models.
+It's designed to showcase the capabilities of the ChatGLM3-6B model in a user-friendly interface,
+allowing users to interact with the model through a chat-like interface.
 
 Usage:
 - Run the script to start the Gradio web server.
 - Interact with the model by typing questions and receiving responses.
 
 Requirements:
-- Gradio (required for 4.12.0 and later, 3.x is not support now) should be installed.
+- Gradio (required for 4.13.0 and later, 3.x is not support now) should be installed.
 
 Note: The script includes a modification to the Chatbot's postprocess method to handle markdown to HTML conversion,
 ensuring that the chat interface displays formatted text correctly.
@@ -123,6 +126,7 @@ with gr.Blocks() as demo:
 
     def user(query, history):
         return "", history + [[parse_text(query), ""]]
+
 
     submitBtn.click(user, [user_input, chatbot], [user_input, chatbot], queue=False).then(
         predict, [chatbot, max_length, top_p, temperature], chatbot
