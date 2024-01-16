@@ -18,7 +18,6 @@ latex2mathml>=3.77.0
 # for openai demo
 
 openai>=1.7.2
-zhipuai>=2.0.0b0
 
 pydantic>=2.5.3
 sse-starlette>=1.8.2
