@@ -12,13 +12,19 @@
 
 [Read this in English.](./README_en.md)
 
+### ChatGLM4 发布！🔥🔥🔥
+
+我们已经发布基于最新基座模型 GLM4 的 ChatGLM4 模型，您可以在以下两个渠道直接体验我们的最新模型。
++ [智谱清言](https://www.chatglm.cn) 体验最新版 GLM4 All tools，下载智谱清言 APP 或者使用网页端。
++ [API平台](https://open.bigmodel.cn/) 最新版API，让开发者更轻松的开发。
+
 📔
 更为详细的使用信息，可以参考：[ChatGLM3技术文档](https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof?from=from_copylink)
 或 [B站视频](https://www.bilibili.com/video/BV1uC4y1J7yA)、[YouTube视频](https://www.youtube.com/watch?v=Pw9PB6R7ORA)
 
 ## 介绍
 
-ChatGLM3 是智谱AI和清华大学 KEG 实验室联合发布的新一代对话预训练模型。ChatGLM3-6B 是 ChatGLM3
+ChatGLM3 是智谱AI和清华大学 KEG 实验室联合发布的对话预训练模型。ChatGLM3-6B 是 ChatGLM3
 系列中的开源模型，在保留了前两代模型对话流畅、部署门槛低等众多优秀特性的基础上，ChatGLM3-6B 引入了如下特性：
 
 1. **更强大的基础模型：** ChatGLM3-6B 的基础模型 ChatGLM3-6B-Base
