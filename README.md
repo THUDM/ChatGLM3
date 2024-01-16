@@ -12,13 +12,19 @@
 
 [Read this in English.](./README_en.md)
 
+### ChatGLM4 发布！🔥🔥🔥
+
+我们已经发布基于最新基座模型 GLM4 的 ChatGLM4 模型，您可以在以下两个渠道直接体验我们的最新模型。
++ [智谱清言](https://www.chatglm.cn) 体验最新版 GLM4 All tools，下载智谱清言 APP 或者使用网页端。
++ [API平台](https://open.bigmodel.cn/) 最新版API，让开发者更轻松的开发。
+
 📔
 更为详细的使用信息，可以参考：[ChatGLM3技术文档](https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof?from=from_copylink)
 或 [B站视频](https://www.bilibili.com/video/BV1uC4y1J7yA)、[YouTube视频](https://www.youtube.com/watch?v=Pw9PB6R7ORA)
 
 ## 介绍
 
-ChatGLM3 是智谱AI和清华大学 KEG 实验室联合发布的新一代对话预训练模型。ChatGLM3-6B 是 ChatGLM3
+ChatGLM3 是智谱AI和清华大学 KEG 实验室联合发布的对话预训练模型。ChatGLM3-6B 是 ChatGLM3
 系列中的开源模型，在保留了前两代模型对话流畅、部署门槛低等众多优秀特性的基础上，ChatGLM3-6B 引入了如下特性：
 
 1. **更强大的基础模型：** ChatGLM3-6B 的基础模型 ChatGLM3-6B-Base
@@ -120,17 +126,15 @@ pip install -r requirements.txt
 
 + 为了保证 `torch` 的版本正确，请严格按照 [官方文档](https://pytorch.org/get-started/locally/) 的说明安装。
 
-
 ### 综合 Demo
 
 我们提供了一个集成以下三种功能的综合 Demo，运行方法请参考[综合 Demo](composite_demo/README.md)
-
 
 - Chat: 对话模式，在此模式下可以与模型进行对话。
 - Tool: 工具模式，模型除了对话外，还可以通过工具进行其他操作。
 
 <img src="resources/tool.png" width="400">
-  
+
 - Code Interpreter: 代码解释器模式，模型可以在一个 Jupyter 环境中执行代码并获取结果，以完成复杂任务。
 
 <img src="resources/heart.png" width="400">
@@ -225,22 +229,21 @@ python cli_demo.py
 
 关于工具调用的方法请参考 [工具调用](tools_using_demo/README.md)。
 
-#### OpenAI API Demo
+#### OpenAI API / Zhipu API Demo
 
-感谢 [@xusenlinzy](https://github.com/xusenlinzy) 实现了 OpenAI 格式的流式 API 部署，可以作为任意基于 ChatGPT
-的应用的后端，比如 [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web)
-。可以通过运行仓库中的[openai_api.py](openai_api_demo/openai_api.py) 进行部署：
+我们已经推出了 OpenAI / ZhipuAI 格式的 开源模型 API 部署代码，可以作为任意基于 ChatGPT 的应用的后端。
+目前，可以通过运行仓库中的 [api_server.py](openai_api_demo/api_server.py) 进行部署
 
 ```shell
 cd openai_api_demo
-python openai_api.py
+python api_server.py
 ```
 
-同时，我们也书写了一个示例代码，用来测试API调用的性能。可以通过运行仓库中的[openai_api_request.py](openai_api_demo/openai_api_request.py)
-进行测试
+同时，我们也书写了一个示例代码，用来测试API调用的性能。
 
++ OpenAI 测试脚本：[openai_api_request.py](openai_api_demo/openai_api_request.py)
++ ZhipuAI 测试脚本：[zhipu_api_request.py](openai_api_demo/zhipu_api_request.py)
 + 使用Curl进行测试
-
 ```shell
 curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
 -H "Content-Type: application/json" \

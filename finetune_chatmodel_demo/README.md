@@ -7,7 +7,7 @@
 运行示例需要 `python>=3.10`，除基础的 `torch` 依赖外，示例代码运行还需要依赖 
 
 ```bash
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 ## 多轮对话格式

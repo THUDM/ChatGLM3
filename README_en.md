@@ -10,9 +10,16 @@
 📍Experience the larger-scale ChatGLM model at <a href="https://www.chatglm.cn">chatglm.cn</a>
 </p>
 
+
+### ChatGLM4 is coming! 🔥🔥🔥
+We have released the ChatGLM4 model based on the latest base model GLM4. You can directly experience our latest model in the following two channels.
++ [Zhipu Qingyan](https://www.chatglm.cn) To experience the latest version of GLM4 All tools, download the Zhipu Qingyan app or use the web client.
++ [API Platform](https://open.bigmodel.cn) The latest version of API makes development easier for developers.
+
+
 ## Introduction
 
-ChatGLM3 is a new generation of pre-trained dialogue models jointly released by Zhipu AI and Tsinghua KEG. ChatGLM3-6B is the open-source model in the ChatGLM3 series, maintaining many excellent features of the first two generations such as smooth dialogue and low deployment threshold, while introducing the following features:
+ChatGLM3 is a generation of pre-trained dialogue models jointly released by Zhipu AI and Tsinghua KEG. ChatGLM3-6B is the open-source model in the ChatGLM3 series, maintaining many excellent features of the first two generations such as smooth dialogue and low deployment threshold, while introducing the following features:
 
 1. **Stronger Base Model:** The base model of ChatGLM3-6B, ChatGLM3-6B-Base, adopts a more diverse training dataset, more sufficient training steps, and a more reasonable training strategy. Evaluations on datasets from various perspectives such as semantics, mathematics, reasoning, code, and knowledge show that **ChatGLM3-6B-Base has the strongest performance among base models below 10B**.
 
@@ -170,13 +177,19 @@ python cli_demo.py
 
 The program will interact in the command line, enter instructions in the command line and hit enter to generate a response. Enter `clear` to clear the dialogue history, enter `stop` to terminate the program.
 
-### OpenAI API Demo
-Thanks to [@xusenlinzy](https://github.com/xusenlinzy) for implementing the OpenAI format streaming API deployment, which can serve as the backend for any ChatGPT-based application, such as [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web). You can deploy it by running [openai_api.py](openai_api_demo/openai_api.py) in the repository:
+### OpenAI API /Zhipu API Demo 
+We have launched open source model API deployment code in OpenAI / ZhipuAI format, which can be used as the backend of any ChatGPT-based application.
+Currently, you can deploy by running [api_server.py](openai_api_demo/api_server.py) in the warehouse
+
 ```shell
 cd openai_api_demo
-python openai_api.py
+python api_server.py
 ```
-Also, we have written a sample code to test the performance of the API calls. This can be tested by running [openai_api_request.py](openai_api_demo/openai_api_request.py) in the repository
+
+At the same time, we also wrote a sample code to test the performance of API calls.
+
++ OpenAI test script: [openai_api_request.py](openai_api_demo/openai_api_request.py)
++ ZhipuAI test script: [zhipu_api_request.py](openai_api_demo/zhipu_api_request.py)
 + Test with Curl
 ```shell
 curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
