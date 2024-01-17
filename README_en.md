@@ -10,16 +10,26 @@
 📍Experience the larger-scale ChatGLM model at <a href="https://www.chatglm.cn">chatglm.cn</a>
 </p>
 
+📔
+About `ChatGLM3-6B`
+For more detailed usage information, please refer to: 
++ [ChatGLM3 technical documentation](https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof?from=from_copylink)
++ [Bilibili video](https://www.bilibili.com/video/BV1uC4y1J7yA)
++ [YouTube video](https://www.youtube.com/watch?v=Pw9PB6R7ORA)
 
-### ChatGLM4 is coming! 🔥🔥🔥
-We have released the ChatGLM4 model based on the latest base model GLM4. You can directly experience our latest model in the following two channels.
-+ [Zhipu Qingyan](https://www.chatglm.cn) To experience the latest version of GLM4 All tools, download the Zhipu Qingyan app or use the web client.
-+ [API Platform](https://open.bigmodel.cn) The latest version of API makes development easier for developers.
+## GLM-4 Introduction
 
+We have released the latest **GLM-4** model, which has made new breakthroughs in multiple indicators. You can directly experience our latest model in the following two channels.
 
-## Introduction
++ [Chatglm Qingyan](https://www.chatglm.cn) To experience the latest version of GLM-4, including **GLM, all tools** and other functions, download the Zhipu Qingyan APP
+  Or use [web page](https://www.chatglm.cn).
++ [API Platform](https://open.bigmodel.cn/) The new generation API platform has been launched. You can directly access the API
+  Experience new models such as `GLM-4`, `GLM-3-Turbo`, `CharGLM-3`, and `CogView-3` on the platform.
+  Among them, two models, `GLM-4` and `GLM-3-Turbo`, support new functions such as `system prompt`, `function call`, `retrieval`, `Web_Search`, etc. Welcome to experience it.
 
-ChatGLM3 is a generation of pre-trained dialogue models jointly released by Zhipu AI and Tsinghua KEG. ChatGLM3-6B is the open-source model in the ChatGLM3 series, maintaining many excellent features of the first two generations such as smooth dialogue and low deployment threshold, while introducing the following features:
+## ChatGLM3 Introduction
+
+**ChatGLM3** is a generation of pre-trained dialogue models jointly released by Zhipu AI and Tsinghua KEG. ChatGLM3-6B is the open-source model in the ChatGLM3 series, maintaining many excellent features of the first two generations such as smooth dialogue and low deployment threshold, while introducing the following features:
 
 1. **Stronger Base Model:** The base model of ChatGLM3-6B, ChatGLM3-6B-Base, adopts a more diverse training dataset, more sufficient training steps, and a more reasonable training strategy. Evaluations on datasets from various perspectives such as semantics, mathematics, reasoning, code, and knowledge show that **ChatGLM3-6B-Base has the strongest performance among base models below 10B**.
 
@@ -146,6 +156,9 @@ git clone https://huggingface.co/THUDM/chatglm3-6b
 If the download from HuggingFace is slow, you can also download it from [ModelScope](https://modelscope.cn/models/ZhipuAI/chatglm3-6b).
 
 # Model Fine-tuning
+
+> We will rewrite the fine-tuning code soon.
+
 Please refer to the dialog model fine-tuning [ChatGLM3-6B fine-tuning example](finetune_chatmodel_demo/README.md), or the base model fine-tuning [ChatGLM3-6B-base fine-tuning example](finetune_basemodel_demo/README.md).
 Please note that different fine-tuning scripts correspond to different models. Please select the corresponding model according to your needs.
 
