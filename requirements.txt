@@ -31,3 +31,12 @@ tiktoken>=0.5.2
 langchain>=0.1.0
 langchainhub>=0.1.14
 arxiv>=2.1.0
+
+
+# for finetune demo
+jieba>=0.42.1
+ruamel_yaml>=0.18.5
+rouge_chinese>=1.0.3
+jupyter>=1.0.0
+datasets>=1.16.0
+peft>=0.7.1

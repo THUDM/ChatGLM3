@@ -27,6 +27,8 @@ We have released the latest **GLM-4** model, which has made new breakthroughs in
   Experience new models such as `GLM-4`, `GLM-3-Turbo`, `CharGLM-3`, and `CogView-3` on the platform.
   Among them, two models, `GLM-4` and `GLM-3-Turbo`, support new functions such as `system prompt`, `function call`, `retrieval`, `Web_Search`, etc. Welcome to experience it.
 
+-----
+
 ## ChatGLM3 Introduction
 
 **ChatGLM3** is a generation of pre-trained dialogue models jointly released by Zhipu AI and Tsinghua KEG. ChatGLM3-6B is the open-source model in the ChatGLM3 series, maintaining many excellent features of the first two generations such as smooth dialogue and low deployment threshold, while introducing the following features:

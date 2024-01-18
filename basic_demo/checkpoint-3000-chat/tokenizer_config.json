@@ -1,0 +1,19 @@
+{
+  "added_tokens_decoder": {},
+  "auto_map": {
+    "AutoTokenizer": [
+      "tokenization_chatglm.ChatGLMTokenizer",
+      null
+    ]
+  },
+  "chat_template": "{% for message in messages %}{% if loop.first %}[gMASK]sop<|{{ message['role'] }}|> \n {{ message['content'] }}{% else %}<|{{ message['role'] }}|> \n {{ message['content'] }}{% endif %}{% endfor %}{% if add_generation_prompt %}<|assistant|>{% endif %}",
+  "clean_up_tokenization_spaces": false,
+  "do_lower_case": false,
+  "eos_token": "</s>",
+  "model_max_length": 1000000000000000019884624838656,
+  "pad_token": "<unk>",
+  "padding_side": "left",
+  "remove_space": false,
+  "tokenizer_class": "ChatGLMTokenizer",
+  "unk_token": "<unk>"
+}

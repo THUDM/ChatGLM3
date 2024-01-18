@@ -20,13 +20,15 @@
 
 ## GLM-4 介绍
 
-我们已经发布最新的 **GLM-4** 模型，该模型在多个指标上有了新的突破，您可以在以下两个渠道直接体验我们的最新模型。
+我们已经发布最新的 **GLM-4** 模型，该模型在多个指标上有了新的突破，您可以在以下两个渠道体验我们的最新模型。
 
 + [智谱清言](https://www.chatglm.cn) 体验最新版 GLM-4，包括 **GLMs，All tools**等功能，下载 智谱清言 APP
   或者使用 [网页端](https://www.chatglm.cn)。
 + [API平台](https://open.bigmodel.cn/) 新一代 API 平台已经上线，您可以直接在 API
   平台上体验 `GLM-4`、`GLM-3-Turbo`、`CharGLM-3`，`CogView-3` 等新模型。
   其中`GLM-4`、`GLM-3-Turbo`两个模型支持了 `System Prompt`、`Function Call`、 `Retrieval`、`Web_Search`等新功能，欢迎体验。
+
+-----
 
 ## ChatGLM3 介绍
 
