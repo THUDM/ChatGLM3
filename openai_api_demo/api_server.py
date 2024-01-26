@@ -109,7 +109,7 @@ class DeltaMessage(BaseModel):
 
 ## for Embedding
 class EmbeddingRequest(BaseModel):
-    input: List[str]
+    input: List[str] | str
     model: str
 
 
@@ -174,6 +174,8 @@ async def health() -> Response:
 
 @app.post("/v1/embeddings", response_model=EmbeddingResponse)
 async def get_embeddings(request: EmbeddingRequest):
+    if isinstance(request.input, str):
+        request.input = [request.input]
     embeddings = [embedding_model.encode(text) for text in request.input]
     embeddings = [embedding.tolist() for embedding in embeddings]
 
