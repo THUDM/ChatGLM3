@@ -307,6 +307,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
     if isinstance(function_call, dict):
         finish_reason = "function_call"
         function_call = FunctionCallResponse(**function_call)
+        response["text"]=response["text"].split("<|assistant|>")[0]
 
     message = ChatMessage(
         role="assistant",

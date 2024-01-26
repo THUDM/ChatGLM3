@@ -18,28 +18,31 @@ class InvalidScoreLogitsProcessor(LogitsProcessor):
 
 def process_response(output: str, use_tool: bool = False) -> Union[str, dict]:
     content = ""
-    for response in output.split("<|assistant|>"):
-        metadata, content = response.split("\n", maxsplit=1)
-        if not metadata.strip():
-            content = content.strip()
-            content = content.replace("[[训练时间]]", "2023年")
-        else:
-            if use_tool:
-                content = "\n".join(content.split("\n")[1:-1])
-
-                def tool_call(**kwargs):
-                    return kwargs
-
-                parameters = eval(content)
-                content = {
-                    "name": metadata.strip(),
-                    "arguments": json.dumps(parameters, ensure_ascii=False)
-                }
+    try:
+        for response in output.split("<|assistant|>"):
+            metadata, content = response.split("\n", maxsplit=1)
+            if not metadata.strip():
+                content = content.strip()
+                content = content.replace("[[训练时间]]", "2023年")
             else:
-                content = {
-                    "name": metadata.strip(),
-                    "content": content
-                }
+                if use_tool:
+                    content = "\n".join(content.split("\n")[1:-1])
+
+                    def tool_call(**kwargs):
+                        return kwargs
+
+                    parameters = eval(content)
+                    content = {
+                        "name": metadata.strip(),
+                        "arguments": json.dumps(parameters, ensure_ascii=False)
+                    }
+                else:
+                    content = {
+                        "name": metadata.strip(),
+                        "content": content
+                    }
+    except Exception as e:
+        print(e)
     return content
 
 
@@ -143,14 +146,30 @@ def process_chatglm_messages(messages, tools=None):
 
         elif role == "assistant" and func_call is not None:
             for response in content.split("<|assistant|>"):
-                metadata, sub_content = response.split("\n", maxsplit=1)
-                messages.append(
-                    {
-                        "role": role,
-                        "metadata": metadata,
-                        "content": sub_content.strip()
-                    }
-                )
+                try:
+                    metadata, sub_content = response.split("\n", maxsplit=1)
+                    messages.append(
+                        {
+                            "role": role,
+                            "metadata": metadata,
+                            "content": sub_content.strip()
+                        }
+                    )
+                except:
+                    # arguments=json.loads(func_call.arguments)
+                    messages.append(
+                        {
+                            "role": role,
+                            "content": content
+                        }
+                    )
+                    messages.append(
+                        {
+                            "role": role,
+                            "metadata": func_call.name,
+                            "content": func_call.arguments
+                        }
+                    )
         else:
             messages.append({"role": role, "content": content})
     return messages
