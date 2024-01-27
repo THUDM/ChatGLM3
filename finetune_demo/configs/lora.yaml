@@ -3,14 +3,14 @@ data_config:
   val_file: dev.json
   test_file: dev.json
   num_proc: 16
-max_input_length: 128
-max_output_length: 256
+max_input_length: 256
+max_output_length: 512
 training_args:
   # see `transformers.Seq2SeqTrainingArguments`
   output_dir: ./output
   max_steps: 3000
   # settings for data loading
-  per_device_train_batch_size: 4
+  per_device_train_batch_size: 1
   dataloader_num_workers: 16
   remove_unused_columns: false
   # settings for saving checkpoints
@@ -31,7 +31,9 @@ training_args:
   predict_with_generate: true
   # see `transformers.GenerationConfig`
   generation_config:
-    max_new_tokens: 256
+    max_new_tokens: 4000
+  # set your absolute deepspeed path here
+  #deepspeed: ds_zero_2.json
 peft_config:
   peft_type: LORA
   task_type: CAUSAL_LM

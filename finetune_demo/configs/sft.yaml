@@ -31,6 +31,5 @@ training_args:
   predict_with_generate: true
   generation_config:
     max_new_tokens: 256
-
-  # change to your absolute path of deepspeed.json
-  deepspeed: deepspeed.json
+  # set your absolute deepspeed path here
+  deepspeed: ds_zero_3.json

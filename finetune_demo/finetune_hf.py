@@ -364,6 +364,7 @@ def process_batch_eval(
     return {'input_ids': batched_input_ids, 'output_ids': batched_output_ids}
 
 
+# TODO: Not sure if this is necessary, can set it to half
 def _prepare_model_for_training(model: nn.Module):
     for param in model.parameters():
         if param.requires_grad:
@@ -380,17 +381,33 @@ def load_tokenizer_and_model(
     )
     if peft_config is not None:
         if peft_config.peft_type.name == "PREFIX_TUNING":
-            config = AutoConfig.from_pretrained(model_dir, trust_remote_code=trust_remote_code)
+            config = AutoConfig.from_pretrained(
+                model_dir,
+                trust_remote_code=trust_remote_code,
+                empty_init=False
+            )
             config.pre_seq_len = peft_config.num_virtual_tokens
             config.use_cache = False
-            model = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=trust_remote_code, config=config)
-
+            model = AutoModelForCausalLM.from_pretrained(
+                model_dir,
+                trust_remote_code=trust_remote_code,
+                config=config,
+                empty_init=False
+            )
         if peft_config.peft_type.name == "LORA":
-            model = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=trust_remote_code)
+            model = AutoModelForCausalLM.from_pretrained(
+                model_dir,
+                trust_remote_code=trust_remote_code,
+                empty_init=False
+            )
             model = get_peft_model(model, peft_config)
             model.print_trainable_parameters()
     else:
-        model = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=trust_remote_code)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_dir,
+            trust_remote_code=trust_remote_code,
+            empty_init=False
+        )
     print_model_size(model)
 
     return tokenizer, model
@@ -419,7 +436,6 @@ def compute_metrics(eval_preds: EvalPrediction, tokenizer: PreTrainedTokenizer):
     return {k: np.mean(v) for k, v in metrics_dct.items()}
 
 
-# TODO: add help
 @app.command()
 def main(
         data_dir: Annotated[str, typer.Argument(help='')],
@@ -479,8 +495,10 @@ def main(
     # _sanity_check(
     #     train_dataset[0]["input_ids"], train_dataset[0]["labels"], tokenizer
     # )
-    _prepare_model_for_training(model)
-    # sets special tokens for generation
+
+    # turn model to fp32
+    # _prepare_model_for_training(model)
+
     ft_config.training_args.generation_config.pad_token_id = (
         tokenizer.pad_token_id
     )

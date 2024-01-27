@@ -43,11 +43,6 @@ def load_model_and_tokenizer(
     )
     return model, tokenizer
 
-
-# TODO: apply chat template
-# def apply_chat_templeate(tokenizer: TokenizerType, messages: dict[str, str]) -> Union[]):
-
-
 @app.command()
 def main(
         model_dir: Annotated[str, typer.Argument(help='')],

@@ -105,10 +105,7 @@ Then use pip to install the dependencies:
 ```
 pip install -r requirements.txt
 ```
-+ The `transformers` library version should be `4.30.2` and above, and `torch` library should be 2.0 and above to obtain the best inference performance.
 + In order to ensure that the version of `torch` is correct, please strictly follow the instructions of [official documentation](https://pytorch.org/get-started/locally/) for installation.
-+ The `gradio` library version should be the `3.x` version.
-
 
 ### Integrated Demo
 
@@ -159,10 +156,7 @@ If the download from HuggingFace is slow, you can also download it from [ModelSc
 
 # Model Fine-tuning
 
-> We will rewrite the fine-tuning code soon.
-
-Please refer to the dialog model fine-tuning [ChatGLM3-6B fine-tuning example](finetune_chatmodel_demo/README.md), or the base model fine-tuning [ChatGLM3-6B-base fine-tuning example](finetune_basemodel_demo/README.md).
-Please note that different fine-tuning scripts correspond to different models. Please select the corresponding model according to your needs.
+We provide a basic fine-tuning framework for ChatGLM3-6B. You can use it to fine-tune the model on your own dataset. For more details, please refer to [Fine-tuning Demo](finetune_demo/README_en.md).
 
 ### Web-based Dialogue Demo
 ![web-demo](resources/web-demo.gif)
