@@ -197,7 +197,7 @@ python finetune_hf.py  data/AdvertiseGen/  THUDM/chatglm3-6b  configs/lora.yaml
 
 ## 使用微调后的模型
 
-您可以在任何一个 demo 内使用我们的 `lora` 和 全参微调的模型，具体方式如下:
+您可以在任何一个 demo 内使用我们的 `lora` 和 全参微调的模型。这需要你自己按照以下教程进行修改代码。
 
 1. 使用`finetune_demo/inference_hf.py`中读入模型的方式替换 demo 中读入模型的方式。
 
