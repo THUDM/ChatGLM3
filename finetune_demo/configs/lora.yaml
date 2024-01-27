@@ -35,7 +35,6 @@ training_args:
 peft_config:
   peft_type: LORA
   task_type: CAUSAL_LM
-  # see `peft.LoraConfig`
   r: 8
   lora_alpha: 32
   lora_dropout: 0.1

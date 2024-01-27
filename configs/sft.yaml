@@ -8,7 +8,7 @@ max_output_length: 256
 training_args:
   # see `transformers.Seq2SeqTrainingArguments`
   output_dir: ./output
-  max_steps: 3000
+  max_steps: 6000
   # settings for data loading
   per_device_train_batch_size: 4
   dataloader_num_workers: 16
@@ -31,6 +31,3 @@ training_args:
   predict_with_generate: true
   generation_config:
     max_new_tokens: 256
-
-  # change to your absolute path of deepspeed.json
-  deepspeed: deepspeed.json

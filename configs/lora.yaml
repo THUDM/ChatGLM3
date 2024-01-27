@@ -29,8 +29,13 @@ training_args:
   # uncomment the following line to detect nan or inf values
   # debug: underflow_overflow
   predict_with_generate: true
+  # see `transformers.GenerationConfig`
   generation_config:
     max_new_tokens: 256
-
-  # change to your absolute path of deepspeed.json
-  deepspeed: deepspeed.json
+peft_config:
+  peft_type: LORA
+  task_type: CAUSAL_LM
+  # see `peft.LoraConfig`
+  r: 8
+  lora_alpha: 32
+  lora_dropout: 0.1
