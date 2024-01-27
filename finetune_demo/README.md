@@ -6,6 +6,8 @@
 
 运行示例需要 `python>=3.10`，除基础的 `torch` 依赖外，示例代码运行还需要依赖。
 
+**我们提供了 [示例notebook](lora_finetune.ipynb) 用于演示如何使用我们的微调代码。**
+
 ```bash
 pip install -r requirements.txt
 ```
