@@ -128,8 +128,10 @@ pip install -r requirements.txt
 
 这里以 AdvertiseGen 数据集为例,
 您可以从 [Google Drive](https://drive.google.com/file/d/13_vf0xRTQsyneRKdD1bZIr93vBGOczrk/view?usp=sharing)
-或者 [Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/b3f119a008264b1cabd1/?dl=1) 下载 AdvertiseGen 数据集，将解压后的
-AdvertiseGen 目录放到 `data` 目录下并自行转换为如下格式数据集。
+或者 [Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/b3f119a008264b1cabd1/?dl=1) 下载 AdvertiseGen 数据集。
+将解压后的 AdvertiseGen 目录放到 `data` 目录下并自行转换为如下格式数据集。
+
+> 请注意，现在的微调代码中加入了验证集，因此，对于一组完整的微调数据集，必须包含训练数据集和验证数据集，测试数据集可以不填写。或者直接用验证数据集代替。
 
 ```
 {"conversations": [{"role": "user", "content": "类型#裙*裙长#半身裙"}, {"role": "assistant", "content": "这款百搭时尚的仙女半身裙，整体设计非常的飘逸随性，穿上之后每个女孩子都能瞬间变成小仙女啦。料子非常的轻盈，透气性也很好，穿到夏天也很舒适。"}]}
@@ -265,8 +267,9 @@ token 不参与 `loss` 计算。
    这在某些情况下是必要的，因为混合精度训练或其他操作可能会更改模型参数的数据类型。该代码默打开，可以注释，但是如果使用
    `half` 格式训练出现问题，可以切换回这个代码，显存可能增加。
 3. 微调后的模型可以使用任何支持 `peft` 载入的模型加速框架，在这里，我们没有提供demo。
-
-##      
+4. 本仓库的微调数据集格式与 API 微调数据集格式有一定区别
+    + ZhipuAI API 微调数据集中的 `messages` 字段在本仓库为 `conversation` 字段。
+    + ZhipuAI API 中的微调文件为 `jsonl`, 在本仓库，需要简单的将文件名改为 `json`。
 
 ## 参考文献
 
