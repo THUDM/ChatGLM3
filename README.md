@@ -20,13 +20,15 @@
 
 ## GLM-4 介绍
 
-我们已经发布最新的 **GLM-4** 模型，该模型在多个指标上有了新的突破，您可以在以下两个渠道直接体验我们的最新模型。
+我们已经发布最新的 **GLM-4** 模型，该模型在多个指标上有了新的突破，您可以在以下两个渠道体验我们的最新模型。
 
 + [智谱清言](https://www.chatglm.cn) 体验最新版 GLM-4，包括 **GLMs，All tools**等功能，下载 智谱清言 APP
   或者使用 [网页端](https://www.chatglm.cn)。
 + [API平台](https://open.bigmodel.cn/) 新一代 API 平台已经上线，您可以直接在 API
   平台上体验 `GLM-4`、`GLM-3-Turbo`、`CharGLM-3`，`CogView-3` 等新模型。
   其中`GLM-4`、`GLM-3-Turbo`两个模型支持了 `System Prompt`、`Function Call`、 `Retrieval`、`Web_Search`等新功能，欢迎体验。
+
+-----
 
 ## ChatGLM3 介绍
 
@@ -191,11 +193,9 @@ git clone https://huggingface.co/THUDM/chatglm3-6b
 中下载。
 
 ### 模型微调
-> 我们将于最近重写微调代码，敬请期待。
 
-请参考对话模型微调 [ChatGLM3-6B 微调示例](finetune_chatmodel_demo/README.md)
-,或基座模型微调 [ChatGLM3-6B-base 微调示例](finetune_basemodel_demo/README.md)。
-请注意，不同的微调脚本对应的模型并不相同，请根据需要选择对应的模型。
+我们提供了一个微调 ChatGLM3-6B 模型的基础套件，可以用来微调 ChatGLM3-6B 模型。微调套件的使用方法请参考
+[微调套件](finetune_demo/README.md)。
 
 ### 网页版对话 Demo
 

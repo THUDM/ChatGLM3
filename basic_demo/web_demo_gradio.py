@@ -19,14 +19,54 @@ ensuring that the chat interface displays formatted text correctly.
 import os
 import gradio as gr
 import torch
-from transformers import AutoModel, AutoTokenizer, StoppingCriteria, StoppingCriteriaList, TextIteratorStreamer
 from threading import Thread
+
+from typing import Union, Annotated
+from pathlib import Path
+from peft import AutoPeftModelForCausalLM, PeftModelForCausalLM
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    PreTrainedModel,
+    PreTrainedTokenizer,
+    PreTrainedTokenizerFast,
+    StoppingCriteria,
+    StoppingCriteriaList,
+    TextIteratorStreamer
+)
+
+ModelType = Union[PreTrainedModel, PeftModelForCausalLM]
+TokenizerType = Union[PreTrainedTokenizer, PreTrainedTokenizerFast]
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
 
-tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
-model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
+
+def _resolve_path(path: Union[str, Path]) -> Path:
+    return Path(path).expanduser().resolve()
+
+
+def load_model_and_tokenizer(
+        model_dir: Union[str, Path], trust_remote_code: bool = True
+) -> tuple[ModelType, TokenizerType]:
+    model_dir = _resolve_path(model_dir)
+    if (model_dir / 'adapter_config.json').exists():
+        model = AutoPeftModelForCausalLM.from_pretrained(
+            model_dir, trust_remote_code=trust_remote_code, device_map='auto'
+        )
+        tokenizer_dir = model.peft_config['default'].base_model_name_or_path
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            model_dir, trust_remote_code=trust_remote_code, device_map='auto'
+        )
+        tokenizer_dir = model_dir
+    tokenizer = AutoTokenizer.from_pretrained(
+        tokenizer_dir, trust_remote_code=trust_remote_code
+    )
+    return model, tokenizer
+
+
+model, tokenizer = load_model_and_tokenizer(MODEL_PATH, trust_remote_code=True)
 
 
 class StopOnTokens(StoppingCriteria):
@@ -134,4 +174,4 @@ with gr.Blocks() as demo:
     emptyBtn.click(lambda: None, None, chatbot, queue=False)
 
 demo.queue()
-demo.launch(server_name="127.0.0.1", server_port=8501, inbrowser=True, share=False)
+demo.launch(server_name="127.0.0.1", server_port=7870, inbrowser=True, share=False)
