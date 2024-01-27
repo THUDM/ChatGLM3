@@ -3,8 +3,8 @@ data_config:
   val_file: dev.json
   test_file: dev.json
   num_proc: 16
-max_input_length: 256
-max_output_length: 512
+max_input_length: 128
+max_output_length: 256
 training_args:
   # see `transformers.Seq2SeqTrainingArguments`
   output_dir: ./output
@@ -31,7 +31,7 @@ training_args:
   predict_with_generate: true
   # see `transformers.GenerationConfig`
   generation_config:
-    max_new_tokens: 4000
+    max_new_tokens: 256
   # set your absolute deepspeed path here
   #deepspeed: ds_zero_2.json
 peft_config:

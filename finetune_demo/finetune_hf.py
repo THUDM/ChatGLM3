@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 import dataclasses as dc
 import functools
 from collections.abc import Callable, Mapping, Sequence
@@ -19,8 +18,7 @@ from peft import (
     PeftConfig,
     PeftModelForCausalLM,
     get_peft_config,
-    get_peft_model,
-    PrefixEncoder
+    get_peft_model
 )
 from rouge_chinese import Rouge
 from torch import nn
@@ -45,8 +43,6 @@ app = typer.Typer(pretty_exceptions_show_locals=False)
 
 class DataCollatorForSeq2Seq(_DataCollatorForSeq2Seq):
     def __call__(self, features, return_tensors=None):
-        # manually adds padding tokens to `output_ids` if exists
-        # The padding logic is similar to `labels`, but always pads on the right.
         output_ids = (
             [feature['output_ids'] for feature in features]
             if 'output_ids' in features[0].keys()
@@ -55,8 +51,11 @@ class DataCollatorForSeq2Seq(_DataCollatorForSeq2Seq):
         if output_ids is not None:
             max_output_length = max(len(out) for out in output_ids)
             if self.pad_to_multiple_of is not None:
-                max_output_length = ((
-                                             max_output_length + self.pad_to_multiple_of - 1) // self.pad_to_multiple_of * self.pad_to_multiple_of)
+                max_output_length = (
+                        (
+                                max_output_length + self.pad_to_multiple_of - 1) //
+                        self.pad_to_multiple_of * self.pad_to_multiple_of
+                )
             for feature in features:
                 remainder = [self.tokenizer.pad_token_id] * (
                         max_output_length - len(feature['output_ids'])
@@ -497,7 +496,7 @@ def main(
     # )
 
     # turn model to fp32
-    # _prepare_model_for_training(model)
+    _prepare_model_for_training(model)
 
     ft_config.training_args.generation_config.pad_token_id = (
         tokenizer.pad_token_id

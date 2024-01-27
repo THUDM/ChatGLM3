@@ -4,17 +4,25 @@
 
 如果将模型下载到了本地，本文和代码中的 `THUDM/chatglm3-6b` 字段均应替换为相应地址以从本地加载模型。
 
-运行示例需要 `python>=3.10`，除基础的 `torch` 依赖外，示例代码运行还需要依赖
+运行示例需要 `python>=3.10`，除基础的 `torch` 依赖外，示例代码运行还需要依赖。
 
 ```bash
 pip install -r requirements.txt
 ```
 
+## 测试硬件标准
+
+我们仅提供了单机多卡/多机多卡的运行示例，因此您需要至少一台具有多个 GPU 的机器。本仓库中的**默认配置文件**中，我们记录了显存的占用情况：
+
++ SFT 全量微调: 4张显卡平均分配，每张显卡占用 `48346MiB` 显存。
++ P-TuningV2 微调: 1张显卡，占用 `18426MiB` 显存。
++ LORA 微调: 1张显卡，占用 `14082MiB` 显存。
+
+> 请注意，该结果仅供参考，对于不同的参数，显存占用可能会有所不同。请结合你的硬件情况进行调整。
+
 ## 多轮对话格式
 
 多轮对话微调示例采用 ChatGLM3 对话格式约定，对不同角色添加不同 `loss_mask` 从而在一遍计算中为多轮回复计算 `loss`。
-
-### 数据格式和预处理
 
 对于数据文件，样例采用如下格式
 
@@ -116,7 +124,7 @@ pip install -r requirements.txt
 - `system` 角色为可选角色，但若存在 `system` 角色，其必须出现在 `user`
   角色之前，且一个完整的对话数据（无论单轮或者多轮对话）只能出现一次 `system` 角色。
 
-### 数据集格式示例
+## 数据集格式示例
 
 这里以 AdvertiseGen 数据集为例,
 您可以从 [Google Drive](https://drive.google.com/file/d/13_vf0xRTQsyneRKdD1bZIr93vBGOczrk/view?usp=sharing)
@@ -127,7 +135,7 @@ AdvertiseGen 目录放到 `data` 目录下并自行转换为如下格式数据�
 {"conversations": [{"role": "user", "content": "类型#裙*裙长#半身裙"}, {"role": "assistant", "content": "这款百搭时尚的仙女半身裙，整体设计非常的飘逸随性，穿上之后每个女孩子都能瞬间变成小仙女啦。料子非常的轻盈，透气性也很好，穿到夏天也很舒适。"}]}
 ```
 
-### 配置文件
+## 配置文件
 
 微调配置文件位于 `config` 目录下，包括以下文件：
 
@@ -167,7 +175,7 @@ AdvertiseGen 目录放到 `data` 目录下并自行转换为如下格式数据�
     + P-TuningV2 参数：
         + num_virtual_tokens: 虚拟 token 的数量。
 
-### 开始微调
+## 开始微调
 
 通过以下代码执行 **单机多卡/多机多卡** 运行。
 
@@ -183,7 +191,7 @@ cd finetune_demo
 python finetune_hf.py  data/AdvertiseGen/  THUDM/chatglm3-6b  configs/lora.yaml
 ```
 
-### 使用微调后的模型
+## 使用微调后的模型
 
 您可以在任何一个 demo 内使用我们的 `lora` 和 全参微调的模型，具体方式如下:
 
@@ -217,12 +225,9 @@ def load_model_and_tokenizer(
    ，原始模型地址为`path/to/base_model`,则你应该使用`/path/to/finetune_adapter_model`作为`model_dir`。
 3. 完成上述操作后，就能正常使用微调的模型了，其他的调用方式没有变化。
 
-```python
-
 ### 提示
 
-1.
-微调代码在开始训练前，会先打印首条训练数据的预处理信息(默认已经注释，可以解除注释)，显示为
+1. 微调代码在开始训练前，会先打印首条训练数据的预处理信息(默认已经注释，可以解除注释)，显示为
 
 ```log
 Sanity
@@ -253,24 +258,15 @@ Check >> >> >> >> >> >> >
 Check
 ```
 
-字样，每行依次表示一个
-detokenized
-string, token_id
-和
-target_id。其中，`target_id`
-为
-`token_id`
-在模型词表中的索引，`-100`
-表示该
-token
-不参与
-`loss`
-计算。
+字样，每行依次表示一个 detokenized string, token_id 和 target_id。其中，`target_id`为`token_id`在模型词表中的索引，`-100`表示该
+token 不参与 `loss` 计算。
 
 2. `_prepare_model_for_training` 的作用是遍历模型的所有可训练参数，并确保它们的数据类型为`torch.float32`。
-   这在某些情况下是必要的，因为混合精度训练或其他操作可能会更改模型参数的数据类型。该代码默认注释，如果使用
-   `half` 格式训练出现问题，可以执行这个代码。显存占用将会增加。
+   这在某些情况下是必要的，因为混合精度训练或其他操作可能会更改模型参数的数据类型。该代码默打开，可以注释，但是如果使用
+   `half` 格式训练出现问题，可以切换回这个代码，显存可能增加。
 3. 微调后的模型可以使用任何支持 `peft` 载入的模型加速框架，在这里，我们没有提供demo。
+
+##      
 
 ## 参考文献
 

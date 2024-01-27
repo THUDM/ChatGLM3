@@ -10,7 +10,7 @@ training_args:
   output_dir: ./output
   max_steps: 3000
   # settings for data loading
-  per_device_train_batch_size: 4
+  per_device_train_batch_size: 1
   dataloader_num_workers: 16
   remove_unused_columns: false
   # settings for saving checkpoints
@@ -32,4 +32,4 @@ training_args:
   generation_config:
     max_new_tokens: 256
   # set your absolute deepspeed path here
-  deepspeed: ds_zero_3.json
+  deepspeed: /share/home/zyx/Code/ChatGLM3/finetune_demo/configs/ds_zero_3.json
