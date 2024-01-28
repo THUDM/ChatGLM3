@@ -8,7 +8,7 @@ max_output_length: 256
 training_args:
   # see `transformers.Seq2SeqTrainingArguments`
   output_dir: ./output
-  max_steps: 3000
+  max_steps: 500
   # settings for data loading
   per_device_train_batch_size: 1
   dataloader_num_workers: 16
@@ -32,4 +32,4 @@ training_args:
   generation_config:
     max_new_tokens: 256
   # set your absolute deepspeed path here
-  deepspeed: ds_zero_3.json
+  deepspeed: /share/home/zyx/Code/ChatGLM3/finetune_demo/configs/ds_zero_3.json

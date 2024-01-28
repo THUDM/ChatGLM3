@@ -197,6 +197,18 @@ python finetune_hf.py  data/AdvertiseGen/  THUDM/chatglm3-6b  configs/lora.yaml
 
 ## 使用微调后的模型
 
+### 在 inference_hf.py 中验证微调后的模型
+
+您可以在 `finetune_demo/inference_hf.py` 中使用我们的微调后的模型，仅需要一行代码就能简单的进行测试。
+
+```angular2html
+python inference_hf.py your_finetune_path --prompt your prompt
+```
+
+这样，得到的回答就微调后的回答了。
+
+### 在本仓库的其他 demo 或者外部仓库使用微调后的模型
+
 您可以在任何一个 demo 内使用我们的 `lora` 和 全参微调的模型。这需要你自己按照以下教程进行修改代码。
 
 1. 使用`finetune_demo/inference_hf.py`中读入模型的方式替换 demo 中读入模型的方式。

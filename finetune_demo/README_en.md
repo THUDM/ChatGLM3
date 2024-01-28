@@ -221,6 +221,16 @@ python finetune_hf.py data/AdvertiseGen/ THUDM/chatglm3-6b configs/lora.yaml
 
 ## Use the fine-tuned model
 
+### Verify the fine-tuned model in inference_hf.py
+
+You can use our fine-tuned model in `finetune_demo/inference_hf.py`, which can be easily tested with just one line of code.
+```angular2html
+python inference_hf.py your_finetune_path --prompt your prompt
+```
+In this way, the answer you get is a fine-tuned answer.
+
+### Use the fine-tuned model in other demos in this repos or external repos
+
 You can use our `lora` and fully parameterized fine-tuned models in any demo, as follows:
 
 1. Use the method of reading the model in `finetune_demo/inference_hf.py` to replace the method of reading the model in
