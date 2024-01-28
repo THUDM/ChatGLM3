@@ -88,8 +88,6 @@ class Seq2SeqTrainer(_Seq2SeqTrainer):
         generated_tokens = generated_tokens[:, input_ids.size()[1]:]
         if self.args.predict_with_generate:
             labels = output_ids
-
-        breakpoint()
         return loss, generated_tokens, labels
 
 
