@@ -240,6 +240,13 @@ You can use our `lora` and fully parameterized fine-tuned models in any demo, as
 > The fine-tuning path is recorded in . If your original model location changes, you should modify the path
 > of `base_model_name_or_path` in `adapter_config.json`.
 
+
+> Please note that we have only tested using NVIDIA Hopper (representative GPU: H100) and Ampère (representative GPU: A100) architecture and series of graphics cards. If you use a graphics card with another architecture, you may experience
+> 1. Unknown training problem/Video memory usage is different from the above.
+> 2. The architecture is too low and does not support certain features.
+> 3. The problem of reasoning effect.
+> The above three situations are problems that the community has encountered before. Although the probability is extremely low, if you encounter the above problems, you can try to solve them in the community.
+
 ```python
 def load_model_and_tokenizer(
         model_dir: Union[str, Path], trust_remote_code: bool = True
