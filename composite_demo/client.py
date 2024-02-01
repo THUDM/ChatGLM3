@@ -139,6 +139,7 @@ class HFClient(Client):
                 config=config,
                 device_map="auto"
             ).eval()
+            # add .quantized(4) before .eval() to use int4 model
             prefix_state_dict = torch.load(os.path.join(pt_checkpoint, "pytorch_model.bin"))
             new_prefix_state_dict = {}
             for k, v in prefix_state_dict.items():
