@@ -4,5 +4,5 @@ rouge_chinese>=1.0.3
 jupyter>=1.0.0
 datasets>=2.16.1
 peft==0.7.1
-transformers==4.36.2
+transformers>=4.37.2
 deepspeed>=0.13.1
