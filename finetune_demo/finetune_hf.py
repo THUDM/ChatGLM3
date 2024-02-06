@@ -370,40 +370,40 @@ def _prepare_model_for_training(model: nn.Module):
 
 def load_tokenizer_and_model(
         model_dir: str,
-        trust_remote_code: bool = False,
         peft_config: Optional[PeftConfig] = None,
 ) -> tuple[PreTrainedTokenizer, nn.Module]:
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_dir, trust_remote_code=trust_remote_code
-    )
+    tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
     if peft_config is not None:
         if peft_config.peft_type.name == "PREFIX_TUNING":
             config = AutoConfig.from_pretrained(
                 model_dir,
-                trust_remote_code=trust_remote_code,
-                empty_init=False
+                trust_remote_code=True,
+                empty_init=False,
+                use_cache=False
             )
             config.pre_seq_len = peft_config.num_virtual_tokens
             config.use_cache = False
             model = AutoModelForCausalLM.from_pretrained(
                 model_dir,
-                trust_remote_code=trust_remote_code,
+                trust_remote_code=True,
                 config=config,
                 empty_init=False
             )
         if peft_config.peft_type.name == "LORA":
             model = AutoModelForCausalLM.from_pretrained(
                 model_dir,
-                trust_remote_code=trust_remote_code,
-                empty_init=False
+                trust_remote_code=True,
+                empty_init=False,
+                use_cache=False
             )
             model = get_peft_model(model, peft_config)
             model.print_trainable_parameters()
     else:
         model = AutoModelForCausalLM.from_pretrained(
             model_dir,
-            trust_remote_code=trust_remote_code,
-            empty_init=False
+            trust_remote_code=True,
+            empty_init=False,
+            use_cache=False
         )
     print_model_size(model)
 
@@ -445,11 +445,7 @@ def main(
         config_file: Annotated[str, typer.Argument(help='')],
 ):
     ft_config = FinetuningConfig.from_file(config_file)
-    tokenizer, model = load_tokenizer_and_model(
-        model_dir,
-        trust_remote_code=True,
-        peft_config=ft_config.peft_config,
-    )
+    tokenizer, model = load_tokenizer_and_model(model_dir, peft_config=ft_config.peft_config)
     data_manager = DataManager(data_dir, ft_config.data_config)
 
     train_dataset = data_manager.get_dataset(
@@ -504,6 +500,7 @@ def main(
         tokenizer.get_command('<|user|>'),
         tokenizer.get_command('<|observation|>'),
     ]
+    model.gradient_checkpointing_enable()
     trainer = Seq2SeqTrainer(
         model=model,
         args=ft_config.training_args,
