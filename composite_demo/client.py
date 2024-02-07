@@ -137,9 +137,8 @@ class HFClient(Client):
                 model_path,
                 trust_remote_code=True,
                 config=config,
-                device_map="auto"
-            ).eval()
-            # add .quantized(4) before .eval() to use int4 model
+                device_map="auto").eval()
+            # add .quantize(4).cuda() before .eval() and remove device_map="auto" to use int4 model
             prefix_state_dict = torch.load(os.path.join(pt_checkpoint, "pytorch_model.bin"))
             new_prefix_state_dict = {}
             for k, v in prefix_state_dict.items():
@@ -148,13 +147,8 @@ class HFClient(Client):
             print("Loaded from pt checkpoints", new_prefix_state_dict.keys())
             self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
         else:
-            self.model = (
-                AutoModel.from_pretrained(
-                    MODEL_PATH,
-                    trust_remote_code=True,
-                    device_map="auto"
-                ).eval())
-            # plus .quantized() if you want to use quantized model
+            self.model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
+            # add .quantize(4).cuda() before .eval() and remove device_map="auto" to use int4 model
 
     def generate_stream(
             self,
