@@ -133,7 +133,11 @@ class HFClient(Client):
                 trust_remote_code=True,
                 pre_seq_len=PRE_SEQ_LEN
             )
-            self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True, config=config, device_map="auto")
+            self.model = AutoModel.from_pretrained(
+                model_path,
+                trust_remote_code=True,
+                config=config,
+                device_map="auto").eval()
             # add .quantize(4).cuda() before .eval() and remove device_map="auto" to use int4 model
             prefix_state_dict = torch.load(os.path.join(pt_checkpoint, "pytorch_model.bin"))
             new_prefix_state_dict = {}
@@ -143,7 +147,7 @@ class HFClient(Client):
             print("Loaded from pt checkpoints", new_prefix_state_dict.keys())
             self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
         else:
-            self.model = (AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval())
+            self.model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
             # add .quantize(4).cuda() before .eval() and remove device_map="auto" to use int4 model
 
     def generate_stream(
