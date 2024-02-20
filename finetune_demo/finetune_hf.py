@@ -505,6 +505,7 @@ def main(
         tokenizer.get_command('<|observation|>'),
     ]
     model.gradient_checkpointing_enable()
+    model.enable_input_require_grads()
     trainer = Seq2SeqTrainer(
         model=model,
         args=ft_config.training_args,
