@@ -200,6 +200,10 @@ OMP_NUM_THREADS=1 torchrun --standalone --nnodes=1 --nproc_per_node=8  finetune_
 cd finetune_demo
 python finetune_hf.py  data/AdvertiseGen/  THUDM/chatglm3-6b  configs/lora.yaml
 ```
+单机及多机的第四参数(no)为是否断点继训,可输入类型有三种  
+1:no 直接重新训练  
+2:yes   自动从最后一个保存的 Checkpoint开始训练  
+3:XX 断点号数字 例 600 则从序号600 Checkpoint开始训练
 
 ## 使用微调后的模型
 

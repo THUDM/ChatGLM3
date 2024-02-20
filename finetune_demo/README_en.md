@@ -218,6 +218,10 @@ Execute **Single machine single card** operation through the following code.
 cd finetune_demo
 python finetune_hf.py data/AdvertiseGen/ THUDM/chatglm3-6b configs/lora.yaml
 ```
+The fourth parameter (no) is whether to continue training with breakpoints. There are three types of inputs available:
+1. no, retrain directly.
+2. yes, automatically start training from the last saved checkpoint.
+3. XX breakpoint number. Example 600: start training from checkpoint number 600
 
 ## Use the fine-tuned model
 
