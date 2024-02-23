@@ -541,7 +541,7 @@ def main(
             if checkpointsn > 0:
                 model.gradient_checkpointing_enable()
                 model.enable_input_require_grads()
-                checkpointdir = output_dir + "\\checkpoint-" + str(checkpointsn)
+                checkpointdir = os.path.join(output_dir, "checkpoint-" + str(checkpointsn))
                 print("resume checkpoint from  checkpoint-" + str(checkpointsn))
                 trainer.train(resume_from_checkpoint=checkpointdir)
             else:
