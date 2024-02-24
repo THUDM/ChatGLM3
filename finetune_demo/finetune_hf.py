@@ -542,9 +542,9 @@ def main(
             if checkpointsn > 0:
                 model.gradient_checkpointing_enable()
                 model.enable_input_require_grads()
-                checkpointdir = output_dir + "\\checkpoint-" + str(checkpointsn)
+                checkpointdirectory = os.path.join(output_dir, "checkpoint-" + str(checkpointsn))
                 print("resume checkpoint from  checkpoint-" + str(checkpointsn))
-                trainer.train(resume_from_checkpoint=checkpointdir)
+                trainer.train(resume_from_checkpoint=checkpointdirectory)
             else:
                 # If not, start from scratch
                 trainer.train()
@@ -555,9 +555,9 @@ def main(
                     checkpointsn = int(auto_resume_from_checkpoint)
                     model.gradient_checkpointing_enable()
                     model.enable_input_require_grads()
-                    checkpointdir = output_dir + "\\checkpoint-" + str(checkpointsn)
+                    checkpointdirectory = os.path.join(output_dir, "checkpoint-" + str(checkpointsn))
                     print("resume checkpoint from  checkpoint-" + str(checkpointsn))
-                    trainer.train(resume_from_checkpoint=checkpointdir)
+                    trainer.train(resume_from_checkpoint=checkpointdirectory)
             else:
                 print(auto_resume_from_checkpoint,
                       "The specified checkpoint sn(" + auto_resume_from_checkpoint + ") has not been saved. Please search for the correct chkeckpoint in the model output directory")
