@@ -37,4 +37,4 @@ training_args:
 peft_config:
   peft_type: PREFIX_TUNING
   task_type: CAUSAL_LM
-  num_virtual_tokens: 64
+  num_virtual_tokens: 128

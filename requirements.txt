@@ -1,15 +1,15 @@
 # basic requirements
 
-protobuf>=4.25.2
-transformers>=4.37.2
+protobuf>=4.25.3
+transformers>=4.38.1
 tokenizers>=0.15.0
 cpm_kernels>=1.0.11
 torch>=2.1.0
-gradio>=4.16.0
-sentencepiece>=0.1.99
-sentence_transformers>=2.3.1
-accelerate>=0.26.1
-streamlit>=1.30.0
+gradio>=4.19.2
+sentencepiece>=0.2.0
+sentence_transformers>=2.4.0
+accelerate>=0.27.2
+streamlit>=1.31.0
 fastapi>=0.109.0
 loguru~=0.7.2
 mdtex2html>=1.3.0
@@ -17,17 +17,17 @@ latex2mathml>=3.77.0
 jupyter_client>=8.6.0
 
 # for openai demo
-openai>=1.10.0
+openai>=1.12.0
 zhipuai>=2.0.1
 
-pydantic>=2.6.0
+pydantic>=2.6.2
 sse-starlette>=2.0.0
-uvicorn>=0.27.0
+uvicorn>=0.27.1
 timm>=0.9.12
-tiktoken>=0.5.2
+tiktoken>=0.6.0
 
 # for langchain demo
 
-langchain>=0.1.5
+langchain>=0.1.9
 langchainhub>=0.1.14
 arxiv>=2.1.0

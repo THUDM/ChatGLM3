@@ -24,9 +24,9 @@ We have released the latest **GLM-4** model, which has made new breakthroughs in
 + [Chatglm Qingyan](https://www.chatglm.cn) To experience the latest version of GLM-4, including **GLM, all tools** and other functions, download the Zhipu Qingyan APP
   Or use [web page](https://www.chatglm.cn).
 + [API Platform](https://open.bigmodel.cn/) The new generation API platform has been launched. You can directly access the API
-  Experience new models such as `GLM-4`, `GLM-3-Turbo`, `CharGLM-3`, and `CogView-3` on the platform.
+  Experience new models such as `GLM-4`, `GLM-3-Turbo`, `CharaterGLM-3`, and `CogView-3` on the platform.
   Among them, two models, `GLM-4` and `GLM-3-Turbo`, support new functions such as `system prompt`, `function call`, `retrieval`, `Web_Search`, etc. Welcome to experience it.
-
++ [GLM4 API Open source Guidance](https://github.com/MetaGLM/glm-cookbook/) The open source guidance of GLM4 API using.
 -----
 
 ## ChatGLM3 Introduction
