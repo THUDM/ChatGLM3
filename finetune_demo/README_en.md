@@ -218,7 +218,9 @@ Execute **Single machine single card** operation through the following code.
 cd finetune_demo
 python finetune_hf.py data/AdvertiseGen/ THUDM/chatglm3-6b configs/lora.yaml
 ```
+
 The fourth parameter (no) is whether to continue training with breakpoints. There are three types of inputs available:
+
 1. no, retrain directly.
 2. yes, automatically start training from the last saved checkpoint.
 3. XX breakpoint number. Example 600: start training from checkpoint number 600
@@ -227,10 +229,13 @@ The fourth parameter (no) is whether to continue training with breakpoints. Ther
 
 ### Verify the fine-tuned model in inference_hf.py
 
-You can use our fine-tuned model in `finetune_demo/inference_hf.py`, which can be easily tested with just one line of code.
+You can use our fine-tuned model in `finetune_demo/inference_hf.py`, which can be easily tested with just one line of
+code.
+
 ```angular2html
 python inference_hf.py your_finetune_path --prompt your prompt
 ```
+
 In this way, the answer you get is a fine-tuned answer.
 
 ### Use the fine-tuned model in other demos in this repos or external repos
@@ -245,11 +250,14 @@ You can use our `lora` and fully parameterized fine-tuned models in any demo, as
 > of `base_model_name_or_path` in `adapter_config.json`.
 
 
-> Please note that we have only tested using NVIDIA Hopper (representative GPU: H100) and Ampère (representative GPU: A100) architecture and series of graphics cards. If you use a graphics card with another architecture, you may experience
+> Please note that we have only tested using NVIDIA Hopper (representative GPU: H100) and Ampère (representative GPU:
+> A100) architecture and series of graphics cards. If you use a graphics card with another architecture, you may
+> experience
 > 1. Unknown training problem/Video memory usage is different from the above.
 > 2. The architecture is too low and does not support certain features.
 > 3. The problem of reasoning effect.
-> The above three situations are problems that the community has encountered before. Although the probability is extremely low, if you encounter the above problems, you can try to solve them in the community.
+     > The above three situations are problems that the community has encountered before. Although the probability is
+     extremely low, if you encounter the above problems, you can try to solve them in the community.
 
 ```python
 def load_model_and_tokenizer(
@@ -323,9 +331,25 @@ Token does not participate in `loss` calculation.
    model parameters. This code is opened by default and can be commented, but if you use
    If there is a problem with `half` format training, you can switch back to this code, and the video memory may
    increase.
-3. The fine-tuned model can use any model acceleration framework that supports `peft` loading. Here, we do not provide a
+3. In our [Huggingface model code](https://huggingface.co/THUDM/chatglm3-6b/blob/main/modeling_chatglm.py), there is the
+   following content:
+    ```python
+   if self.gradient_checkpointing and self.training:
+                layer_ret = torch.utils.checkpoint.checkpoint(
+                    layer,
+                    hidden_states,
+                    attention_mask,
+                    rotary_pos_emb,
+                    kv_caches[index],
+                    use_cache,
+                    use_reentrant=False
+                )
+   ```
+   This may cause the video memory to increase during training, so if you have insufficient video memory, you can try
+   changing ``` use_reentrant``` to `True`.
+4. The fine-tuned model can use any model acceleration framework that supports `peft` loading. Here, we do not provide a
    demo.
-4. There are certain differences between the fine-tuning data set format of this warehouse and the API fine-tuning data
+5. There are certain differences between the fine-tuning data set format of this warehouse and the API fine-tuning data
    set format.
     + The `messages` field in the ZhipuAI API fine-tuning data set is the `conversation` field in this warehouse.
     + The fine-tuning file in ZhipuAI API is `jsonl`. In this warehouse, you need to simply change the file name

@@ -26,7 +26,7 @@ pip install -r requirements.txt
 > 1. 未知的训练问题 / 显存占用与上述有误差。
 > 2. 架构过低而不支持某些特性。
 > 3. 推理效果问题。
-> 以上三种情况为社区曾经遇到过的问题，虽然概率极地，如果您遇到了以上问题，可以尝试在社区中解决。
+     > 以上三种情况为社区曾经遇到过的问题，虽然概率极地，如果您遇到了以上问题，可以尝试在社区中解决。
 
 ## 多轮对话格式
 
@@ -200,9 +200,10 @@ OMP_NUM_THREADS=1 torchrun --standalone --nnodes=1 --nproc_per_node=8  finetune_
 cd finetune_demo
 python finetune_hf.py  data/AdvertiseGen/  THUDM/chatglm3-6b  configs/lora.yaml
 ```
+
 单机及多机的第四参数(no)为是否断点继训,可输入类型有三种  
 1:no 直接重新训练  
-2:yes   自动从最后一个保存的 Checkpoint开始训练  
+2:yes 自动从最后一个保存的 Checkpoint开始训练  
 3:XX 断点号数字 例 600 则从序号600 Checkpoint开始训练
 
 ## 使用微调后的模型
@@ -290,10 +291,24 @@ token 不参与 `loss` 计算。
 2. `_prepare_model_for_training` 的作用是遍历模型的所有可训练参数，并确保它们的数据类型为`torch.float32`。
    这在某些情况下是必要的，因为混合精度训练或其他操作可能会更改模型参数的数据类型。该代码默打开，可以注释，但是如果使用
    `half` 格式训练出现问题，可以切换回这个代码，显存可能增加。
-3. 微调后的模型可以使用任何支持 `peft` 载入的模型加速框架，在这里，我们没有提供demo。
-4. 本仓库的微调数据集格式与 API 微调数据集格式有一定区别
-    + ZhipuAI API 微调数据集中的 `messages` 字段在本仓库为 `conversation` 字段。
-    + ZhipuAI API 中的微调文件为 `jsonl`, 在本仓库，需要简单的将文件名改为 `json`。
+3. 在我们的[Huggingface模型代码](https://huggingface.co/THUDM/chatglm3-6b/blob/main/modeling_chatglm.py)中，有以下内容：
+    ```python
+   if self.gradient_checkpointing and self.training:
+                layer_ret = torch.utils.checkpoint.checkpoint(
+                    layer,
+                    hidden_states,
+                    attention_mask,
+                    rotary_pos_emb,
+                    kv_caches[index],
+                    use_cache,
+                    use_reentrant=False
+                )
+   ```
+   这可能导致训练的时候显存增加，因此，如果您的显存不足，可以尝试将``` use_reentrant``` 修改为`True`。
+4. 微调后的模型可以使用任何支持 `peft` 载入的模型加速框架，在这里，我们没有提供demo。
+5. 本仓库的微调数据集格式与 API 微调数据集格式有一定区别
+   + ZhipuAI API 微调数据集中的 `messages` 字段在本仓库为 `conversation` 字段。
+   + ZhipuAI API 中的微调文件为 `jsonl`, 在本仓库，需要简单的将文件名改为 `json`。
 
 ## 参考文献
 
