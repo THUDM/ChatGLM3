@@ -32,4 +32,4 @@ training_args:
   generation_config:
     max_new_tokens: 256
   # set your absolute deepspeed path here
-  deepspeed: /share/home/zyx/Code/ChatGLM3/finetune_demo/configs/ds_zero_3.json
+  deepspeed: ds_zero_3.json
