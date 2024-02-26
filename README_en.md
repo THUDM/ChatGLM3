@@ -26,7 +26,9 @@ We have released the latest **GLM-4** model, which has made new breakthroughs in
 + [API Platform](https://open.bigmodel.cn/) The new generation API platform has been launched. You can directly access the API
   Experience new models such as `GLM-4`, `GLM-3-Turbo`, `CharaterGLM-3`, and `CogView-3` on the platform.
   Among them, two models, `GLM-4` and `GLM-3-Turbo`, support new functions such as `system prompt`, `function call`, `retrieval`, `Web_Search`, etc. Welcome to experience it.
-+ [GLM4 API Open source Guidance](https://github.com/MetaGLM/glm-cookbook/) The open source guidance of GLM4 API using.
++ [GLM4 API Open Source Tutorial](https://github.com/MetaGLM/glm-cookbook/) - A tutorial and basic application guide for the GLM-4 API. You are invited to explore and experiment.
+  For API-related inquiries, refer to this open-source tutorial, or utilize the [GLM-4 API AI Assistant](https://open.bigmodel.cn/shareapp/v1/?share_code=sQwt5qyqYVaNh1O_87p8O) for assistance with common questions.
+
 -----
 
 ## ChatGLM3 Introduction
