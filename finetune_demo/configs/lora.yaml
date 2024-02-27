@@ -34,6 +34,8 @@ training_args:
     max_new_tokens: 256
   # set your absolute deepspeed path here
   #deepspeed: ds_zero_2.json
+  # set to true if train with cpu.
+  use_cpu: false
 peft_config:
   peft_type: LORA
   task_type: CAUSAL_LM
