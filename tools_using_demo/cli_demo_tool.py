@@ -70,6 +70,8 @@ def main():
         print("")
         if isinstance(response, dict):
             role = "observation"
+        else:
+            role = "user"
 
 
 if __name__ == "__main__":
