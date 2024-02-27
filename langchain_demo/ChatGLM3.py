@@ -61,7 +61,21 @@ class ChatGLM3(LLM):
             "content": "Answer the following questions as best as you can. You have access to the following tools:",
             "tools": tools_json
         })
-        query = f"""{prompt.split("Human: ")[-1].strip()}"""
+
+        dialog_parts = prompt.split("Human: ")
+        for part in dialog_parts[1:]:
+            if "\nAI: " in part:
+                user_input, ai_response = part.split("\nAI: ")
+                ai_response = ai_response.split("\n")[0]
+            else:
+                user_input = part
+                ai_response = None
+
+            ans.append({"role": "user", "content": user_input.strip()})
+            if ai_response:
+                ans.append({"role": "assistant", "content": ai_response.strip()})
+
+        query = dialog_parts[-1].split("\n")[0]
         return ans, query
 
     def _extract_observation(self, prompt: str):
