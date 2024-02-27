@@ -55,7 +55,7 @@ from langchain import hub
 from langchain.agents import AgentExecutor, create_structured_chat_agent, load_tools
 from langchain_core.messages import AIMessage, HumanMessage
 
-from ChatGLM3 import ChatGLM3
+from langchain_community.llms.chatglm3 import ChatGLM3
 from tools.Calculator import Calculator
 from tools.Weather import Weather
 from tools.DistanceConversion import DistanceConverter
@@ -63,8 +63,8 @@ from tools.DistanceConversion import DistanceConverter
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 
 if __name__ == "__main__":
-    llm = ChatGLM3()
-    llm.load_model(MODEL_PATH)
+    endpoint_url = "http://127.0.0.1:8000/v1/chat/completions"
+    llm = ChatGLM3(endpoint_url=endpoint_url,max_tokens=8192,top_p=0.9)
     prompt = hub.pull("hwchase17/structured-chat-agent")
 
     # for single parameter without history
