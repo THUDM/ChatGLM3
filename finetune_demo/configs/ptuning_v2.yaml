@@ -34,6 +34,7 @@ training_args:
     max_new_tokens: 512
   # set your absolute deepspeed path here
   #deepspeed: ds_zero_3.json
+  use_cpu: false
 peft_config:
   peft_type: PREFIX_TUNING
   task_type: CAUSAL_LM

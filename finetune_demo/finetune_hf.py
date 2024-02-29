@@ -362,9 +362,10 @@ def process_batch_eval(
 
 
 # TODO: Not sure if this is necessary, can set it to half
-def _prepare_model_for_training(model: nn.Module):
+def _prepare_model_for_training(model: nn.Module, use_cpu: bool):
     for param in model.parameters():
-        if param.requires_grad:
+        if param.requires_grad or use_cpu:
+	    # if train with cpu, cast all params to fp32 instead of trainable ones.
             param.data = param.data.to(torch.float32)
 
 
@@ -487,7 +488,7 @@ def main(
     # )
 
     # turn model to fp32
-    _prepare_model_for_training(model)
+    _prepare_model_for_training(model, ft_config.training_args.use_cpu)
 
     ft_config.training_args.generation_config.pad_token_id = (
         tokenizer.pad_token_id
