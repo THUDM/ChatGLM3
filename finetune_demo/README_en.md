@@ -219,11 +219,20 @@ cd finetune_demo
 python finetune_hf.py data/AdvertiseGen/ THUDM/chatglm3-6b configs/lora.yaml
 ```
 
-The fourth parameter (no) is whether to continue training with breakpoints. There are three types of inputs available:
+## Fine-tuning from a checkpoint
 
-1. no, retrain directly.
-2. yes, automatically start training from the last saved checkpoint.
-3. XX breakpoint number. Example 600: start training from checkpoint number 600
+If you train according to the above method, each fine-tuning will start from scratch. If you want to fine-tune from a
+half-trained model, you can add a fourth parameter, which has two ways to pass in:
+
+1. `yes`, automatically start training from the last saved Checkpoint
+2. `XX`, breakpoint number, for example, `600` means training from Checkpoint number 600
+
+For example, this is an example of continuing fine-tuning from the last saved point
+```angular2html
+
+cd finetune_demo
+python finetune_hf.py  data/AdvertiseGen/  THUDM/chatglm3-6b  configs/lora.yaml yes
+```
 
 ## Use the fine-tuned model
 

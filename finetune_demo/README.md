@@ -201,10 +201,19 @@ cd finetune_demo
 python finetune_hf.py  data/AdvertiseGen/  THUDM/chatglm3-6b  configs/lora.yaml
 ```
 
-单机及多机的第四参数(no)为是否断点继训,可输入类型有三种  
-1:no 直接重新训练  
-2:yes 自动从最后一个保存的 Checkpoint开始训练  
-3:XX 断点号数字 例 600 则从序号600 Checkpoint开始训练
+## 从保存点进行微调
+
+如果按照上述方式进行训练，每次微调都会从头开始，如果你想从训练一半的模型开始微调，你可以加入第四个参数，这个参数有两种传入方式:
+
+1. `yes`, 自动从最后一个保存的 Checkpoint开始训练
+2. `XX`, 断点号数字 例 `600` 则从序号600 Checkpoint开始训练
+
+例如，这就是一个从最后一个保存点继续微调的示例代码
+```angular2html
+cd finetune_demo
+python finetune_hf.py  data/AdvertiseGen/  THUDM/chatglm3-6b  configs/lora.yaml yes
+```
+
 
 ## 使用微调后的模型
 
@@ -307,8 +316,8 @@ token 不参与 `loss` 计算。
    这可能导致训练的时候显存增加，因此，如果您的显存不足，可以尝试将``` use_reentrant``` 修改为`True`。
 4. 微调后的模型可以使用任何支持 `peft` 载入的模型加速框架，在这里，我们没有提供demo。
 5. 本仓库的微调数据集格式与 API 微调数据集格式有一定区别
-   + ZhipuAI API 微调数据集中的 `messages` 字段在本仓库为 `conversation` 字段。
-   + ZhipuAI API 中的微调文件为 `jsonl`, 在本仓库，需要简单的将文件名改为 `json`。
+    + ZhipuAI API 微调数据集中的 `messages` 字段在本仓库为 `conversation` 字段。
+    + ZhipuAI API 中的微调文件为 `jsonl`, 在本仓库，需要简单的将文件名改为 `json`。
 
 ## 参考文献
 
