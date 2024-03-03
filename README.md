@@ -12,8 +12,7 @@
 
 [Read this in English.](./README_en.md)
 
-📔 关于`ChatGLM3-6B`
-更为详细的使用信息，可以参考
+📔 关于`ChatGLM3-6B` 更为详细的使用信息，可以参考
 
 + [ChatGLM3 开放技术文档](https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof?from=from_copylink)
 + [Bilibili video](https://www.bilibili.com/video/BV1uC4y1J7yA)
@@ -63,11 +62,11 @@ ChatGLM3 开源模型旨在与开源社区一起推动大模型技术发展，�
 
 ## 模型列表
 
-|      Model       | Seq Length |                                                                                                   Download                                                                                                   
-|:----------------:|:----------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:
-|   ChatGLM3-6B    |     8k     |        [HuggingFace](https://huggingface.co/THUDM/chatglm3-6b) \| [ModelScope](https://modelscope.cn/models/ZhipuAI/chatglm3-6b) \| [WiseModel](https://www.wisemodel.cn/models/ZhipuAI/chatglm3-6b)         
-| ChatGLM3-6B-Base |     8k     | [HuggingFace](https://huggingface.co/THUDM/chatglm3-6b-base) \| [ModelScope](https://modelscope.cn/models/ZhipuAI/chatglm3-6b-base) \| [WiseModel](https://www.wisemodel.cn/models/ZhipuAI/chatglm3-6b-base) 
-| ChatGLM3-6B-32K  |    32k     |  [HuggingFace](https://huggingface.co/THUDM/chatglm3-6b-32k) \| [ModelScope](https://modelscope.cn/models/ZhipuAI/chatglm3-6b-32k) \| [WiseModel](https://www.wisemodel.cn/models/ZhipuAI/chatglm3-6b-32k)   
+|      Model       | Seq Length |                                                                                                   Download                                                                                                   |
+|:----------------:|:----------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+|   ChatGLM3-6B    |     8k     |        [HuggingFace](https://huggingface.co/THUDM/chatglm3-6b) \| [ModelScope](https://modelscope.cn/models/ZhipuAI/chatglm3-6b) \| [WiseModel](https://www.wisemodel.cn/models/ZhipuAI/chatglm3-6b)         |
+| ChatGLM3-6B-Base |     8k     | [HuggingFace](https://huggingface.co/THUDM/chatglm3-6b-base) \| [ModelScope](https://modelscope.cn/models/ZhipuAI/chatglm3-6b-base) \| [WiseModel](https://www.wisemodel.cn/models/ZhipuAI/chatglm3-6b-base) |
+| ChatGLM3-6B-32K  |    32k     |  [HuggingFace](https://huggingface.co/THUDM/chatglm3-6b-32k) \| [ModelScope](https://modelscope.cn/models/ZhipuAI/chatglm3-6b-32k) \| [WiseModel](https://www.wisemodel.cn/models/ZhipuAI/chatglm3-6b-32k)   |
 
 请注意，所有模型的最新更新都会在 Huggingface 率先发布。 ModelScope 和 WiseModel 由于没有与 Huggingface 同步，需要开发人员手动更新，可能会在
 Huggingface 更新后一段时间内同步更新。
@@ -79,10 +78,11 @@ Huggingface 更新后一段时间内同步更新。
 推理加速：
 
 * [chatglm.cpp](https://github.com/li-plus/chatglm.cpp): 类似 llama.cpp 的量化加速推理方案，实现笔记本上实时对话
-* [ChatGLM3-TPU](https://github.com/sophgo/ChatGLM3-TPU): 采用TPU加速推理方案，在算能端侧芯片BM1684X（16T@FP16，内存16G）上实时运行约7.5
-  token/s
+* [ChatGLM3-TPU](https://github.com/sophgo/ChatGLM3-TPU): 采用TPU加速推理方案，在算能端侧芯片BM1684X（16T@FP16，内存16G）上实时运行约7.5 token/s
 * [TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM/tree/main):
-  NVIDIA开发的高性能GPU加速推理方案，可以参考此[步骤](./tensorrt_llm_demo/README.md)部署ChatGLM3
+  NVIDIA开发的高性能 GPU 加速推理方案，可以参考此 [步骤](./tensorrt_llm_demo/README.md) 部署 ChatGLM3-6B 模型
+* [OpenVINO](https://github.com/OpenVINO-dev-contest/chatglm3.openvino): 
+Intel 开发的高性能 CPU 和 GPU 加速推理方案，可以参考此 [步骤](./openvino_demo/README.md) 部署 ChatGLM3-6B 模型
 
 高效微调：
 
@@ -104,7 +104,7 @@ Huggingface 更新后一段时间内同步更新。
 | Model            | GSM8K | MATH | BBH  | MMLU | C-Eval | CMMLU | MBPP | AGIEval |
 |------------------|:-----:|:----:|:----:|:----:|:------:|:-----:|:----:|:-------:|
 | ChatGLM2-6B-Base | 32.4  | 6.5  | 33.7 | 47.9 |  51.7  | 50.0  |  -   |    -    |
-| Best Baseline    | 52.1  | 13.1 | 45.0 | 60.1 |  63.5  | 62.2  | 47.5 |  45.8   
+| Best Baseline    | 52.1  | 13.1 | 45.0 | 60.1 |  63.5  | 62.2  | 47.5 |  45.8   |
 | ChatGLM3-6B-Base | 72.3  | 25.7 | 66.1 | 61.4 |  69.0  | 67.5  | 52.4 |  53.7   |
 
 > Best Baseline 指的是截止 2023年10月27日、模型参数在 10B 以下、在对应数据集上表现最好的预训练模型，不包括只针对某一项任务训练而未保持通用能力的模型。
@@ -170,18 +170,12 @@ B, 很高兴见到你, 欢迎问我任何问题。
 >> > print(response)
 晚上睡不着可能会让你感到焦虑或不舒服, 但以下是一些可以帮助你入睡的方法:
 
-1.
-制定规律的睡眠时间表: 保持规律的睡眠时间表可以帮助你建立健康的睡眠习惯, 使你更容易入睡。尽量在每天的相同时间上床, 并在同一时间起床。
-2.
-创造一个舒适的睡眠环境: 确保睡眠环境舒适, 安静, 黑暗且温度适宜。可以使用舒适的床上用品, 并保持房间通风。
-3.
-放松身心: 在睡前做些放松的活动, 例如泡个热水澡, 听些轻柔的音乐, 阅读一些有趣的书籍等, 有助于缓解紧张和焦虑, 使你更容易入睡。
-4.
-避免饮用含有咖啡因的饮料: 咖啡因是一种刺激性物质, 会影响你的睡眠质量。尽量避免在睡前饮用含有咖啡因的饮料, 例如咖啡, 茶和可乐。
-5.
-避免在床上做与睡眠无关的事情: 在床上做些与睡眠无关的事情, 例如看电影, 玩游戏或工作等, 可能会干扰你的睡眠。
-6.
-尝试呼吸技巧: 深呼吸是一种放松技巧, 可以帮助你缓解紧张和焦虑, 使你更容易入睡。试着慢慢吸气, 保持几秒钟, 然后缓慢呼气。
+1.制定规律的睡眠时间表: 保持规律的睡眠时间表可以帮助你建立健康的睡眠习惯, 使你更容易入睡。尽量在每天的相同时间上床, 并在同一时间起床。
+2.创造一个舒适的睡眠环境: 确保睡眠环境舒适, 安静, 黑暗且温度适宜。可以使用舒适的床上用品, 并保持房间通风。
+3.放松身心: 在睡前做些放松的活动, 例如泡个热水澡, 听些轻柔的音乐, 阅读一些有趣的书籍等, 有助于缓解紧张和焦虑, 使你更容易入睡。
+4.避免饮用含有咖啡因的饮料: 咖啡因是一种刺激性物质, 会影响你的睡眠质量。尽量避免在睡前饮用含有咖啡因的饮料, 例如咖啡, 茶和可乐。
+5.避免在床上做与睡眠无关的事情: 在床上做些与睡眠无关的事情, 例如看电影, 玩游戏或工作等, 可能会干扰你的睡眠。
+6.尝试呼吸技巧: 深呼吸是一种放松技巧, 可以帮助你缓解紧张和焦虑, 使你更容易入睡。试着慢慢吸气, 保持几秒钟, 然后缓慢呼气。
 
 如果这些方法无法帮助你入睡, 你可以考虑咨询医生或睡眠专家, 寻求进一步的建议。
 ```
@@ -317,6 +311,11 @@ Pro），在空余内存不足的情况下会使用硬盘上的虚拟内存，�
 
 如果你有多张 GPU，但是每张 GPU 的显存大小都不足以容纳完整的模型，那么可以将模型切分在多张GPU上。首先安装
 accelerate: `pip install accelerate`，然后即可正常加载模型。
+
+### OpenVINO Demo
+
+ChatGLM3-6B 已经支持使用 OpenVINO
+工具包进行加速推理，在英特尔的GPU和GPU设备上有较大推理速度提升。具体使用方法请参考 [OpenVINO Demo](Intel_device_demo/openvino_demo/README.md)。
 
 ### TensorRT-LLM Demo
 

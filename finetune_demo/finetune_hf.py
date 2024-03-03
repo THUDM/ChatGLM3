@@ -441,6 +441,7 @@ def main(
             default='',
             help='If entered as yes, automatically use the latest save checkpoint. If it is a numerical example 12 15, use the corresponding save checkpoint. If the input is no, restart training'
         ),
+
 ):
     ft_config = FinetuningConfig.from_file(config_file)
     tokenizer, model = load_tokenizer_and_model(model_dir, peft_config=ft_config.peft_config)

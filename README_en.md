@@ -63,6 +63,7 @@ Inference acceleration:
 * [chatglm.cpp](https://github.com/li-plus/chatglm.cpp): Real-time inference on your laptop accelerated by quantization, similar to llama.cpp.
 * [ChatGLM3-TPU](https://github.com/sophgo/ChatGLM3-TPU): Using the TPU accelerated inference solution, it runs about 7.5 token/s in real time on the end-side chip BM1684X (16T@FP16, 16G DDR).
 * [TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM/tree/main): A high-performance GPU-accelerated inference solution developed by NVIDIA, you can refer to these [steps](./tensorrt_llm_demo/README.md) to deploy ChatGLM3.
+* [OpenVINO](https://github.com/OpenVINO-dev-contest/chatglm3.openvino): A high-performance CPU and GPU accelerated inference solution developed by Intel, you can refer to this [step](./openvino_demo/README.md) to deploy the ChatGLM3-6B model
 
 Efficient fine-tuning:
 * [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory): An excellent, easy-to-use and efficient fine-tuning framework.
@@ -253,6 +254,13 @@ Loading the half-precision ChatGLM3-6B model requires about 13GB of memory. Mach
 ### Multi-GPU Deployment
 
 If you have multiple GPUs, but each GPU's VRAM size is not enough to accommodate the complete model, then the model can be split across multiple GPUs. First, install accelerate: `pip install accelerate`, and then load the model as usual.
+
+
+### OpenVINO Demo
+
+ChatGLM3-6B already supports the use of OpenVINO
+The toolkit accelerates inference and has a greater inference speed improvement on Intel's GPUs and GPU devices. For specific usage, please refer to [OpenVINO Demo](Intel_device_demo/openvino_demo/README.md).
+
 
 ### TensorRT-LLM Demo
 
