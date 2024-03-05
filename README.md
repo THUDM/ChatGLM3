@@ -82,7 +82,7 @@ Huggingface 更新后一段时间内同步更新。
 * [TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM/tree/main):
   NVIDIA开发的高性能 GPU 加速推理方案，可以参考此 [步骤](./tensorrt_llm_demo/README.md) 部署 ChatGLM3-6B 模型
 * [OpenVINO](https://github.com/OpenVINO-dev-contest/chatglm3.openvino): 
-Intel 开发的高性能 CPU 和 GPU 加速推理方案，可以参考此 [步骤](./openvino_demo/README.md) 部署 ChatGLM3-6B 模型
+Intel 开发的高性能 CPU 和 GPU 加速推理方案，可以参考此 [步骤](./Intel_device_demo/openvino_demo/README.md) 部署 ChatGLM3-6B 模型
 
 高效微调：
 
