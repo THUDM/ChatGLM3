@@ -63,7 +63,7 @@ Inference acceleration:
 * [chatglm.cpp](https://github.com/li-plus/chatglm.cpp): Real-time inference on your laptop accelerated by quantization, similar to llama.cpp.
 * [ChatGLM3-TPU](https://github.com/sophgo/ChatGLM3-TPU): Using the TPU accelerated inference solution, it runs about 7.5 token/s in real time on the end-side chip BM1684X (16T@FP16, 16G DDR).
 * [TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM/tree/main): A high-performance GPU-accelerated inference solution developed by NVIDIA, you can refer to these [steps](./tensorrt_llm_demo/README.md) to deploy ChatGLM3.
-* [OpenVINO](https://github.com/OpenVINO-dev-contest/chatglm3.openvino): A high-performance CPU and GPU accelerated inference solution developed by Intel, you can refer to this [step](./Intel_device_demo/openvino_demo/README.md) to deploy the ChatGLM3-6B model
+* [OpenVINO](https://github.com/openvinotoolkit): A high-performance CPU and GPU accelerated inference solution developed by Intel, you can refer to this [step](./Intel_device_demo/openvino_demo/README.md) to deploy the ChatGLM3-6B model
 
 Efficient fine-tuning:
 * [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory): An excellent, easy-to-use and efficient fine-tuning framework.

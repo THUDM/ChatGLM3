@@ -81,7 +81,7 @@ Huggingface 更新后一段时间内同步更新。
 * [ChatGLM3-TPU](https://github.com/sophgo/ChatGLM3-TPU): 采用TPU加速推理方案，在算能端侧芯片BM1684X（16T@FP16，内存16G）上实时运行约7.5 token/s
 * [TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM/tree/main):
   NVIDIA开发的高性能 GPU 加速推理方案，可以参考此 [步骤](./tensorrt_llm_demo/README.md) 部署 ChatGLM3-6B 模型
-* [OpenVINO](https://github.com/OpenVINO-dev-contest/chatglm3.openvino): 
+* [OpenVINO](https://github.com/openvinotoolkit): 
 Intel 开发的高性能 CPU 和 GPU 加速推理方案，可以参考此 [步骤](./Intel_device_demo/openvino_demo/README.md) 部署 ChatGLM3-6B 模型
 
 高效微调：
