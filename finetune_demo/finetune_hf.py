@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-
+import os
+import jieba
 import dataclasses as dc
 import functools
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Annotated, Any, Optional, Union
-
-import jieba
 import numpy as np
 import ruamel.yaml as yaml
 import torch
@@ -34,7 +33,6 @@ from transformers import (
 from transformers import DataCollatorForSeq2Seq as _DataCollatorForSeq2Seq
 
 from transformers import Seq2SeqTrainer as _Seq2SeqTrainer
-import os
 
 ModelType = Union[PreTrainedModel, PeftModelForCausalLM]
 TokenizerType = Union[PreTrainedTokenizer, PreTrainedTokenizerFast]
@@ -89,6 +87,19 @@ class Seq2SeqTrainer(_Seq2SeqTrainer):
         if self.args.predict_with_generate:
             labels = output_ids
         return loss, generated_tokens, labels
+
+    # def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
+    #     if output_dir is None:
+    #         output_dir = self.args.output_dir
+    #     os.makedirs(output_dir, exist_ok=True)
+    #     ptuning_params = {k: v for k, v in self.model.transformer.prefix_encoder.state_dict().items()}
+    #
+    #     torch.save(ptuning_params, os.path.join(output_dir, 'pytorch_model.bin'))
+    #
+    #     print(f"P-Tuning model weights saved in {output_dir}")
+    #
+    #     if self.tokenizer is not None:
+    #         self.tokenizer.save_pretrained(output_dir)
 
 
 def _resolve_path(path: Union[str, Path]) -> Path:
@@ -365,7 +376,7 @@ def process_batch_eval(
 def _prepare_model_for_training(model: nn.Module, use_cpu: bool):
     for param in model.parameters():
         if param.requires_grad or use_cpu:
-	    # if train with cpu, cast all params to fp32 instead of trainable ones.
+            # if train with cpu, cast all params to fp32 instead of trainable ones.
             param.data = param.data.to(torch.float32)
 
 
@@ -484,9 +495,9 @@ def main(
         print('test_dataset:', test_dataset)
 
     # checks encoded dataset
-    # _sanity_check(
-    #     train_dataset[0]["input_ids"], train_dataset[0]["labels"], tokenizer
-    # )
+    _sanity_check(
+        train_dataset[0]["input_ids"], train_dataset[0]["labels"], tokenizer
+    )
 
     # turn model to fp32
     _prepare_model_for_training(model, ft_config.training_args.use_cpu)
@@ -515,7 +526,6 @@ def main(
         compute_metrics=functools.partial(compute_metrics, tokenizer=tokenizer),
     )
 
-    # Determine whether to continue training without breakpoints or if it is empty, then start training again directly
     if auto_resume_from_checkpoint.upper() == "" or auto_resume_from_checkpoint is None:
         trainer.train()
     else:
