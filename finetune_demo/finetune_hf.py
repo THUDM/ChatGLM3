@@ -88,6 +88,9 @@ class Seq2SeqTrainer(_Seq2SeqTrainer):
             labels = output_ids
         return loss, generated_tokens, labels
 
+    # For P-Tuning a new save_model function is fine for the prefix_encoder model
+    # but may cost problems for the whole model loading
+
     # def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
     #     if output_dir is None:
     #         output_dir = self.args.output_dir
@@ -372,11 +375,11 @@ def process_batch_eval(
     return {'input_ids': batched_input_ids, 'output_ids': batched_output_ids}
 
 
-# TODO: Not sure if this is necessary, can set it to half
+# Not sure if this is necessary, can set it to half.
+# If train with cpu, cast all params to fp32 instead of trainable ones.
 def _prepare_model_for_training(model: nn.Module, use_cpu: bool):
     for param in model.parameters():
         if param.requires_grad or use_cpu:
-            # if train with cpu, cast all params to fp32 instead of trainable ones.
             param.data = param.data.to(torch.float32)
 
 
