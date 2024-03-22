@@ -124,7 +124,9 @@ Action:
 {json.dumps(final_answer_json, ensure_ascii=False)}
 ```"""
 
-    def _call(self, prompt: str, history: List = [], stop: Optional[List[str]] = ["<|user|>"]):
+    def _call(self, prompt: str, history: List = None, stop: Optional[List[str]] = ["<|user|>"]):
+        if not history:
+            history = []
         if not self.has_search:
             self.history, query = self._tool_history(prompt)
         else:
