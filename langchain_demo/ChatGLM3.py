@@ -93,7 +93,7 @@ class ChatGLM3(LLM):
 
             lines = content.split('\n')
             for line in lines:
-                if 'tool_call(' in line and ')' in line and self.has_search is False:
+                if 'tool_call(' in line and ')' in line:
                     # 获取括号内的字符串
                     params_str = line.split('tool_call(')[-1].split(')')[0]
 
@@ -124,7 +124,9 @@ Action:
 {json.dumps(final_answer_json, ensure_ascii=False)}
 ```"""
 
-    def _call(self, prompt: str, history: List = [], stop: Optional[List[str]] = ["<|user|>"]):
+    def _call(self, prompt: str, history: List = None, stop: Optional[List[str]] = ["<|user|>"]):
+        if not history:
+            history = []
         if not self.has_search:
             self.history, query = self._tool_history(prompt)
         else:
