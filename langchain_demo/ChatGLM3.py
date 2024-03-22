@@ -93,7 +93,7 @@ class ChatGLM3(LLM):
 
             lines = content.split('\n')
             for line in lines:
-                if 'tool_call(' in line and ')' in line and self.has_search is False:
+                if 'tool_call(' in line and ')' in line:
                     # 获取括号内的字符串
                     params_str = line.split('tool_call(')[-1].split(')')[0]
 
