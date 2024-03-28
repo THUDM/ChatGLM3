@@ -9,6 +9,8 @@ training_args:
   # see `transformers.Seq2SeqTrainingArguments`
   output_dir: ./output
   max_steps: 3000
+  # needed to be fit for the dataset
+  learning_rate: 5e-5
   # settings for data loading
   per_device_train_batch_size: 4
   dataloader_num_workers: 16
