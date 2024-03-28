@@ -38,7 +38,7 @@ from contextlib import asynccontextmanager
 from typing import List, Literal, Optional, Union
 from loguru import logger
 from pydantic import BaseModel, Field
-from bigdl.llm.transformers import AutoModel
+from ipex_llm.transformers import AutoModel
 from transformers import AutoTokenizer
 from utils import process_response, generate_chatglm3, generate_stream_chatglm3
 # from sentence_transformers import SentenceTransformer

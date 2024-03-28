@@ -1,5 +1,5 @@
 import time
-from bigdl.llm.transformers import AutoModel
+from ipex_llm.transformers import AutoModel
 from transformers import AutoTokenizer
 
 CHATGLM_V3_PROMPT_FORMAT = "\n{prompt}\n"

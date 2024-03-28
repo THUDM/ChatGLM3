@@ -18,7 +18,7 @@ ensuring that the chat interface displays formatted text correctly.
 
 import os
 import streamlit as st
-from bigdl.llm.transformers import AutoModel
+from ipex_llm.transformers import AutoModel
 from transformers import AutoTokenizer
 
 
