@@ -76,7 +76,6 @@ class Seq2SeqTrainer(_Seq2SeqTrainer):
             ignore_keys=None,
             **gen_kwargs,
     ) -> tuple[Optional[float], Optional[torch.Tensor], Optional[torch.Tensor]]:
-
         if self.args.predict_with_generate:
             output_ids = inputs.pop('output_ids')
         input_ids = inputs['input_ids']
@@ -87,7 +86,6 @@ class Seq2SeqTrainer(_Seq2SeqTrainer):
         if self.args.predict_with_generate:
             labels = output_ids
         return loss, generated_tokens, labels
-
     # For P-Tuning a new save_model function is fine for the prefix_encoder model
     # but may cost problems for the whole model loading
 
@@ -525,7 +523,7 @@ def main(
         ),
         train_dataset=train_dataset,
         eval_dataset=val_dataset.select(list(range(50))),
-        tokenizer=tokenizer,
+        # tokenizer=tokenizer, # to avoid the wrong of the tokenizer
         compute_metrics=functools.partial(compute_metrics, tokenizer=tokenizer),
     )
 
