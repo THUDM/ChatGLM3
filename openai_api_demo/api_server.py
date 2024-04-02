@@ -23,6 +23,9 @@ Note:
     Users need to configure their special tokens and can enable multi-GPU support as per the provided instructions.
     Embedding Models only support in One GPU.
 
+    Running this script requires 14-15GB of GPU memory. 2 GB for the embedding model and 12-13 GB for the FP16 ChatGLM3 LLM.
+
+
 """
 
 import os
@@ -52,7 +55,7 @@ MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
 
 # set Embedding Model path
-EMBEDDING_PATH = os.environ.get('EMBEDDING_PATH', 'BAAI/bge-large-zh-v1.5')
+EMBEDDING_PATH = os.environ.get('EMBEDDING_PATH', 'BAAI/bge-m3')
 
 
 @asynccontextmanager
