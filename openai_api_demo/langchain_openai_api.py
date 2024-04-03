@@ -6,6 +6,7 @@ from the `langchain_community` library. It facilitates continuous dialogue with 
 to start the GLM3 model's service.
 2. Run the Script: The script includes functionality for initializing the LLMChain object and obtaining AI responses,
 allowing the user to input questions and receive AI answers.
+
 """
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
@@ -23,6 +24,8 @@ def initialize_llm_chain(messages: list):
         max_tokens=8096,
         prefix_messages=messages,
         top_p=0.9,
+        streaming=True, # Set to True for streaming completions
+
     )
     return LLMChain(prompt=prompt, llm=llm)
 

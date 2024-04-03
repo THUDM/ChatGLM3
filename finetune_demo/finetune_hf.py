@@ -513,6 +513,7 @@ def main(
     ]
     model.gradient_checkpointing_enable()
     model.enable_input_require_grads()
+
     trainer = Seq2SeqTrainer(
         model=model,
         args=ft_config.training_args,
@@ -523,7 +524,7 @@ def main(
         ),
         train_dataset=train_dataset,
         eval_dataset=val_dataset.select(list(range(50))),
-        # tokenizer=tokenizer, # to avoid the wrong of the tokenizer
+        tokenizer=tokenizer if ft_config.peft_config.peft_type != "LORA" else None,  # LORA does not need tokenizer
         compute_metrics=functools.partial(compute_metrics, tokenizer=tokenizer),
     )
 
