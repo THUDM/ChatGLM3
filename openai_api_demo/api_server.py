@@ -112,7 +112,7 @@ class DeltaMessage(BaseModel):
 
 ## for Embedding
 class EmbeddingRequest(BaseModel):
-    input: List[str]
+    input: Union[List[str], str]
     model: str
 
 
@@ -177,7 +177,10 @@ async def health() -> Response:
 
 @app.post("/v1/embeddings", response_model=EmbeddingResponse)
 async def get_embeddings(request: EmbeddingRequest):
-    embeddings = [embedding_model.encode(text) for text in request.input]
+    if isinstance(request.input, str):
+        embeddings = [embedding_model.encode(request.input)]
+    else:
+        embeddings = [embedding_model.encode(text) for text in request.input]
     embeddings = [embedding.tolist() for embedding in embeddings]
 
     def num_tokens_from_string(string: str) -> int:
