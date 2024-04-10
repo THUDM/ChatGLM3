@@ -33,7 +33,7 @@ pip install -r requirements.txt
 由于需要将Huggingface模型转换为OpenVINO IR模型，因此您需要下载模型并转换。
 
 ```
-python3 convert.py --model_id THUDM/chatglm3-6b --precision int4 --output {your_path}/chatglm3-6b 
+python3 convert.py --model_id THUDM/chatglm3-6b --precision int4 --output {your_path}/chatglm3-6b-ov 
 ```
 
 ### 可以选择的参数
@@ -46,7 +46,7 @@ python3 convert.py --model_id THUDM/chatglm3-6b --precision int4 --output {your_
 ## 3. 运行ChatGLM3 机器人
 
 ```
-python3 chat.py --model_path {your_path}/chatglm3-6b --max_sequence_length 4096 --device CPU
+python3 chat.py --model_path {your_path}/chatglm3-6b-ov --max_sequence_length 4096 --device CPU
 ```
 
 ### 可以选择的参数
