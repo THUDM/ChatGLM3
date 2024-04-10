@@ -94,7 +94,7 @@ Intel 开发的高性能 CPU 和 GPU 加速推理方案，可以参考此 [步�
 * [LangChain-Chatchat](https://github.com/chatchat-space/Langchain-Chatchat): 基于 ChatGLM 等大语言模型与 Langchain
   等应用框架实现，开源、可离线部署的检索增强生成(RAG)大模型知识库项目。
 
-* [BISHENG](https://github.com/dataelement/bisheng): 开源大模型应用开发平台,赋能和加速大模型应用开发落地，帮助用户以最佳体验进入下一代应用开发模式。
+* [BISHENG](https://github.com/dataelement/bisheng): 开源大模型应用开发平台，赋能和加速大模型应用开发落地，帮助用户以最佳体验进入下一代应用开发模式。
 
 ## 评测结果
 
