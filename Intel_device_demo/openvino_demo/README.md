@@ -4,7 +4,6 @@
 [OpenVINO](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/overview.html) 是 Intel 为深度学习推理而设计的开源工具包。它可以帮助开发者优化模型，提高推理性能，减少模型的内存占用。本示例将展示如何使用 OpenVINO 部署 ChatGLM3。
 
 你需要克隆本仓库，然后按照以下步骤进行操作来将模型转换你的 OpenVINO IR 模型，随后进行推理。
-## 请你
 ## 1. 环境配置
 
 首先，克隆OpenVINO GLM3 推理仓库并安装依赖。
@@ -53,7 +52,7 @@ python3 quantize.py --model_path {your_path}/chatglm3-6b --precision int4 --outp
 * `-- precision` - 量化精度：int8 或 int4。
 * `--output` - 保存模型的路径。
 
-## 4. 运行ChatGLM3 机器人
+## 4. 运行 ChatGLM3 模型
 
 ```
 python3 chat.py --model_path {your_path}/chatglm3-6b --max_sequence_length 4096 --device CPU
