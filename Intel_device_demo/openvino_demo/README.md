@@ -4,7 +4,6 @@
 [OpenVINO](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/overview.html) 是 Intel 为深度学习推理而设计的开源工具包。它可以帮助开发者优化模型，提高推理性能，减少模型的内存占用。本示例将展示如何使用 OpenVINO 部署 ChatGLM3。
 
 你需要克隆本仓库，然后按照以下步骤进行操作来将模型转换你的 OpenVINO IR 模型，随后进行推理。
-## 请你
 ## 1. 环境配置
 
 首先，克隆OpenVINO GLM3 推理仓库并安装依赖。
@@ -33,20 +32,30 @@ pip install -r requirements.txt
 由于需要将Huggingface模型转换为OpenVINO IR模型，因此您需要下载模型并转换。
 
 ```
-python3 convert.py --model_id THUDM/chatglm3-6b --precision int4 --output {your_path}/chatglm3-6b-ov 
+python3 convert.py --model_id THUDM/chatglm3-6b --output {your_path}/chatglm3-6b 
 ```
 
 ### 可以选择的参数
 
 * `--model_id` - 模型所在目录的路径（绝对路径）。
-* `--precision` - 模型精度：fp16, int8 或 int4。
 * `--output` - 转换后模型保存的地址
 
-
-## 3. 运行ChatGLM3 机器人
+## 3. 量化模型（非必须）
 
 ```
-python3 chat.py --model_path {your_path}/chatglm3-6b-ov --max_sequence_length 4096 --device CPU
+python3 quantize.py --model_path {your_path}/chatglm3-6b --precision int4 --output {your_path}/chatglm3-6b-int4
+```
+
+### 可以选择的参数
+
+* `--model_path` - OpenVINO IR 模型所在目录的路径。
+* `-- precision` - 量化精度：int8 或 int4。
+* `--output` - 保存模型的路径。
+
+## 4. 运行 ChatGLM3 模型
+
+```
+python3 chat.py --model_path {your_path}/chatglm3-6b --max_sequence_length 4096 --device CPU
 ```
 
 ### 可以选择的参数

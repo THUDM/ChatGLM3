@@ -6,6 +6,7 @@ from the `langchain_community` library. It facilitates continuous dialogue with 
 to start the GLM3 model's service.
 2. Run the Script: The script includes functionality for initializing the LLMChain object and obtaining AI responses,
 allowing the user to input questions and receive AI answers.
+3. This demo is not support for streaming.
 
 """
 from langchain.chains import LLMChain
@@ -21,11 +22,9 @@ def initialize_llm_chain(messages: list):
     endpoint_url = "http://127.0.0.1:8000/v1/chat/completions"
     llm = ChatGLM3(
         endpoint_url=endpoint_url,
-        max_tokens=8096,
+        max_tokens=4096,
         prefix_messages=messages,
-        top_p=0.9,
-        streaming=True, # Set to True for streaming completions
-
+        top_p=0.9
     )
     return LLMChain(prompt=prompt, llm=llm)
 
