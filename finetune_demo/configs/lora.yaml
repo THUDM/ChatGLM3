@@ -17,7 +17,7 @@ training_args:
   remove_unused_columns: false
   # settings for saving checkpoints
   save_strategy: steps
-  save_steps: 2000
+  save_steps: 500
   # settings for logging
   log_level: info
   logging_strategy: steps
