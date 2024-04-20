@@ -5,3 +5,4 @@ requests>=2.31.0
 ipykernel>=6.26.0
 ipython>=8.18.1
 jupyter_client>=8.6.0
+torch=2.2.2
