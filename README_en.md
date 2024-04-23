@@ -205,11 +205,19 @@ At the same time, we also wrote a sample code to test the performance of API cal
 + OpenAI test script: [openai_api_request.py](openai_api_demo/openai_api_request.py)
 + ZhipuAI test script: [zhipu_api_request.py](openai_api_demo/zhipu_api_request.py)
 + Test with Curl
-```shell
+
+```chat shell
 curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
--H "Content-Type: application/json" \\
--d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"system\", \"content\": \"You are ChatGLM3, a large language model trained by Zhipu. Follow the user's instructions carefully. Respond using markdown.\"}, {\"role\": \"user\", \"content\": \"Hello, tell me a story, about 100 words\"}], \"stream\": false, \"max_title": \"\". false, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
+-H "Content-Type: application/json" \
+-d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"system\", \"content\": \"You are ChatGLM3, a large language model trained by Zhipu.AI. Follow the user's instructions carefully. Respond using markdown.\"}, {\"role\": \"user\", \"content\": \"你好，给我讲一个故事，大概100字\"}], \"stream\": false, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
 ````
+
+```agent-chat stream shell
+curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
+-H "Content-Type: application/json" \
+-d "{\"model\": \"chatglm3-6b\", \"agent\": true, \"messages\": [{\"role\": \"user\", \"content\": \"37乘以8加7除2等于多少？\"}], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
+````
+
 + Testing with Python
 ```shell
 cd openai_api_demo
