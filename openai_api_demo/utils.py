@@ -155,7 +155,7 @@ def process_chatglm_messages(messages, tools=None):
                     }
                 )
         else:
-            if msg_has_sys:
+            if role == "system" and msg_has_sys:
                 msg_has_sys = False
                 continue
             messages.append({"role": role, "content": content})
