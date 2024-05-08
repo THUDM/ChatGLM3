@@ -44,7 +44,7 @@ from pydantic import BaseModel, Field
 from transformers import AutoTokenizer, AutoModel
 from utils import process_response, generate_chatglm3, generate_stream_chatglm3
 from sentence_transformers import SentenceTransformer
-from tools.schema import tool_class, tool_def, tool_param_start_with
+from tools.schema import tool_class, tool_def, tool_param_start_with, tool_define_param_name
 from sse_starlette.sse import EventSourceResponse
 
 # Set up limit request time
@@ -273,12 +273,16 @@ async def create_chat_completion(request: ChatCompletionRequest):
             if tool_param_start_with in output:
                 tool = tool_class.get(function_call.name)
                 if tool:
-                    tool_param = json.loads(function_call.arguments).get("symbol")
-                    if tool().parameter_validation(tool_param):
-                        observation = str(tool().run(tool_param))
-                        tool_response = observation
+                    this_tool_define_param_name = tool_define_param_name.get(function_call.name)
+                    if this_tool_define_param_name:
+                        tool_param = json.loads(function_call.arguments).get(this_tool_define_param_name)
+                        if tool().parameter_validation(tool_param):
+                            observation = str(tool().run(tool_param))
+                            tool_response = observation
+                        else:
+                            tool_response = "Tool parameter values error, please tell the user about this situation."
                     else:
-                        tool_response = "Tool parameter values error, please tell the user about this situation."
+                        tool_response = "Tool parameter is not defined in tools schema, please tell the user about this situation."
                 else:
                     tool_response = "No available tools found, please tell the user about this situation."
             else:

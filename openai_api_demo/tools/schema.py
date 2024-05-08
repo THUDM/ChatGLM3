@@ -32,3 +32,16 @@ Like:
   ]
 """
 tool_def = []
+
+
+""" 
+ Describes the tool parameter name defined in the system prompt.
+ E.g：
+ tool_define_param_name = {
+    'Calculator': "symbol",
+    ...
+}
+"""
+tool_define_param_name = {
+
+}
