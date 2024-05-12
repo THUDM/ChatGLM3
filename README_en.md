@@ -226,7 +226,7 @@ curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
          ], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
 ````
 
-+ Openai style custom interface agent-chat Curl test (You need to implement the contents of the custom tool description script openai_api_demo/tools/schema.py, and specify AGENT_CONTROLLER in api_server.py as True)：
++ Openai style custom interface agent-chat Curl test (You need to implement the contents of the custom tool description script openai_api_demo/tools/schema.py, and specify AGENT_CONTROLLER in api_server.py as 'true')：
 ```shell
 curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
 -H "Content-Type: application/json" \

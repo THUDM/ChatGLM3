@@ -279,7 +279,7 @@ curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
          ], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
 ````
 
-+ Openai style custom interface agent-chat Curl 测试（你需要实现自定义的工具描述脚本openai_api_demo/tools/schema.py的内容，并且将api_server.py中AGENT_CONTROLLER指定为True）：
++ Openai style custom interface agent-chat Curl 测试（你需要实现自定义的工具描述脚本openai_api_demo/tools/schema.py的内容，并且将api_server.py中AGENT_CONTROLLER指定为'true'）：
 ```shell
 curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
 -H "Content-Type: application/json" \
