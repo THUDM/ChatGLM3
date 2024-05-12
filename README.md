@@ -285,6 +285,8 @@ curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
 -H "Content-Type: application/json" \
 -d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"user\", \"content\": \"37乘以8加7除2等于多少？\"}], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
 ````
+该接口用于openai风格的自定义工具箱的自主调度。具有调度异常的自处理回复能力，无需另外实现调度算法，用户无需api_key。
+
 
 + 使用Python进行测试
 

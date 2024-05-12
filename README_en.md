@@ -232,6 +232,7 @@ curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
 -H "Content-Type: application/json" \
 -d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"user\", \"content\": \"37乘以8加7除2等于多少？\"}], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
 ````
+This interface is used for autonomous scheduling of OpenAI-style custom toolboxes. It has the ability to self-process and respond to scheduling exceptions, without the need to implement additional scheduling algorithms, and users do not need an api_key.
 
 + Testing with Python
 ```shell
