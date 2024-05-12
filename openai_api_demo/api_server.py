@@ -238,10 +238,20 @@ async def create_chat_completion(request: ChatCompletionRequest):
         echo=False,
         stream=request.stream,
         repetition_penalty=request.repetition_penalty,
+        tools=request.tools,
         agent=request.agent
     )
     logger.debug(f"==== request ====\n{gen_params}")
-    gen_params["tools"] = tool_def if gen_params["agent"] else []
+
+    if gen_params["tools"] is None:
+        gen_params["tools"] = []
+
+    """
+    You can also implement custom tool class methods here to facilitate flexible deployment of your agents.
+    Then you need to add the following code here:
+    """
+    if not gen_params["tools"] and gen_params["agent"]:
+        gen_params["tools"] = tool_def
 
     if request.stream:
 
@@ -265,28 +275,34 @@ async def create_chat_completion(request: ChatCompletionRequest):
         if isinstance(function_call, dict):
             function_call = FunctionCallResponse(**function_call)
 
-            """
-            In this demo, we did not register any tools.
-            You can use the tools that have been implemented in our `tools_using_demo` and implement your own streaming tool implementation here.
-            Similar to the following method:
-            """
-            if tool_param_start_with in output:
-                tool = tool_class.get(function_call.name)
-                if tool:
-                    this_tool_define_param_name = tool_define_param_name.get(function_call.name)
-                    if this_tool_define_param_name:
-                        tool_param = json.loads(function_call.arguments).get(this_tool_define_param_name)
-                        if tool().parameter_validation(tool_param):
-                            observation = str(tool().run(tool_param))
-                            tool_response = observation
+            if request.tools:
+                """
+                Standard openai interface in this demo: we did not register any tools.
+                You can use the tools that have been implemented in our `tools_using_demo` and implement your own streaming tool implementation here.
+                Similar to the following method:
+                      function_args = json.loads(function_call.arguments)
+                      tool_response = dispatch_tool(tool_name: str, tool_params: dict)
+                """
+                tool_response = ""
+
+            elif not request.tools and gen_params["tools"] and gen_params["agent"]:
+                if tool_param_start_with in output:
+                    tool = tool_class.get(function_call.name)
+                    if tool:
+                        this_tool_define_param_name = tool_define_param_name.get(function_call.name)
+                        if this_tool_define_param_name:
+                            tool_param = json.loads(function_call.arguments).get(this_tool_define_param_name)
+                            if tool().parameter_validation(tool_param):
+                                observation = str(tool().run(tool_param))
+                                tool_response = observation
+                            else:
+                                tool_response = "Tool parameter values error, please tell the user about this situation."
                         else:
-                            tool_response = "Tool parameter values error, please tell the user about this situation."
+                            tool_response = "Tool parameter is not defined in tools schema, please tell the user about this situation."
                     else:
-                        tool_response = "Tool parameter is not defined in tools schema, please tell the user about this situation."
+                        tool_response = "No available tools found, please tell the user about this situation."
                 else:
-                    tool_response = "No available tools found, please tell the user about this situation."
-            else:
-                tool_response = "Tool parameter content error, please tell the user about this situation."
+                    tool_response = "Tool parameter content error, please tell the user about this situation."
 
             if not gen_params.get("messages"):
                 gen_params["messages"] = []
@@ -531,12 +547,17 @@ async def parse_output_text(model_id: str, value: str):
 def contains_custom_function(value: str, tools: list) -> bool:
     """
     Determine whether 'function_call' according to a special function prefix.
+
+    For example, the functions defined in "tools_using_demo/tool_register.py" are all "get_xxx" and start with "get_".
+
     [Note] This is not a rigorous judgment method, only for reference.
 
     :param value:
     :param tools:
     :return:
     """
+    if value and 'get_' in value:
+        return True
     for tool in tools:
         if value and tool["name"] in value:
             return True
