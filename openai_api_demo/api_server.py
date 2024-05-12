@@ -50,6 +50,11 @@ from sse_starlette.sse import EventSourceResponse
 # Set up limit request time
 EventSourceResponse.DEFAULT_PING_INTERVAL = 1000
 
+""" Openai style custom interface agent-chat controller. 
+Indicates whether to use tools/schema to customize the toolbox and support the agent-chat algorithm for self-handling of tool scheduling exceptions.
+ """
+AGENT_CONTROLLER = False
+
 # set LLM path
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
@@ -146,7 +151,6 @@ class ChatCompletionRequest(BaseModel):
     stream: Optional[bool] = False
     tools: Optional[Union[dict, List[dict]]] = None
     repetition_penalty: Optional[float] = 1.1
-    agent: Optional[bool] = False
 
 
 class ChatCompletionResponseChoice(BaseModel):
@@ -225,7 +229,7 @@ async def list_models():
 
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponse)
 async def create_chat_completion(request: ChatCompletionRequest):
-    global model, tokenizer
+    global model, tokenizer, AGENT_CONTROLLER
 
     if len(request.messages) < 1 or request.messages[-1].role == "assistant":
         raise HTTPException(status_code=400, detail="Invalid request")
@@ -238,13 +242,12 @@ async def create_chat_completion(request: ChatCompletionRequest):
         echo=False,
         stream=request.stream,
         repetition_penalty=request.repetition_penalty,
-        tools=request.tools,
-        agent=request.agent
+        tools=request.tools
     )
-    logger.debug(f"==== request ====\n{gen_params}")
-
+    gen_params["agent"] = AGENT_CONTROLLER
     if gen_params["tools"] is None:
         gen_params["tools"] = []
+    logger.debug(f"==== request ====\n{gen_params}")
 
     """
     You can also implement custom tool class methods here to facilitate flexible deployment of your agents.
@@ -274,6 +277,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
         # CallFunction
         if isinstance(function_call, dict):
             function_call = FunctionCallResponse(**function_call)
+            tool_response = ""
 
             if request.tools:
                 """

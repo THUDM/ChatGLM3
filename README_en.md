@@ -226,11 +226,11 @@ curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
          ], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
 ````
 
-+ Openai style custom interface agent-chat Curl test（You need to implement the contents of the custom tool description script openai_api_demo/tools/schema.py）：
++ Openai style custom interface agent-chat Curl test (You need to implement the contents of the custom tool description script openai_api_demo/tools/schema.py, and specify AGENT_CONTROLLER in api_server.py as True)：
 ```shell
 curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
 -H "Content-Type: application/json" \
--d "{\"model\": \"chatglm3-6b\", \"agent\": true, \"messages\": [{\"role\": \"user\", \"content\": \"37乘以8加7除2等于多少？\"}], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
+-d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"user\", \"content\": \"37乘以8加7除2等于多少？\"}], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
 ````
 
 + Testing with Python
