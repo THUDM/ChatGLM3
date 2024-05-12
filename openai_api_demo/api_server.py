@@ -53,7 +53,7 @@ EventSourceResponse.DEFAULT_PING_INTERVAL = 1000
 """ Openai style custom interface agent-chat controller. 
 Indicates whether to use tools/schema to customize the toolbox and support the agent-chat algorithm for self-handling of tool scheduling exceptions.
  """
-AGENT_CONTROLLER = False
+AGENT_CONTROLLER = os.environ.get('AGENT_CONTROLLER', 'false')
 
 # set LLM path
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
@@ -244,7 +244,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
         repetition_penalty=request.repetition_penalty,
         tools=request.tools
     )
-    gen_params["agent"] = AGENT_CONTROLLER
+    gen_params["agent"] = False if AGENT_CONTROLLER == "false" else True
     if gen_params["tools"] is None:
         gen_params["tools"] = []
     logger.debug(f"==== request ====\n{gen_params}")
