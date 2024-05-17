@@ -33,6 +33,7 @@ from transformers import Seq2SeqTrainer as _Seq2SeqTrainer
 
 ModelType = Union[PreTrainedModel, PeftModelForCausalLM]
 TokenizerType = Union[PreTrainedTokenizer, PreTrainedTokenizerFast]
+# 定义一个 Typer 应用实例，用于创建命令行接口
 app = typer.Typer(pretty_exceptions_show_locals=False)
 
 
@@ -427,9 +428,12 @@ def compute_metrics(eval_preds: EvalPrediction,
     return {k: np.mean(v) for k, v in metrics_dct.items()}
 
 
+# 使用 Typer 装饰器将 main 函数注册为应用的一个命令
 @app.command()
 def main(
+    # 定义命令行参数 data_dir，用于指定数据目录
     data_dir: Annotated[str, typer.Argument(help='')],
+    # 定义命令行参数 model_dir，用于指定模型目录
     model_dir: Annotated[
         str,
         typer.Argument(
@@ -437,18 +441,25 @@ def main(
             'A string that specifies the model id of a pretrained model configuration hosted on huggingface.co, or a path to a directory containing a model configuration file.'
         ),
     ],
+    # 定义命令行参数 config_file，用于指定配置文件路径
     config_file: Annotated[str, typer.Argument(help='')],
+
+    # 定义命令行参数 auto_resume_from_checkpoint，用于指定是否自动恢复检查点
     auto_resume_from_checkpoint: str = typer.Argument(
         default='',
         help=
         'If entered as yes, automatically use the latest save checkpoint. If it is a numerical example 12 15, use the corresponding save checkpoint. If the input is no, restart training'
     ),
 ):
+    # 从配置文件加载微调配置
     ft_config = FinetuningConfig.from_file(config_file)
+    # 加载分词器和模型
     tokenizer, model = load_tokenizer_and_model(
         model_dir, peft_config=ft_config.peft_config)
+    # 创建数据管理器
     data_manager = DataManager(data_dir, ft_config.data_config)
 
+    # 获取训练数据集
     train_dataset = data_manager.get_dataset(
         Split.TRAIN,
         functools.partial(
@@ -460,6 +471,7 @@ def main(
         batched=True,
     )
     print('train_dataset:', train_dataset)
+    # 获取验证数据集
     val_dataset = data_manager.get_dataset(
         Split.VALIDATION,
         functools.partial(
@@ -472,6 +484,7 @@ def main(
     )
     if val_dataset is not None:
         print('val_dataset:', val_dataset)
+    # 获取测试数据集
     test_dataset = data_manager.get_dataset(
         Split.TEST,
         functools.partial(
@@ -485,13 +498,13 @@ def main(
     if test_dataset is not None:
         print('test_dataset:', test_dataset)
 
-    # checks encoded dataset
+    # 检查编码数据集
     _sanity_check(train_dataset[0]["input_ids"], train_dataset[0]["labels"],
                   tokenizer)
 
-    # turn model to fp32
+    # 将模型转换为 fp32
     _prepare_model_for_training(model, ft_config.training_args.use_cpu)
-
+    # 设置生成配置中的 pad_token_id 和 eos_token_id
     ft_config.training_args.generation_config.pad_token_id = (
         tokenizer.pad_token_id)
     ft_config.training_args.generation_config.eos_token_id = [
@@ -503,25 +516,41 @@ def main(
     model.enable_input_require_grads()
 
     trainer = Seq2SeqTrainer(
+        # 指定训练用的模型实例
         model=model,
+        # 指定训练参数，包括输出目录、学习率、批量大小等
         args=ft_config.training_args,
+        # 指定用于处理序列到序列任务数据的数据收集器
         data_collator=DataCollatorForSeq2Seq(
+            # 指定分词器实例
             tokenizer=tokenizer,
+            # 指定如何填充序列：'longest' 或 'max_length'
             padding='longest',
+            # 指定如何返回张量：'pt' (PyTorch张量) 或 'tf' (TensorFlow张量)
             return_tensors='pt',
         ),
+        # 指定训练数据集
         train_dataset=train_dataset,
+        # 指定评估数据集
         eval_dataset=val_dataset.select(list(range(50))),
-        tokenizer=tokenizer if ft_config.peft_config.peft_type != "LORA" else
-        None,  # LORA does not need tokenizer
+        # 如果使用的是 LORA 微调，不需要分词器
+        tokenizer=tokenizer
+        if ft_config.peft_config.peft_type != "LORA" else None,
+        # 指定计算指标的函数
         compute_metrics=functools.partial(compute_metrics,
                                           tokenizer=tokenizer),
     )
 
     if auto_resume_from_checkpoint.upper(
     ) == "" or auto_resume_from_checkpoint is None:
+        # 如果自动恢复检查点的参数为空或未指定，或者指定为否，则直接开始训练
         trainer.train()
     else:
+        # 如果指定了自动恢复检查点，则从指定的检查点继续训练
+        """
+        如果指定为是，则检查模型输出目录中是否有可用的检查点，并尝试从最新的检查点恢复训练。
+        如果指定的检查点编号存在，则使用该检查点继续训练。
+        如果指定的检查点编号不存在或输入无效，则打印错误信息，并提示用户在模型输出目录中手动查找正确的检查点。 """
         output_dir = ft_config.training_args.output_dir
         dirlist = os.listdir(output_dir)
         checkpoint_sn = 0
@@ -562,6 +591,8 @@ def main(
                 )
 
     # test stage
+    """ 使用训练好的模型在 test_dataset 上进行预测。
+    输出预测结果，通常包括生成文本和相应的评估指标，以评估模型的性能 """
     if test_dataset is not None:
         trainer.predict(test_dataset)
 
