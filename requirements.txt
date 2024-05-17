@@ -1,5 +1,5 @@
 # basic requirements
-
+#python==3.12.3
 protobuf>=4.25.3
 transformers>=4.39.3
 tokenizers>=0.15.0
@@ -31,3 +31,6 @@ langchain>=0.1.16
 langchainhub>=0.1.15
 arxiv>=2.1.0
 modelscope
+nltk==3.8.1
+ruamel.yaml==0.17.21 
+jieba==0.42.1

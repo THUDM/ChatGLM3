@@ -12,12 +12,8 @@ import torch
 import typer
 from datasets import Dataset, DatasetDict, NamedSplit, Split, load_dataset
 from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
-from peft import (
-    PeftConfig,
-    PeftModelForCausalLM,
-    get_peft_config,
-    get_peft_model
-)
+from peft import (PeftConfig, PeftModelForCausalLM, get_peft_config,
+                  get_peft_model)
 from rouge_chinese import Rouge
 from torch import nn
 from transformers import (
@@ -28,7 +24,8 @@ from transformers import (
     PreTrainedModel,
     PreTrainedTokenizer,
     PreTrainedTokenizerFast,
-    Seq2SeqTrainingArguments, AutoConfig,
+    Seq2SeqTrainingArguments,
+    AutoConfig,
 )
 from transformers import DataCollatorForSeq2Seq as _DataCollatorForSeq2Seq
 
@@ -40,52 +37,48 @@ app = typer.Typer(pretty_exceptions_show_locals=False)
 
 
 class DataCollatorForSeq2Seq(_DataCollatorForSeq2Seq):
+
     def __call__(self, features, return_tensors=None):
-        output_ids = (
-            [feature['output_ids'] for feature in features]
-            if 'output_ids' in features[0].keys()
-            else None
-        )
+        output_ids = ([feature['output_ids'] for feature in features]
+                      if 'output_ids' in features[0].keys() else None)
         if output_ids is not None:
             max_output_length = max(len(out) for out in output_ids)
             if self.pad_to_multiple_of is not None:
                 max_output_length = (
-                        (
-                                max_output_length + self.pad_to_multiple_of - 1) //
-                        self.pad_to_multiple_of * self.pad_to_multiple_of
-                )
+                    (max_output_length + self.pad_to_multiple_of - 1) //
+                    self.pad_to_multiple_of * self.pad_to_multiple_of)
             for feature in features:
                 remainder = [self.tokenizer.pad_token_id] * (
-                        max_output_length - len(feature['output_ids'])
-                )
+                    max_output_length - len(feature['output_ids']))
                 if isinstance(feature['output_ids'], list):
                     feature['output_ids'] = feature['output_ids'] + remainder
                 else:
                     feature['output_ids'] = np.concatenate(
-                        [feature['output_ids'], remainder]
-                    ).astype(np.int64)
+                        [feature['output_ids'], remainder]).astype(np.int64)
         return super().__call__(features, return_tensors)
 
 
 class Seq2SeqTrainer(_Seq2SeqTrainer):
+
     def prediction_step(
-            self,
-            model: nn.Module,
-            inputs: dict[str, Any],
-            prediction_loss_only: bool,
-            ignore_keys=None,
-            **gen_kwargs,
-    ) -> tuple[Optional[float], Optional[torch.Tensor], Optional[torch.Tensor]]:
+        self,
+        model: nn.Module,
+        inputs: dict[str, Any],
+        prediction_loss_only: bool,
+        ignore_keys=None,
+        **gen_kwargs,
+    ) -> tuple[Optional[float], Optional[torch.Tensor],
+               Optional[torch.Tensor]]:
         if self.args.predict_with_generate:
             output_ids = inputs.pop('output_ids')
         input_ids = inputs['input_ids']
         loss, generated_tokens, labels = super().prediction_step(
-            model, inputs, prediction_loss_only, ignore_keys, **gen_kwargs
-        )
+            model, inputs, prediction_loss_only, ignore_keys, **gen_kwargs)
         generated_tokens = generated_tokens[:, input_ids.size()[1]:]
         if self.args.predict_with_generate:
             labels = output_ids
         return loss, generated_tokens, labels
+
     # For P-Tuning a new save_model function is fine for the prefix_encoder model
     # but may cost problems for the whole model loading
 
@@ -108,9 +101,9 @@ def _resolve_path(path: Union[str, Path]) -> Path:
 
 
 def _sanity_check(
-        input_ids: Sequence[int],
-        output_ids: Sequence[int],
-        tokenizer: PreTrainedTokenizer,
+    input_ids: Sequence[int],
+    output_ids: Sequence[int],
+    tokenizer: PreTrainedTokenizer,
 ):
     print('--> Sanity check')
     for in_id, out_id in zip(input_ids, output_ids):
@@ -150,8 +143,7 @@ class DataConfig(object):
             for split, data_file in zip(
                 [Split.TRAIN, Split.VALIDATION, Split.TEST],
                 [self.train_file, self.val_file, self.test_file],
-            )
-            if data_file is not None
+            ) if data_file is not None
         }
 
 
@@ -163,8 +155,8 @@ class FinetuningConfig(object):
     max_output_length: int
 
     training_args: Seq2SeqTrainingArguments = dc.field(
-        default_factory=lambda: Seq2SeqTrainingArguments(output_dir='./output')
-    )
+        default_factory=lambda: Seq2SeqTrainingArguments(output_dir='./output'
+                                                         ))
     peft_config: Optional[PeftConfig] = None
 
     def __post_init__(self):
@@ -175,22 +167,19 @@ class FinetuningConfig(object):
             self.data_config.val_file = None
         else:
             self.training_args.per_device_eval_batch_size = (
-                    self.training_args.per_device_eval_batch_size
-                    or self.training_args.per_device_train_batch_size
-            )
+                self.training_args.per_device_eval_batch_size
+                or self.training_args.per_device_train_batch_size)
 
     @classmethod
     def from_dict(cls, **kwargs) -> 'FinetuningConfig':
         training_args = kwargs.get('training_args', None)
         if training_args is not None and not isinstance(
-                training_args, Seq2SeqTrainingArguments
-        ):
+                training_args, Seq2SeqTrainingArguments):
             gen_config = training_args.get('generation_config')
             # TODO: a bit hacky
             if not isinstance(gen_config, GenerationConfig):
                 training_args['generation_config'] = GenerationConfig(
-                    **gen_config
-                )
+                    **gen_config)
             kwargs['training_args'] = Seq2SeqTrainingArguments(**training_args)
 
         data_config = kwargs.get('data_config')
@@ -210,10 +199,10 @@ class FinetuningConfig(object):
 
 
 def _load_datasets(
-        data_dir: Path,
-        data_format: str,
-        data_files: dict[NamedSplit, str],
-        num_proc: Optional[int],
+    data_dir: Path,
+    data_format: str,
+    data_files: dict[NamedSplit, str],
+    num_proc: Optional[int],
 ) -> DatasetDict:
     if data_format in ('.csv', '.json', '.jsonl'):
         dataset_dct = load_dataset(
@@ -230,6 +219,7 @@ def _load_datasets(
 
 
 class DataManager(object):
+
     def __init__(self, data_dir: str, data_config: DataConfig):
         self._num_proc = data_config.num_proc
 
@@ -244,11 +234,11 @@ class DataManager(object):
         return self._dataset_dct.get(split, None)
 
     def get_dataset(
-            self,
-            split: NamedSplit,
-            process_fn: Callable[[dict[str, Any]], dict[str, Any]],
-            batched: bool = True,
-            remove_orig_columns: bool = True,
+        self,
+        split: NamedSplit,
+        process_fn: Callable[[dict[str, Any]], dict[str, Any]],
+        batched: bool = True,
+        remove_orig_columns: bool = True,
     ) -> Optional[Dataset]:
         orig_dataset = self._get_dataset(split)
         if orig_dataset is None:
@@ -268,15 +258,16 @@ class DataManager(object):
 
 def print_model_size(model: PreTrainedModel):
     print("--> Model")
-    total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    total_params = sum(p.numel() for p in model.parameters()
+                       if p.requires_grad)
     print(f"\n--> model has {total_params / 1e6}M params\n")
 
 
 def process_batch(
-        batch: Mapping[str, Sequence],
-        tokenizer: PreTrainedTokenizer,
-        max_input_length: int,
-        max_output_length: int,
+    batch: Mapping[str, Sequence],
+    tokenizer: PreTrainedTokenizer,
+    max_input_length: int,
+    max_output_length: int,
 ) -> dict[str, list]:
     batched_tools = batch.get('tools', None)
     batched_conv = batch['conversations']
@@ -305,8 +296,7 @@ def process_batch(
                 raise NotImplementedError()
             else:
                 new_input_ids = tokenizer.build_single_message(
-                    message['role'], '', message['content']
-                )
+                    message['role'], '', message['content'])
                 new_loss_masks = [loss_mask_val] * len(new_input_ids)
 
             input_ids += new_input_ids
@@ -327,10 +317,10 @@ def process_batch(
 
 
 def process_batch_eval(
-        batch: Mapping[str, Sequence],
-        tokenizer: PreTrainedTokenizer,
-        max_input_length: int,
-        max_output_length: int,
+    batch: Mapping[str, Sequence],
+    tokenizer: PreTrainedTokenizer,
+    max_input_length: int,
+    max_output_length: int,
 ) -> dict[str, list]:
     batched_tools = batch.get('tools', None)
     batched_conv = batch['conversations']
@@ -357,17 +347,15 @@ def process_batch_eval(
                 raise NotImplementedError()
             else:
                 new_input_ids = tokenizer.build_single_message(
-                    message['role'], '', message['content']
-                )
+                    message['role'], '', message['content'])
                 if message['role'] == 'assistant':
                     output_prompt, output_ids = (
                         new_input_ids[:1],
                         new_input_ids[1:],
                     )
                     output_ids.append(tokenizer.eos_token_id)
-                    batched_input_ids.append(
-                        input_ids[:max_input_length] + output_prompt[:1]
-                    )
+                    batched_input_ids.append(input_ids[:max_input_length] +
+                                             output_prompt[:1])
                     batched_output_ids.append(output_ids[:max_output_length])
                 input_ids += new_input_ids
     return {'input_ids': batched_input_ids, 'output_ids': batched_output_ids}
@@ -382,13 +370,15 @@ def _prepare_model_for_training(model: nn.Module, use_cpu: bool):
 
 
 def load_tokenizer_and_model(
-        model_dir: str,
-        peft_config: Optional[PeftConfig] = None,
+    model_dir: str,
+    peft_config: Optional[PeftConfig] = None,
 ) -> tuple[PreTrainedTokenizer, nn.Module]:
-    tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_dir,
+                                              trust_remote_code=True)
     if peft_config is not None:
         if peft_config.peft_type.name == "PREFIX_TUNING":
-            config = AutoConfig.from_pretrained(model_dir, trust_remote_code=True)
+            config = AutoConfig.from_pretrained(model_dir,
+                                                trust_remote_code=True)
             config.pre_seq_len = peft_config.num_virtual_tokens
             config.use_cache = False
             model = AutoModelForCausalLM.from_pretrained(
@@ -401,22 +391,20 @@ def load_tokenizer_and_model(
                 model_dir,
                 trust_remote_code=True,
                 empty_init=False,
-                use_cache=False
-            )
+                use_cache=False)
             model = get_peft_model(model, peft_config)
             model.print_trainable_parameters()
     else:
-        model = AutoModelForCausalLM.from_pretrained(
-            model_dir,
-            trust_remote_code=True,
-            empty_init=False,
-            use_cache=False
-        )
+        model = AutoModelForCausalLM.from_pretrained(model_dir,
+                                                     trust_remote_code=True,
+                                                     empty_init=False,
+                                                     use_cache=False)
     print_model_size(model)
     return tokenizer, model
 
 
-def compute_metrics(eval_preds: EvalPrediction, tokenizer: PreTrainedTokenizer):
+def compute_metrics(eval_preds: EvalPrediction,
+                    tokenizer: PreTrainedTokenizer):
     batched_pred_ids, batched_label_ids = eval_preds
 
     metrics_dct = {'rouge-1': [], 'rouge-2': [], 'rouge-l': [], 'bleu-4': []}
@@ -426,7 +414,8 @@ def compute_metrics(eval_preds: EvalPrediction, tokenizer: PreTrainedTokenizer):
         pred_tokens = list(jieba.cut(pred_txt))
         label_tokens = list(jieba.cut(label_txt))
         rouge = Rouge()
-        scores = rouge.get_scores(' '.join(pred_tokens), ' '.join(label_tokens))
+        scores = rouge.get_scores(' '.join(pred_tokens),
+                                  ' '.join(label_tokens))
         for k, v in scores[0].items():
             metrics_dct[k].append(round(v['f'] * 100, 4))
         metrics_dct['bleu-4'].append(
@@ -434,29 +423,30 @@ def compute_metrics(eval_preds: EvalPrediction, tokenizer: PreTrainedTokenizer):
                 [label_tokens],
                 pred_tokens,
                 smoothing_function=SmoothingFunction().method3,
-            )
-        )
+            ))
     return {k: np.mean(v) for k, v in metrics_dct.items()}
 
 
 @app.command()
 def main(
-        data_dir: Annotated[str, typer.Argument(help='')],
-        model_dir: Annotated[
-            str,
-            typer.Argument(
-                help='A string that specifies the model id of a pretrained model configuration hosted on huggingface.co, or a path to a directory containing a model configuration file.'
-            ),
-        ],
-        config_file: Annotated[str, typer.Argument(help='')],
-        auto_resume_from_checkpoint: str = typer.Argument(
-            default='',
-            help='If entered as yes, automatically use the latest save checkpoint. If it is a numerical example 12 15, use the corresponding save checkpoint. If the input is no, restart training'
+    data_dir: Annotated[str, typer.Argument(help='')],
+    model_dir: Annotated[
+        str,
+        typer.Argument(
+            help=
+            'A string that specifies the model id of a pretrained model configuration hosted on huggingface.co, or a path to a directory containing a model configuration file.'
         ),
-
+    ],
+    config_file: Annotated[str, typer.Argument(help='')],
+    auto_resume_from_checkpoint: str = typer.Argument(
+        default='',
+        help=
+        'If entered as yes, automatically use the latest save checkpoint. If it is a numerical example 12 15, use the corresponding save checkpoint. If the input is no, restart training'
+    ),
 ):
     ft_config = FinetuningConfig.from_file(config_file)
-    tokenizer, model = load_tokenizer_and_model(model_dir, peft_config=ft_config.peft_config)
+    tokenizer, model = load_tokenizer_and_model(
+        model_dir, peft_config=ft_config.peft_config)
     data_manager = DataManager(data_dir, ft_config.data_config)
 
     train_dataset = data_manager.get_dataset(
@@ -496,16 +486,14 @@ def main(
         print('test_dataset:', test_dataset)
 
     # checks encoded dataset
-    _sanity_check(
-        train_dataset[0]["input_ids"], train_dataset[0]["labels"], tokenizer
-    )
+    _sanity_check(train_dataset[0]["input_ids"], train_dataset[0]["labels"],
+                  tokenizer)
 
     # turn model to fp32
     _prepare_model_for_training(model, ft_config.training_args.use_cpu)
 
     ft_config.training_args.generation_config.pad_token_id = (
-        tokenizer.pad_token_id
-    )
+        tokenizer.pad_token_id)
     ft_config.training_args.generation_config.eos_token_id = [
         tokenizer.eos_token_id,
         tokenizer.get_command('<|user|>'),
@@ -524,18 +512,22 @@ def main(
         ),
         train_dataset=train_dataset,
         eval_dataset=val_dataset.select(list(range(50))),
-        tokenizer=tokenizer if ft_config.peft_config.peft_type != "LORA" else None,  # LORA does not need tokenizer
-        compute_metrics=functools.partial(compute_metrics, tokenizer=tokenizer),
+        tokenizer=tokenizer if ft_config.peft_config.peft_type != "LORA" else
+        None,  # LORA does not need tokenizer
+        compute_metrics=functools.partial(compute_metrics,
+                                          tokenizer=tokenizer),
     )
 
-    if auto_resume_from_checkpoint.upper() == "" or auto_resume_from_checkpoint is None:
+    if auto_resume_from_checkpoint.upper(
+    ) == "" or auto_resume_from_checkpoint is None:
         trainer.train()
     else:
         output_dir = ft_config.training_args.output_dir
         dirlist = os.listdir(output_dir)
         checkpoint_sn = 0
         for checkpoint_str in dirlist:
-            if checkpoint_str.find("eckpoint") > 0 and checkpoint_str.find("tmp") == -1:
+            if checkpoint_str.find("eckpoint") > 0 and checkpoint_str.find(
+                    "tmp") == -1:
                 checkpoint = int(checkpoint_str.replace("checkpoint-", ""))
                 if checkpoint > checkpoint_sn:
                     checkpoint_sn = checkpoint
@@ -543,8 +535,10 @@ def main(
             if checkpoint_sn > 0:
                 model.gradient_checkpointing_enable()
                 model.enable_input_require_grads()
-                checkpoint_directory = os.path.join(output_dir, "checkpoint-" + str(checkpoint_sn))
-                print("resume checkpoint from  checkpoint-" + str(checkpoint_sn))
+                checkpoint_directory = os.path.join(
+                    output_dir, "checkpoint-" + str(checkpoint_sn))
+                print("resume checkpoint from  checkpoint-" +
+                      str(checkpoint_sn))
                 trainer.train(resume_from_checkpoint=checkpoint_directory)
             else:
                 trainer.train()
@@ -554,12 +548,18 @@ def main(
                     checkpoint_sn = int(auto_resume_from_checkpoint)
                     model.gradient_checkpointing_enable()
                     model.enable_input_require_grads()
-                    checkpoint_directory = os.path.join(output_dir, "checkpoint-" + str(checkpoint_sn))
-                    print("resume checkpoint from  checkpoint-" + str(checkpoint_sn))
+                    checkpoint_directory = os.path.join(
+                        output_dir, "checkpoint-" + str(checkpoint_sn))
+                    print("resume checkpoint from  checkpoint-" +
+                          str(checkpoint_sn))
                     trainer.train(resume_from_checkpoint=checkpoint_directory)
             else:
-                print(auto_resume_from_checkpoint,
-                      "The specified checkpoint sn(" + auto_resume_from_checkpoint + ") has not been saved. Please search for the correct chkeckpoint in the model output directory")
+                print(
+                    auto_resume_from_checkpoint,
+                    "The specified checkpoint sn(" +
+                    auto_resume_from_checkpoint +
+                    ") has not been saved. Please search for the correct chkeckpoint in the model output directory"
+                )
 
     # test stage
     if test_dataset is not None:
