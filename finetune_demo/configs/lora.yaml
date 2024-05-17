@@ -52,7 +52,7 @@ training_args:
   generation_config:
     max_new_tokens: 512
   # 是否使用 CPU 进行训练
-  use_cpu: false
+  use_cpu: true
 
 
 # peft_config 是一个用于配置 LORA (Low-Rank Adaptation) 微调的配置文件。
