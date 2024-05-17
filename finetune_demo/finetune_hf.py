@@ -382,7 +382,7 @@ def load_tokenizer_and_model(
     # 加载预训练的分词器实例
     tokenizer = AutoTokenizer.from_pretrained(model_dir,
                                               trust_remote_code=True)
-   
+
     # 如果 peft_config 参数不为 None，说明需要进行 LORA 或 PREFIX_TUNING 微调
     if peft_config is not None:
         # 如果 peft_config 的 peft_type 名称是 "PREFIX_TUNING"
@@ -409,6 +409,18 @@ def load_tokenizer_and_model(
                 empty_init=False,
                 use_cache=False)
             # 使用 get_peft_model 函数对模型进行 LORA 微调
+            # 这个函数的主要逻辑如下：
+            """  检查模型类型： 确保输入的 model 是一个 PreTrainedModel 实例。
+                - 如果 model 不是 PreTrainedModel 实例，函数将抛出一个 ValueError。
+            检查 peft_config 类型：
+                - 确保 peft_config 包含 LORA 配置。如果 peft_config 没有 LORA 配置，函数将抛出一个 ValueError。
+            创建 LORA 适配器：
+                - 如果 peft_config 包含 LORA 配置，函数将创建一个 PeftAdapter 实例。PeftAdapter 是用于 LORA 微调的适配器类。
+            添加 LORA 适配器到模型：
+                - 将创建的 PeftAdapter 实例添加到原始模型中。这将使模型能够使用 LORA 适配器进行微调。
+            返回微调后的模型：
+                - 返回微调后的模型，该模型现在包含 LORA 适配器，并准备进行微调。 """
+
             model = get_peft_model(model, peft_config)
             # 打印模型的可训练参数
             model.print_trainable_parameters()
