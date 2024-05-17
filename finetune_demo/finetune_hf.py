@@ -438,7 +438,7 @@ def main(
         str,
         typer.Argument(
             help=
-            'A string that specifies the model id of a pretrained model configuration hosted on huggingface.co, or a path to a directory containing a model configuration file.'
+            "A string that specifies the model id of a pretrained model configuration hosted on huggingface.co, or a path to a directory containing a model configuration file."
         ),
     ],
     # 定义命令行参数 config_file，用于指定配置文件路径
