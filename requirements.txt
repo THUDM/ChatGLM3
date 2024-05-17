@@ -30,3 +30,4 @@ tiktoken>=0.6.0
 langchain>=0.1.16
 langchainhub>=0.1.15
 arxiv>=2.1.0
+modelscope
