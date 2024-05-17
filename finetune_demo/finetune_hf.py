@@ -374,33 +374,53 @@ def load_tokenizer_and_model(
     model_dir: str,
     peft_config: Optional[PeftConfig] = None,
 ) -> tuple[PreTrainedTokenizer, nn.Module]:
+    """
+    1. 加载预训练的分词器和模型，并根据提供的 peft_config 参数进行相应的微调。\n
+    2. 如果 peft_config 包含 LORA 或 PREFIX_TUNING 微调配置，函数将根据这些配置调整模型。\n
+    3 .如果 peft_config 为 None，则直接加载预训练模型。
+    """
+    # 加载预训练的分词器实例
     tokenizer = AutoTokenizer.from_pretrained(model_dir,
                                               trust_remote_code=True)
+   
+    # 如果 peft_config 参数不为 None，说明需要进行 LORA 或 PREFIX_TUNING 微调
     if peft_config is not None:
+        # 如果 peft_config 的 peft_type 名称是 "PREFIX_TUNING"
         if peft_config.peft_type.name == "PREFIX_TUNING":
+            # 加载预训练的配置实例
             config = AutoConfig.from_pretrained(model_dir,
                                                 trust_remote_code=True)
+            # 设置前缀序列长度为 peft_config 中的 num_virtual_tokens 参数
             config.pre_seq_len = peft_config.num_virtual_tokens
+            # 设置是否使用模型缓存，默认为 False
             config.use_cache = False
+            # 使用预训练模型和调整后的配置实例创建模型实例
             model = AutoModelForCausalLM.from_pretrained(
                 model_dir,
                 trust_remote_code=True,
                 config=config,
             )
-        if peft_config.peft_type.name == "LORA":
+        # 如果 peft_config 的 peft_type 名称是 "LORA"
+        elif peft_config.peft_type.name == "LORA":
+            # 使用预训练模型目录和调整后的 peft_config 参数创建模型实例
             model = AutoModelForCausalLM.from_pretrained(
                 model_dir,
                 trust_remote_code=True,
                 empty_init=False,
                 use_cache=False)
+            # 使用 get_peft_model 函数对模型进行 LORA 微调
             model = get_peft_model(model, peft_config)
+            # 打印模型的可训练参数
             model.print_trainable_parameters()
     else:
+        # 如果 peft_config 参数为 None，则直接使用预训练模型
         model = AutoModelForCausalLM.from_pretrained(model_dir,
                                                      trust_remote_code=True,
                                                      empty_init=False,
                                                      use_cache=False)
+    # 打印模型的尺寸信息
     print_model_size(model)
+    # 返回分词器和模型实例
     return tokenizer, model
 
 
