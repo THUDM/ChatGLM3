@@ -97,6 +97,8 @@ Intel 开发的高性能 CPU 和 GPU 加速推理方案，可以参考此 [步�
 
 * [BISHENG](https://github.com/dataelement/bisheng): 开源大模型应用开发平台,赋能和加速大模型应用开发落地，帮助用户以最佳体验进入下一代应用开发模式。
 
+* [RAGFlow](https://github.com/infiniflow/ragflow): RAGFlow 是一款基于深度文档理解构建的开源 RAG（Retrieval-Augmented Generation）引擎。可为各种规模的企业及个人提供一套精简的 RAG 工作流程，结合大语言模型（LLM）针对用户各类不同的复杂格式数据提供可靠的问答以及有理有据的引用。
+
 ## 评测结果
 
 ### 典型任务
