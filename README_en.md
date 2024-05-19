@@ -74,6 +74,8 @@ Application framework:
 * [LangChain-Chatchat](https://github.com/chatchat-space/Langchain-Chatchat): Based on large language models such as ChatGLM and application frameworks such as Langchain, open source and offline deployable retrieval enhancement generation (RAG) large Model knowledge base project.
 
 * [BISHENG](https://github.com/dataelement/bisheng): open-source platform for developing LLM applications. It empowers and accelerates the development of LLM applications and helps users to enter the next generation of application development mode with the best experience.
+
+* [RAGFlow](https://github.com/infiniflow/ragflow): An open-source RAG (Retrieval-Augmented Generation) engine based on deep document understanding. It offers a streamlined RAG workflow for businesses of any scale, combining LLM (Large Language Models) to provide truthful question-answering capabilities, backed by well-founded citations from various complex formatted data.
 ## Evaluation Results
 
 ### Typical Tasks
