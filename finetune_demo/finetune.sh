@@ -1,1 +1,0 @@
-CUDA_VISIBLE_DEVICES=0 NCCL_P2P_DISABLE="1" NCCL_IB_DISABLE="1" python finetune_hf.py  data/AdvertiseGen_fix  /Users/ragin/.cache/modelscope/hub/zhipuai/chatglm3-6b  configs/lora.yaml
