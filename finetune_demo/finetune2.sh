@@ -1,0 +1,1 @@
+ python finetune_hf.py  data/AdvertiseGen_fix  /mnt/workspace/.cache/modelscope/ZhipuAI/chatglm3-6b  configs/lora.yaml
