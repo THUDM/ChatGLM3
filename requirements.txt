@@ -34,3 +34,6 @@ modelscope
 nltk==3.8.1
 ruamel.yaml==0.17.21 
 jieba==0.42.1
+peft==0.11.1
+ruamel.yaml=0.2.8
+rouge_chinese==1.0.3
