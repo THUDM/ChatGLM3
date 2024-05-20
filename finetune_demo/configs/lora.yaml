@@ -1,46 +1,78 @@
 data_config:
+  # 训练数据文件路径
   train_file: train.json
+  # 验证数据文件路径
   val_file: dev.json
+  # 测试数据文件路径，与验证数据文件路径相同，假设 dev.json 同时用于验证和测试
   test_file: dev.json
+  # 数据预处理时使用的进程数
   num_proc: 16
+
+# 输入序列的最大长度，超过这个长度的序列将被截断
 max_input_length: 256
+ 
+# 输出序列的最大长度，超过这个长度的序列将被截断
 max_output_length: 512
+  
+# 用于训练序列到序列（Seq2Seq）模型的参数的子部分。
+# 这些参数定义了模型的训练策略、日志记录、评估和优化器设置。
+
 training_args:
-  # see `transformers.Seq2SeqTrainingArguments`
+  # 输出目录，用于保存模型、检查点和日志文件
   output_dir: ./output
+  # 训练的最大步数，达到这个步数后训练停止
   max_steps: 3000
-  # needed to be fit for the dataset
+  # 初始学习率
   learning_rate: 5e-5
-  # settings for data loading
+  # 每个设备上的训练批次大小
   per_device_train_batch_size: 4
+  # 数据加载器的工作进程数，用于加速数据加载
   dataloader_num_workers: 16
+  # 是否在数据加载时移除未使用的列
   remove_unused_columns: false
-  # settings for saving checkpoints
+  # 保存检查点的策略，可以是 "steps" 或 "epoch"
   save_strategy: steps
+  # 在多少训练步骤后保存一次检查点
   save_steps: 500
-  # settings for logging
+  # 日志级别，可能的值有 "debug", "info", "warning", "error", "critical"
   log_level: info
+  # 日志记录的策略，可以是 "steps" 或 "epoch"
   logging_strategy: steps
+  # 在多少训练步骤后记录一次日志
   logging_steps: 10
-  # settings for evaluation
+  # 每个设备上的评估批次大小
   per_device_eval_batch_size: 16
+  # 评估的策略，可以是 "steps" 或 "epoch"
   evaluation_strategy: steps
+  # 在多少训练步骤后评估一次模型
   eval_steps: 500
-  # settings for optimizer
-  # adam_epsilon: 1e-6
-  # uncomment the following line to detect nan or inf values
-  # debug: underflow_overflow
+  # 评估时是否使用生成方法预测
   predict_with_generate: true
-  # see `transformers.GenerationConfig`
+  # 生成时可以生成的最大新令牌数
   generation_config:
     max_new_tokens: 512
-  # set your absolute deepspeed path here
-  #deepspeed: ds_zero_2.json
-  # set to true if train with cpu.
-  use_cpu: false
+  # 是否使用 CPU 进行训练
+  use_cpu: true
+
+
+# peft_config 是一个用于配置 LORA (Low-Rank Adaptation) 微调的配置文件。
+# LORA 是一种用于大型语言模型（如 GPT-3、ChatGLM 等）的微调技术，它允许在不增加模型参数量的情况下对模型进行微调。
+# 在下面配置中，peft_config 包含以下参数：
+# peft_type: 指定 LORA 微调的类型。常见的类型包括 LORA、LORA_BASE 和 LORA_FULL。
+# task_type: 指定模型的任务类型。例如，CAUSAL_LM 表示模型是一个因果语言模型，适用于文本生成任务。
+# r: 指定 LORA 适配层的秩。秩是指适配层的矩阵维度，对于上下文嵌入，它通常是模型嵌入维度的一半。
+# lora_alpha: 指定 LORA 适配层的缩放因子。这个参数决定了适配层输出与原始模型输出的比例。
+# lora_dropout: 指定 LORA 适配层的丢弃率。这个参数用于在训练过程中随机丢弃适配层的部分输出，以提高模型的鲁棒性。
+
 peft_config:
+  # 指定 LORA 微调的类型。LORA 是一种用于模型压缩和微调的技术，它允许在原始模型中添加低秩适配层。
   peft_type: LORA
+  # 指定模型的任务类型。CAUSAL_LM 表示模型是一个因果语言模型，适用于文本生成任务。
   task_type: CAUSAL_LM
+  # 指定 LORA 适配层的秩。秩是指适配层的矩阵维度，对于上下文嵌入，它通常是模型嵌入维度的一半。
   r: 8
+  # 指定 LORA 适配层的缩放因子。这个参数决定了适配层输出与原始模型输出的比例。
   lora_alpha: 32
+  # 指定 LORA 适配层的丢弃率。这个参数用于在训练过程中随机丢弃适配层的部分输出，以提高模型的鲁棒性。
   lora_dropout: 0.1
+    
