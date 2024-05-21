@@ -5,6 +5,7 @@ finetune_demo/output
 finetune_demo/data/*
 !finetune_demo/data/AdvertiseGen
 !finetune_demo/data/AdvertiseGen2
+!finetune_demo/data/cognition
 finetune_demo/formatted_data
 ToolAlpaca/
 *.gz

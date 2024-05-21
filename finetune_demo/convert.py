@@ -1,6 +1,14 @@
 import json
 from typing import Union
 from pathlib import Path
+import sys
+
+data_src = "data/AdvertiseGen"
+
+if sys.argv[1]:
+    data_src = sys.argv[1]
+
+data_fix = data_src + "_fix"
 
 
 def _resolve_path(path: Union[str, Path]) -> Path:
@@ -47,4 +55,4 @@ def convert_adgen(data_dir: Union[str, Path], save_dir: Union[str, Path]):
         _convert(dev_file, out_file)
 
 
-convert_adgen('data/AdvertiseGen', 'data/AdvertiseGen_fix')
+convert_adgen(data_src, data_fix)
