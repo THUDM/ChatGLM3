@@ -191,7 +191,7 @@ pip install -r requirements.txt
 
 ```angular2html
 cd finetune_demo
-OMP_NUM_THREADS=1 torchrun --standalone --nnodes=1 --nproc_per_node=8  finetune_hf.py  data/AdvertiseGen/  THUDM/chatglm3-6b  configs/lora.yaml configs/ds_zero_2.json
+OMP_NUM_THREADS=1 torchrun --standalone --nnodes=1 --nproc_per_node=8  finetune_hf.py  data/AdvertiseGen/  THUDM/chatglm3-6b  configs/lora.yaml
 ```
 
 通过以下代码执行 **单机单卡** 运行。

@@ -26,7 +26,6 @@ def process_response(output: str, use_tool: bool = False) -> Union[str, dict]:
         else:
             if use_tool:
                 content = "\n".join(content.split("\n")[1:-1])
-
                 def tool_call(**kwargs):
                     return kwargs
 
