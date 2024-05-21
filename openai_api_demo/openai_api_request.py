@@ -93,7 +93,7 @@ def embedding():
 
 
 if __name__ == "__main__":
-    # simple_chat(use_stream=False)
-    # simple_chat(use_stream=True)
-    # embedding()
+    simple_chat(use_stream=False)
+    simple_chat(use_stream=True)
+    embedding()
     function_chat()
