@@ -209,7 +209,7 @@ Use the following code to execute **single machine multiple cards/multiple machi
 
 ```angular2html
 cd finetune_demo
-OMP_NUM_THREADS=1 torchrun --standalone --nnodes=1 --nproc_per_node=8  finetune_hf.py  data/AdvertiseGen/  THUDM/chatglm3-6b  configs/lora.yaml configs/ds_zero_2.json
+OMP_NUM_THREADS=1 torchrun --standalone --nnodes=1 --nproc_per_node=8  finetune_hf.py  data/AdvertiseGen/  THUDM/chatglm3-6b  configs/lora.yaml 
 ```
 
 Execute **Single machine single card** operation through the following code.

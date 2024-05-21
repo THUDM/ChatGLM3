@@ -33,7 +33,7 @@ import time
 import tiktoken
 import torch
 import uvicorn
-import json
+
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -44,7 +44,7 @@ from pydantic import BaseModel, Field
 from transformers import AutoTokenizer, AutoModel
 from utils import process_response, generate_chatglm3, generate_stream_chatglm3
 from sentence_transformers import SentenceTransformer
-from tools.schema import tool_class, tool_def, tool_param_start_with, tool_define_param_name
+
 from sse_starlette.sse import EventSourceResponse
 
 # Set up limit request time
@@ -146,7 +146,6 @@ class ChatCompletionRequest(BaseModel):
     stream: Optional[bool] = False
     tools: Optional[Union[dict, List[dict]]] = None
     repetition_penalty: Optional[float] = 1.1
-    agent: Optional[bool] = False
 
 
 class ChatCompletionResponseChoice(BaseModel):
@@ -238,17 +237,16 @@ async def create_chat_completion(request: ChatCompletionRequest):
         echo=False,
         stream=request.stream,
         repetition_penalty=request.repetition_penalty,
-        agent=request.agent
+        tools=request.tools,
     )
     logger.debug(f"==== request ====\n{gen_params}")
-    gen_params["tools"] = tool_def if gen_params["agent"] else []
 
     if request.stream:
 
         # Use the stream mode to read the first few characters, if it is not a function call, direct stram output
         predict_stream_generator = predict_stream(request.model, gen_params)
         output = next(predict_stream_generator)
-        if not contains_custom_function(output, gen_params["tools"]):
+        if not contains_custom_function(output):
             return EventSourceResponse(predict_stream_generator, media_type="text/event-stream")
 
         # Obtain the result directly at one time and determine whether tools needs to be called.
@@ -269,24 +267,10 @@ async def create_chat_completion(request: ChatCompletionRequest):
             In this demo, we did not register any tools.
             You can use the tools that have been implemented in our `tools_using_demo` and implement your own streaming tool implementation here.
             Similar to the following method:
+                function_args = json.loads(function_call.arguments)
+                tool_response = dispatch_tool(tool_name: str, tool_params: dict)
             """
-            if tool_param_start_with in output:
-                tool = tool_class.get(function_call.name)
-                if tool:
-                    this_tool_define_param_name = tool_define_param_name.get(function_call.name)
-                    if this_tool_define_param_name:
-                        tool_param = json.loads(function_call.arguments).get(this_tool_define_param_name)
-                        if tool().parameter_validation(tool_param):
-                            observation = str(tool().run(tool_param))
-                            tool_response = observation
-                        else:
-                            tool_response = "Tool parameter values error, please tell the user about this situation."
-                    else:
-                        tool_response = "Tool parameter is not defined in tools schema, please tell the user about this situation."
-                else:
-                    tool_response = "No available tools found, please tell the user about this situation."
-            else:
-                tool_response = "Tool parameter content error, please tell the user about this situation."
+            tool_response = ""
 
             if not gen_params.get("messages"):
                 gen_params["messages"] = []
@@ -447,7 +431,7 @@ def predict_stream(model_id, gen_params):
         if not is_function_call and len(output) > 7:
 
             # Determine whether a function is called
-            is_function_call = contains_custom_function(output, gen_params["tools"])
+            is_function_call = contains_custom_function(output)
             if is_function_call:
                 continue
 
@@ -528,18 +512,18 @@ async def parse_output_text(model_id: str, value: str):
     yield '[DONE]'
 
 
-def contains_custom_function(value: str, tools: list) -> bool:
+def contains_custom_function(value: str) -> bool:
     """
     Determine whether 'function_call' according to a special function prefix.
+
+    For example, the functions defined in "tools_using_demo/tool_register.py" are all "get_xxx" and start with "get_"
+
     [Note] This is not a rigorous judgment method, only for reference.
 
     :param value:
-    :param tools:
     :return:
     """
-    for tool in tools:
-        if value and tool["name"] in value:
-            return True
+    return value and 'get_' in value
 
 
 if __name__ == "__main__":
