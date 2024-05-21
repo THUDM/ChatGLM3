@@ -20,6 +20,8 @@ training_args:
   log_level: info
   logging_strategy: steps
   logging_steps: 10
+  # 学习率调低，保证微调成功
+  learning_rate: 1e-3
   # settings for evaluation
   per_device_eval_batch_size: 16
   evaluation_strategy: steps
