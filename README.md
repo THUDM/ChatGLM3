@@ -97,6 +97,8 @@ Intel 开发的高性能 CPU 和 GPU 加速推理方案，可以参考此 [步�
 
 * [BISHENG](https://github.com/dataelement/bisheng): 开源大模型应用开发平台,赋能和加速大模型应用开发落地，帮助用户以最佳体验进入下一代应用开发模式。
 
+* [RAGFlow](https://github.com/infiniflow/ragflow): RAGFlow 是一款基于深度文档理解构建的开源 RAG（Retrieval-Augmented Generation）引擎。可为各种规模的企业及个人提供一套精简的 RAG 工作流程，结合大语言模型（LLM）针对用户各类不同的复杂格式数据提供可靠的问答以及有理有据的引用。
+
 ## 评测结果
 
 ### 典型任务
@@ -265,12 +267,28 @@ curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
 -H "Content-Type: application/json" \
 -d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"system\", \"content\": \"You are ChatGLM3, a large language model trained by Zhipu.AI. Follow the user's instructions carefully. Respond using markdown.\"}, {\"role\": \"user\", \"content\": \"你好，给我讲一个故事，大概100字\"}], \"stream\": false, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
 ````
-+ agent-chat Curl 测试
+
++ Standard openai interface agent-chat Curl 测试
 ```shell
 curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
 -H "Content-Type: application/json" \
--d "{\"model\": \"chatglm3-6b\", \"agent\": true, \"messages\": [{\"role\": \"user\", \"content\": \"37乘以8加7除2等于多少？\"}], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
+-d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"user\", \"content\": \"37乘以8加7除2等于多少？\"}], "tools": [{"name": "track", "description": "追踪指定股票的实时价格",
+          "parameters": {"type": "object", "properties": {"symbol": {"description": "需要追踪的股票代码"}},
+                         "required": []}},
+         {"name": "Calculator", "description": "数学计算器，计算数学问题",
+          "parameters": {"type": "object", "properties": {"symbol": {"description": "要计算的数学公式"}},
+                         "required": []}}
+         ], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
 ````
+
++ Openai style custom interface agent-chat Curl 测试（你需要实现自定义的工具描述脚本openai_api_demo/tools/schema.py的内容，并且将api_server.py中AGENT_CONTROLLER指定为'true'）：
+```shell
+curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
+-H "Content-Type: application/json" \
+-d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"user\", \"content\": \"37乘以8加7除2等于多少？\"}], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
+````
+该接口用于openai风格的自定义工具箱的自主调度。具有调度异常的自处理回复能力，无需另外实现调度算法，用户无需api_key。
+
 
 + 使用Python进行测试
 

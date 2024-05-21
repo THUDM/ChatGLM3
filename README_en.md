@@ -74,6 +74,8 @@ Application framework:
 * [LangChain-Chatchat](https://github.com/chatchat-space/Langchain-Chatchat): Based on large language models such as ChatGLM and application frameworks such as Langchain, open source and offline deployable retrieval enhancement generation (RAG) large Model knowledge base project.
 
 * [BISHENG](https://github.com/dataelement/bisheng): open-source platform for developing LLM applications. It empowers and accelerates the development of LLM applications and helps users to enter the next generation of application development mode with the best experience.
+
+* [RAGFlow](https://github.com/infiniflow/ragflow): An open-source RAG (Retrieval-Augmented Generation) engine based on deep document understanding. It offers a streamlined RAG workflow for businesses of any scale, combining LLM (Large Language Models) to provide truthful question-answering capabilities, backed by well-founded citations from various complex formatted data.
 ## Evaluation Results
 
 ### Typical Tasks
@@ -212,12 +214,27 @@ curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
 -H "Content-Type: application/json" \
 -d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"system\", \"content\": \"You are ChatGLM3, a large language model trained by Zhipu.AI. Follow the user's instructions carefully. Respond using markdown.\"}, {\"role\": \"user\", \"content\": \"你好，给我讲一个故事，大概100字\"}], \"stream\": false, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
 ````
-+ agent-chat Curl test
+
++ Standard openai interface agent-chat Curl test
 ```shell
 curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
 -H "Content-Type: application/json" \
--d "{\"model\": \"chatglm3-6b\", \"agent\": true, \"messages\": [{\"role\": \"user\", \"content\": \"37乘以8加7除2等于多少？\"}], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
+-d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"user\", \"content\": \"37乘以8加7除2等于多少？\"}], "tools": [{"name": "track", "description": "追踪指定股票的实时价格",
+          "parameters": {"type": "object", "properties": {"symbol": {"description": "需要追踪的股票代码"}},
+                         "required": []}},
+         {"name": "Calculator", "description": "数学计算器，计算数学问题",
+          "parameters": {"type": "object", "properties": {"symbol": {"description": "要计算的数学公式"}},
+                         "required": []}}
+         ], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
 ````
+
++ Openai style custom interface agent-chat Curl test (You need to implement the contents of the custom tool description script openai_api_demo/tools/schema.py, and specify AGENT_CONTROLLER in api_server.py as 'true')：
+```shell
+curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \
+-H "Content-Type: application/json" \
+-d "{\"model\": \"chatglm3-6b\", \"messages\": [{\"role\": \"user\", \"content\": \"37乘以8加7除2等于多少？\"}], \"stream\": true, \"max_tokens\": 100, \"temperature\": 0.8, \"top_p\": 0.8}"
+````
+This interface is used for autonomous scheduling of OpenAI-style custom toolboxes. It has the ability to self-process and respond to scheduling exceptions, without the need to implement additional scheduling algorithms, and users do not need an api_key.
 
 + Testing with Python
 ```shell
