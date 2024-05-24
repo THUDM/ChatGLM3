@@ -9,14 +9,17 @@ The ChatGLM3-6B License
 2. 许可授予
 
 根据本许可的条款和条件，许可方特此授予您非排他性、全球性、不可转让、不可再许可、可撤销、免版税的版权许可。
-
+本许可允许您免费使用本仓库中的所有开源模型进行学术研究，对于希望将模型用于商业目的的用户，需在[这里](https://open.bigmodel.cn/mla/form)完成登记。
+经过登记的用户可以免费使用本模型进行商业活动，但必须遵守本许可的所有条款和条件。
 上述版权声明和本许可声明应包含在本软件的所有副本或重要部分中。
 
 3.限制
 
 您不得出于任何军事或非法目的使用、复制、修改、合并、发布、分发、复制或创建本软件的全部或部分衍生作品。
 
-您不得利用本软件从事任何危害国家安全和国家统一、危害社会公共利益、侵犯人身权益的行为。
+您不得利用本软件从事任何危害国家安全和国家统一，危害社会公共利益及公序良俗，侵犯他人商业秘密、知识产权、名誉权、肖像权、财产权等权益的行为。
+
+您在使用中应遵循使用地所适用的法律法规政策、道德规范等要求。
 
 4.免责声明
 
@@ -40,15 +43,15 @@ The ChatGLM3-6B License
 
 2. License Grant
 
-Subject to the terms and conditions of this License, the Licensor hereby grants to you a non-exclusive, worldwide, non-transferable, non-sublicensable, revocable, royalty-free copyright license to use the Software.
+Under the terms and conditions of this license, the Licensor hereby grants you a non-exclusive, worldwide, non-transferable, non-sublicensable, revocable, royalty-free copyright license.
+This license permits you to use all open-source models in this repository for academic research free. Users who wish to use the models for commercial purposes must register [here](https://open.bigmodel.cn/mla/form).
+Registered users may use the models for commercial activities free of charge, but must comply with all terms and conditions of this license.
+The license notice shall be included in all copies or substantial portions of the Software.
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-3. Restriction
-
-You will not use, copy, modify, merge, publish, distribute, reproduce, or create derivative works of the Software, in whole or in part, for any military, or illegal purposes.
-
-You will not use the Software for any act that may undermine China's national security and national unity, harm the public interest of society, or infringe upon the rights and interests of human beings.
+3. Restrictions
+You are not allowed to use, copy, modify, merge, publish, distribute, copy or create all or part of the derivative works of this software for any military or illegal purposes.
+You are not allowed to use this software to engage in any behavior that endangers national security and unity, endangers social public interests and public order, infringes on the rights and interests of others such as trade secrets, intellectual property rights, reputation rights, portrait rights, and property rights.
+You should comply with the applicable laws, regulations, policies, ethical standards, and other requirements in the place of use during use.
 
 4. Disclaimer
 
