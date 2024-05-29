@@ -1,6 +1,6 @@
 # basic requirements
 
-transformers>=4.41.0
+transformers==4.40.0
 cpm_kernels>=1.0.11
 torch>=2.3.0
 vllm>=0.4.2
@@ -25,7 +25,7 @@ tiktoken>=0.6.0
 
 # for langchain demo
 
-langchain>=0.2.0
+langchain>=0.2.1
 langchain_community>=0.2.0
 langchainhub>=0.1.15
 arxiv>=2.1.0

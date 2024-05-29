@@ -1,5 +1,4 @@
 import os
-import platform
 from typing import Optional, Union
 from transformers import AutoModel, AutoTokenizer, LogitsProcessorList
 
@@ -8,32 +7,6 @@ TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
 
 tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
 model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, device_map="auto").eval()
-
-
-os_name = platform.system()
-clear_command = "cls" if os_name == "Windows" else "clear"
-stop_stream = False
-
-welcome_prompt = "欢迎使用 ChatGLM3-6B 模型，输入内容即可进行对话，clear 清空对话历史，stop 终止程序"
-
-
-def build_prompt(history):
-    prompt = welcome_prompt
-    for query, response in history:
-        prompt += f"\n\n用户：{query}"
-        prompt += f"\n\nChatGLM3-6B：{response}"
-    return prompt
-
-
-def process_model_outputs(outputs, tokenizer):
-    responses = []
-    for output in outputs:
-        response = tokenizer.decode(output, skip_special_tokens=True)
-        response = response.replace("[gMASK]sop", "").strip()
-        batch_responses.append(response)
-
-    return responses
-
 
 def batch(
         model,
