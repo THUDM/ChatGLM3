@@ -43,7 +43,7 @@ class ChatGLM3(LLM):
 
         for tool_desc in tool_prompts:
             name = tool_desc.split(":")[0]
-            description = tool_desc.split(", args:")[0].split(":")[1].strip()
+            description = tool_desc.split(", args:")[0].split(":")[0].strip()
             parameters_str = tool_desc.split("args:")[1].strip()
             parameters_dict = ast.literal_eval(parameters_str)
             params_cleaned = {}
