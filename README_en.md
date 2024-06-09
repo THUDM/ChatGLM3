@@ -21,13 +21,10 @@ For more detailed usage information, please refer to:
 
 We have released the latest **GLM-4** model, which has made new breakthroughs in multiple indicators. You can directly experience our latest model in the following two channels.
 
-+ [Chatglm Qingyan](https://www.chatglm.cn) To experience the latest version of GLM-4, including **GLM, all tools** and other functions, download the Zhipu Qingyan APP
-  Or use [web page](https://www.chatglm.cn).
-+ [API Platform](https://open.bigmodel.cn/) The new generation API platform has been launched. You can directly access the API
-  Experience new models such as `GLM-4`, `GLM-3-Turbo`, `CharaterGLM-3`, and `CogView-3` on the platform.
-  Among them, two models, `GLM-4` and `GLM-3-Turbo`, support new functions such as `system prompt`, `function call`, `retrieval`, `Web_Search`, etc. Welcome to experience it.
-+ [GLM4 API Open Source Tutorial](https://github.com/MetaGLM/glm-cookbook/) - A tutorial and basic application guide for the GLM-4 API. You are invited to explore and experiment.
-  For API-related inquiries, refer to this open-source tutorial, or utilize the [GLM-4 API AI Assistant](https://open.bigmodel.cn/shareapp/v1/?share_code=sQwt5qyqYVaNh1O_87p8O) for assistance with common questions.
++ [GLM-4 open source model](https://github.com/THUDM/GLM-4) We have open sourced the GLM-4-9B series models, which have significantly improved the performance of various indicators. Welcome to try.
++ [Zhipu Qingyan](https://chatglm.cn/main/detail?fr=ecology_x) Experience the latest version of GLM-4, including **GLMs, All tools** and other functions.
++ [API platform](https://open.bigmodel.cn/?utm_campaign=open&_channel_track_key=OWTVNma9) The new generation of API platform has been launched. You can directly experience new models such as `GLM-4-0520`, `GLM-4-air`, `GLM-4-airx`, `GLM-4-flash`, `GLM-4`, `GLM-3-Turbo`, `CharacterGLM-3`, `CogView-3` on the API platform.
+Among them, the two models `GLM-4` and `GLM-3-Turbo` support new functions such as `System Prompt`, `Function Call`, `Retrieval`, and `Web_Search`. You are welcome to experience them.
 
 -----
 
