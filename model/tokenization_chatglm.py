@@ -29,11 +29,14 @@ class SPTokenizer:
         self.special_tokens = {}
         self.index_special_tokens = {}
         for token in special_tokens:
+            # special_tokens2index
             self.special_tokens[token] = self.n_words
+            # index2special_tokens
             self.index_special_tokens[self.n_words] = token
             self.n_words += 1
         self.role_special_token_expression = "|".join([re.escape(token) for token in special_tokens]) # for apply_chat_template
 
+    # special_tokens不能直接encode
     def tokenize(self, s: str, encode_special_tokens=False):
         if encode_special_tokens:
             last_index = 0
