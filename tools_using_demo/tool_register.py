@@ -40,7 +40,7 @@ def register_tool(func: callable):
     tool_def = {
         "name": tool_name,
         "description": tool_description,
-        "parameters": tool_params
+        "params": tool_params
     }
 
     print("[registered tool] " + pformat(tool_def))
