@@ -321,6 +321,7 @@ def process_batch(
             else:
                 labels.append(-100)
         max_length = max_input_length + max_output_length + 1
+        # truncate
         batched_input_ids.append(input_ids[:max_length])
         batched_labels.append(labels[:max_length])
     return {'input_ids': batched_input_ids, 'labels': batched_labels}
@@ -386,6 +387,7 @@ def load_tokenizer_and_model(
         peft_config: Optional[PeftConfig] = None,
 ) -> tuple[PreTrainedTokenizer, nn.Module]:
     tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
+    # 高效微调
     if peft_config is not None:
         if peft_config.peft_type.name == "PREFIX_TUNING":
             config = AutoConfig.from_pretrained(model_dir, trust_remote_code=True)
@@ -405,6 +407,7 @@ def load_tokenizer_and_model(
             )
             model = get_peft_model(model, peft_config)
             model.print_trainable_parameters()
+    # 全参数微调
     else:
         model = AutoModelForCausalLM.from_pretrained(
             model_dir,
@@ -440,8 +443,11 @@ def compute_metrics(eval_preds: EvalPrediction, tokenizer: PreTrainedTokenizer):
 
 
 @app.command()
+# python finetune_hf.py  data/AdvertiseGen/  THUDM/chatglm3-6b  configs/lora.yaml yes
+# 解析提交脚本后的四个参数
 def main(
         data_dir: Annotated[str, typer.Argument(help='')],
+        # model id
         model_dir: Annotated[
             str,
             typer.Argument(
@@ -521,6 +527,7 @@ def main(
     trainer = Seq2SeqTrainer(
         model=model,
         args=ft_config.training_args,
+        # padding
         data_collator=DataCollatorForSeq2Seq(
             tokenizer=tokenizer,
             padding='longest',
