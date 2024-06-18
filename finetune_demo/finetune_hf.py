@@ -288,9 +288,9 @@ def process_batch(
 
     for tools, conv in zip(batched_tools, batched_conv):
         input_ids, loss_masks = [
-            tokenizer.get_command('[gMASK]'),
-            tokenizer.get_command('sop'),
-        ], [False, False]
+                                    tokenizer.get_command('[gMASK]'),
+                                    tokenizer.get_command('sop'),
+                                ], [False, False]
 
         if tools is not None:
             raise NotImplementedError()
@@ -539,7 +539,7 @@ def main(
         compute_metrics=functools.partial(compute_metrics, tokenizer=tokenizer),
     )
 
-    if auto_resume_from_checkpoint.upper() == "" or auto_resume_from_checkpoint is None:
+    if auto_resume_from_checkpoint is None or auto_resume_from_checkpoint.upper() == "":
         trainer.train()
     else:
         output_dir = ft_config.training_args.output_dir
