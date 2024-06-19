@@ -542,32 +542,33 @@ def main(
     if auto_resume_from_checkpoint is None or auto_resume_from_checkpoint.upper() == "":
         trainer.train()
     else:
+        def do_rf_checkpoint(sn):
+            model.gradient_checkpointing_enable()
+            model.enable_input_require_grads()
+            checkpoint_directory = os.path.join(output_dir, "checkpoint-" + sn)
+            print("resume checkpoint from  checkpoint-" + sn)
+            trainer.train(resume_from_checkpoint=checkpoint_directory)
+
         output_dir = ft_config.training_args.output_dir
-        dirlist = os.listdir(output_dir)
-        checkpoint_sn = 0
-        for checkpoint_str in dirlist:
-            if checkpoint_str.find("eckpoint") > 0 and checkpoint_str.find("tmp") == -1:
-                checkpoint = int(checkpoint_str.replace("checkpoint-", ""))
-                if checkpoint > checkpoint_sn:
-                    checkpoint_sn = checkpoint
-        if auto_resume_from_checkpoint.upper() == "YES":
-            if checkpoint_sn > 0:
-                model.gradient_checkpointing_enable()
-                model.enable_input_require_grads()
-                checkpoint_directory = os.path.join(output_dir, "checkpoint-" + str(checkpoint_sn))
-                print("resume checkpoint from  checkpoint-" + str(checkpoint_sn))
-                trainer.train(resume_from_checkpoint=checkpoint_directory)
-            else:
-                trainer.train()
+
+        # resume from specific checkpoint
+        if auto_resume_from_checkpoint.isdigit() and int(auto_resume_from_checkpoint) > 0:
+            do_rf_checkpoint(auto_resume_from_checkpoint)
         else:
-            if auto_resume_from_checkpoint.isdigit():
-                if int(auto_resume_from_checkpoint) > 0:
-                    checkpoint_sn = int(auto_resume_from_checkpoint)
-                    model.gradient_checkpointing_enable()
-                    model.enable_input_require_grads()
-                    checkpoint_directory = os.path.join(output_dir, "checkpoint-" + str(checkpoint_sn))
-                    print("resume checkpoint from  checkpoint-" + str(checkpoint_sn))
-                    trainer.train(resume_from_checkpoint=checkpoint_directory)
+            # resume from latest checkpoint
+            if auto_resume_from_checkpoint.upper() == "YES":
+                dirlist = os.listdir(output_dir)
+                checkpoint_sn = 0
+                # get latest checkpoint
+                for checkpoint_str in dirlist:
+                    if checkpoint_str.find("eckpoint") > 0 and checkpoint_str.find("tmp") == -1:
+                        checkpoint = int(checkpoint_str.replace("checkpoint-", ""))
+                        if checkpoint > checkpoint_sn:
+                            checkpoint_sn = checkpoint
+                if checkpoint_sn > 0:
+                    do_rf_checkpoint(str(checkpoint_sn))
+                else:
+                    trainer.train()
             else:
                 print(auto_resume_from_checkpoint,
                       "The specified checkpoint sn(" + auto_resume_from_checkpoint + ") has not been saved. Please search for the correct chkeckpoint in the model output directory")
