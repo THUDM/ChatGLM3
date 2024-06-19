@@ -567,7 +567,6 @@ def main(
                 trainer.train()
         else:
             # resume from specific checkpoint
-            # pass str digit from config file
             if auto_resume_from_checkpoint.isdigit() and int(auto_resume_from_checkpoint) > 0:
                 do_rf_checkpoint(auto_resume_from_checkpoint)
             else:
