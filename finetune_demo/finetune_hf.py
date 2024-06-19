@@ -539,7 +539,7 @@ def main(
         compute_metrics=functools.partial(compute_metrics, tokenizer=tokenizer),
     )
 
-    if auto_resume_from_checkpoint is None or auto_resume_from_checkpoint.upper() == "":
+    if auto_resume_from_checkpoint is None or auto_resume_from_checkpoint == "":
         trainer.train()
     else:
         def do_rf_checkpoint(sn):
@@ -551,24 +551,25 @@ def main(
 
         output_dir = ft_config.training_args.output_dir
 
-        # resume from specific checkpoint
-        if auto_resume_from_checkpoint.isdigit() and int(auto_resume_from_checkpoint) > 0:
-            do_rf_checkpoint(auto_resume_from_checkpoint)
+        # resume from latest checkpoint
+        if auto_resume_from_checkpoint.upper() == "YES":
+            dirlist = os.listdir(output_dir)
+            checkpoint_sn = 0
+            # get latest checkpoint
+            for checkpoint_str in dirlist:
+                if checkpoint_str.find("eckpoint") > 0 and checkpoint_str.find("tmp") == -1:
+                    checkpoint = int(checkpoint_str.replace("checkpoint-", ""))
+                    if checkpoint > checkpoint_sn:
+                        checkpoint_sn = checkpoint
+            if checkpoint_sn > 0:
+                do_rf_checkpoint(str(checkpoint_sn))
+            else:
+                trainer.train()
         else:
-            # resume from latest checkpoint
-            if auto_resume_from_checkpoint.upper() == "YES":
-                dirlist = os.listdir(output_dir)
-                checkpoint_sn = 0
-                # get latest checkpoint
-                for checkpoint_str in dirlist:
-                    if checkpoint_str.find("eckpoint") > 0 and checkpoint_str.find("tmp") == -1:
-                        checkpoint = int(checkpoint_str.replace("checkpoint-", ""))
-                        if checkpoint > checkpoint_sn:
-                            checkpoint_sn = checkpoint
-                if checkpoint_sn > 0:
-                    do_rf_checkpoint(str(checkpoint_sn))
-                else:
-                    trainer.train()
+            # resume from specific checkpoint
+            # pass str digit from config file
+            if auto_resume_from_checkpoint.isdigit() and int(auto_resume_from_checkpoint) > 0:
+                do_rf_checkpoint(auto_resume_from_checkpoint)
             else:
                 print(auto_resume_from_checkpoint,
                       "The specified checkpoint sn(" + auto_resume_from_checkpoint + ") has not been saved. Please search for the correct chkeckpoint in the model output directory")
