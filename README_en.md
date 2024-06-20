@@ -1,7 +1,7 @@
 # ChatGLM3
 
 <p align="center">
-🤗 <a href="https://huggingface.co/THUDM/chatglm3-6b" target="_blank">HF Repo</a> • 🤖 <a href="https://modelscope.cn/models/ZhipuAI/chatglm3-6b" target="_blank">ModelScope</a> • 📔 <a href="https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof" target="_blank">Document</a> • 🐦 <a href="https://twitter.com/thukeg" target="_blank">Twitter</a> • 📃 <a href="https://arxiv.org/abs/2103.10360" target="_blank">[GLM@ACL 22]</a> <a href="https://github.com/THUDM/GLM" target="_blank">[GitHub]</a> • 📃 <a href="https://arxiv.org/abs/2210.02414" target="_blank">[GLM-130B@ICLR 23]</a> <a href="https://github.com/THUDM/GLM-130B" target="_blank">[GitHub]</a> <br>
+📄<a href="https://arxiv.org/pdf/2406.12793" target="_blank"> Report </a> • 🤗 <a href="https://huggingface.co/THUDM/chatglm3-6b" target="_blank">HF Repo</a> • 🤖 <a href="https://modelscope.cn/models/ZhipuAI/chatglm3-6b" target="_blank">ModelScope</a> • 🟣 <a href="https://www.wisemodel.cn/models/ZhipuAI/chatglm3-6b" target="_blank">WiseModel</a> • 📔 <a href="https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof" target="_blank">Document</a> •  🧰 <a href="https://openxlab.org.cn/models/hot/THUDM" target="_blank">OpenXLab</a> • 🐦 <a href="https://twitter.com/thukeg" target="_blank">Twitter</a><br>
 </p>
 <p align="center">
     👋 Join our <a href="https://join.slack.com/t/chatglm/shared_invite/zt-25ti5uohv-A_hs~am_D3Q8XPZMpj7wwQ" target="_blank">Slack</a> and <a href="resources/WECHAT.md" target="_blank">WeChat</a>
@@ -10,15 +10,13 @@
 📍Experience the larger-scale ChatGLM model at <a href="https://www.chatglm.cn">chatglm.cn</a>
 </p>
 
-📔
-About `ChatGLM3-6B`
-For more detailed usage information, please refer to:
+📔 About `ChatGLM3-6B`For more detailed usage information, please refer to:
 
 + [ChatGLM3 technical documentation](https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof?from=from_copylink)
 + [Bilibili video](https://www.bilibili.com/video/BV1uC4y1J7yA)
 + [YouTube video](https://www.youtube.com/watch?v=Pw9PB6R7ORA)
 
-## GLM-4 Introduction
+## GLM-4 Open Source Model and API
 
 We have released the latest **GLM-4** model, which has made new breakthroughs in multiple indicators. You can directly
 experience our latest model in the following two channels.
@@ -190,155 +188,33 @@ to [Integrated Demo](composite_demo/README_en.md) for how to run it.
 
 The ChatGLM model can be called to start a conversation using the following code:
 
-```python
->> > from transformers import AutoTokenizer, AutoModel
->> > tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True)
->> > model = AutoModel.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True, device='cuda')
->> > model = model.eval()
->> > response, history = model.chat(tokenizer, "Hello", history=[])
->> > print(response)
-Hello 👋! I
-'m ChatGLM3-6B, the artificial intelligence assistant, nice to meet you. Feel free to ask me any questions.
->> > response, history = model.chat(tokenizer, "What should I do if I can't sleep at night", history=history)
->> > print(response)
-If
-you
-'re having trouble sleeping at night, here are a few suggestions that might help:
+```
+>> from transformers import AutoTokenizer, AutoModel
+>> tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True)
+>> model = AutoModel.from_pretrained("THUDM/chatglm3-6b", trust_remote_code=True, device='cuda')
+>> model = model.eval()
+>> response, history = model.chat(tokenizer, "你好", history=[])
+>> print(response)
 
-1.
-Create
-a
-relaxing
-sleep
-environment: Make
-sure
-your
-bedroom is cool, quiet, and dark.Consider
-using
-earplugs, a
-white
-noise
-machine, or a
-fan
-to
-help
-create
-an
-optimal
-environment.
-2.
-Establish
-a
-bedtime
-routine: Try
-to
-go
-to
-bed and wake
-up
-at
-the
-same
-time
-every
-day, even
-on
-weekends.A
-consistent
-routine
-can
-help
-regulate
-your
-body
-'s internal clock.
-3.
-Avoid
-stimulating
-activities
-before
-bedtime: Avoid
-using
-electronic
-devices, watching
-TV, or engaging in stimulating
-activities
-like
-exercise or puzzle - solving, as these
-can
-interfere
-with your ability to fall asleep.
-4.
-Limit
-caffeine and alcohol: Avoid
-consuming
-caffeine and alcohol
-close
-to
-bedtime, as these
-can
-disrupt
-your
-sleep
-patterns.
-5.
-Practice
-relaxation
-techniques: Try
-meditation, deep
-breathing, or progressive
-muscle
-relaxation
-to
-help
-calm
-your
-mind and body
-before
-sleep.
-6.
-Consider
-taking
-a
-warm
-bath or shower: A
-warm
-bath or shower
-can
-help
-relax
-your
-muscles and promote
-sleep.
-7.
-Get
-some
-fresh
-air: Make
-sure
-to
-get
-some
-fresh
-air
-during
-the
-day, as lack
-of
-vitamin
-D
-can
-interfere
-with sleep quality.
+Hello 👋! I am the AI assistant ChatGLM3-6B, nice to meet you, feel free to ask me any questions.
 
-If
-you
-continue
-to
-have
-difficulty
-sleeping, consult
-with a healthcare professional for further guidance and support.
+>> response, history = model.chat(tokenizer, "What should I do if I can't sleep at night?", history=history)
+>> print(response)
+
+Having trouble sleeping at night may make you feel anxious or uncomfortable, but here are some ways to help you fall asleep:
+
+1. Develop a regular sleep schedule: Keeping a regular sleep schedule can help you develop healthy sleep habits and make it easier for you to fall asleep. Try to go to bed at the same time every day and get up at the same time.
+
+2. Create a comfortable sleeping environment: Make sure the sleeping environment is comfortable, quiet, dark and at a suitable temperature. You can use comfortable bedding and keep the room ventilated.
+
+3. Relax your body and mind: Doing some relaxing activities before bed, such as taking a hot bath, listening to some soft music, reading some interesting books, etc., can help relieve tension and anxiety and make it easier for you to fall asleep.
+
+4. Avoid drinking caffeinated beverages: Caffeine is a stimulant that can affect your sleep quality. Try to avoid drinking caffeinated beverages such as coffee, tea and cola before bed.
+
+5. Avoid doing things that are not related to sleep in bed: Doing things that are not related to sleep in bed, such as watching movies, playing games or working, etc., may interfere with your sleep.
+6. Try breathing techniques: Deep breathing is a relaxation technique that can help you relieve tension and anxiety, making it easier for you to fall asleep. Try breathing in slowly, holding it for a few seconds, and then exhaling slowly.
+
+If these methods don't help you fall asleep, you may consider consulting a doctor or sleep specialist for further advice.
 ```
 
 #### Load Model Locally
@@ -524,11 +400,13 @@ official technical documentation.
 If you find our work helpful, please consider citing the following papers.
 
 ```
-@article{zeng2022glm,
-  title={Glm-130b: An open bilingual pre-trained model},
-  author={Zeng, Aohan and Liu, Xiao and Du, Zhengxiao and Wang, Zihan and Lai, Hanyu and Ding, Ming and Yang, Zhuoyi and Xu, Yifan and Zheng, Wendi and Xia, Xiao and others},
-  journal={arXiv preprint arXiv:2210.02414},
-  year={2022}
+@misc{glm2024chatglm,
+      title={ChatGLM: A Family of Large Language Models from GLM-130B to GLM-4 All Tools}, 
+      author={Team GLM and Aohan Zeng and Bin Xu and Bowen Wang and Chenhui Zhang and Da Yin and Diego Rojas and Guanyu Feng and Hanlin Zhao and Hanyu Lai and Hao Yu and Hongning Wang and Jiadai Sun and Jiajie Zhang and Jiale Cheng and Jiayi Gui and Jie Tang and Jing Zhang and Juanzi Li and Lei Zhao and Lindong Wu and Lucen Zhong and Mingdao Liu and Minlie Huang and Peng Zhang and Qinkai Zheng and Rui Lu and Shuaiqi Duan and Shudan Zhang and Shulin Cao and Shuxun Yang and Weng Lam Tam and Wenyi Zhao and Xiao Liu and Xiao Xia and Xiaohan Zhang and Xiaotao Gu and Xin Lv and Xinghan Liu and Xinyi Liu and Xinyue Yang and Xixuan Song and Xunkai Zhang and Yifan An and Yifan Xu and Yilin Niu and Yuantao Yang and Yueyan Li and Yushi Bai and Yuxiao Dong and Zehan Qi and Zhaoyu Wang and Zhen Yang and Zhengxiao Du and Zhenyu Hou and Zihan Wang},
+      year={2024},
+      eprint={2406.12793},
+      archivePrefix={arXiv},
+      primaryClass={id='cs.CL' full_name='Computation and Language' is_active=True alt_name='cmp-lg' in_archive='cs' is_general=False description='Covers natural language processing. Roughly includes material in ACM Subject Class I.2.7. Note that work on artificial languages (programming languages, logics, formal systems) that does not explicitly address natural-language issues broadly construed (natural-language processing, computational linguistics, speech, text retrieval, etc.) is not appropriate for this area.'}
 }
 ```
 
