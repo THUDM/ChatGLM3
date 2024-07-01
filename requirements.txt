@@ -3,7 +3,7 @@
 transformers==4.40.0
 cpm_kernels>=1.0.11
 torch>=2.3.0
-# vllm>=0.4.2
+vllm>=0.4.2
 gradio>=4.26.0
 sentencepiece>=0.2.0
 sentence_transformers>=2.7.0
@@ -29,10 +29,3 @@ langchain>=0.2.1
 langchain_community>=0.2.0
 langchainhub>=0.1.15
 arxiv>=2.1.0
-
-rouge_chinese
-datasets
-peft
-nltk
-jieba
-colorama
