@@ -35,10 +35,13 @@ from transformers import (
     TextIteratorStreamer
 )
 
+import socket
+
 ModelType = Union[PreTrainedModel, PeftModelForCausalLM]
 TokenizerType = Union[PreTrainedTokenizer, PreTrainedTokenizerFast]
 
-MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
+#MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
+MODEL_PATH = 'chatglm3-6b'
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
 
 
@@ -109,10 +112,12 @@ def parse_text(text):
     text = "".join(lines)
     return text
 
-
-def predict(history, max_length, top_p, temperature):
+def predict(history, max_length, top_p, temperature, system_prompt):
     stop = StopOnTokens()
     messages = []
+    if(system_prompt!=""):
+        messages.append({"role": "system", "content": system_prompt})
+        
     for idx, (user_msg, model_msg) in enumerate(history):
         if idx == len(history) - 1 and not model_msg:
             messages.append({"role": "user", "content": user_msg})
@@ -147,31 +152,32 @@ def predict(history, max_length, top_p, temperature):
             yield history
 
 
-with gr.Blocks() as demo:
-    gr.HTML("""<h1 align="center">ChatGLM3-6B Gradio Simple Demo</h1>""")
-    chatbot = gr.Chatbot()
+with gr.Blocks(title="ChatGLM") as demo:
+    gr.Markdown("## ChatGLM3-6B")
 
     with gr.Row():
         with gr.Column(scale=4):
+            chatbot = gr.Chatbot(layout="panel")
             with gr.Column(scale=12):
-                user_input = gr.Textbox(show_label=False, placeholder="Input...", lines=10, container=False)
+                user_input = gr.Textbox(show_label=False, placeholder="Input to chat...", lines=3, container=False)
             with gr.Column(min_width=32, scale=1):
-                submitBtn = gr.Button("Submit")
+                submitBtn = gr.Button("Submit", variant="primary")
         with gr.Column(scale=1):
             emptyBtn = gr.Button("Clear History")
-            max_length = gr.Slider(0, 32768, value=8192, step=1.0, label="Maximum length", interactive=True)
+            max_length = gr.Slider(0, 32768, value=16384, step=1.0, label="Maximum length", interactive=True)
             top_p = gr.Slider(0, 1, value=0.8, step=0.01, label="Top P", interactive=True)
             temperature = gr.Slider(0.01, 1, value=0.6, step=0.01, label="Temperature", interactive=True)
-
+            gr.HTML("""<span>System Prompt</span>""")
+            system_prompt = gr.Textbox(show_label=False, placeholder="System Prompt", lines=6, container=False)
 
     def user(query, history):
         return "", history + [[parse_text(query), ""]]
 
 
     submitBtn.click(user, [user_input, chatbot], [user_input, chatbot], queue=False).then(
-        predict, [chatbot, max_length, top_p, temperature], chatbot
+        predict, [chatbot, max_length, top_p, temperature, system_prompt], chatbot
     )
     emptyBtn.click(lambda: None, None, chatbot, queue=False)
 
 demo.queue()
-demo.launch(server_name="127.0.0.1", server_port=7870, inbrowser=True, share=False)
+demo.launch(server_name=socket.gethostbyname(socket.gethostname()), server_port=7870, inbrowser=True, share=False)
